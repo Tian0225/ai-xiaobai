@@ -5,10 +5,8 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
 
   // 明确指定项目根目录，消除 Turbopack 警告
-  experimental: {
-    turbo: {
-      root: process.cwd(),
-    },
+  turbo: {
+    root: process.cwd(),
   },
 };
 
