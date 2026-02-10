@@ -4,9 +4,14 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
 
-  // 明确指定项目根目录，消除 Turbopack 警告
-  turbo: {
-    root: process.cwd(),
+  // 图片优化配置
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.anthropic.com',
+      },
+    ],
   },
 };
 

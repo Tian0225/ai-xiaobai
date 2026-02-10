@@ -1,98 +1,103 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import PaymentForm from '@/components/payment/payment-form'
+"use client";
 
-export default async function MembershipPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+import { useState, useEffect } from "react";
+import { Check, Sparkles, Zap, Users, BookOpen, Crown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import PaymentForm from "@/components/payment/payment-form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-  if (!user) {
-    redirect('/auth?next=/membership')
-  }
+const membershipBenefits = [
+  {
+    icon: BookOpen,
+    title: "所有进阶教程",
+    description: "解锁全部会员专属教程，持续更新中",
+  },
+  {
+    icon: Sparkles,
+    title: "每月最新教程",
+    description: "Agent Teams、Clawdbot、最新 MCP 等热门话题",
+  },
+  {
+    icon: Users,
+    title: "专属社群",
+    description: "加入微信会员群，与其他开发者交流学习",
+  },
+  {
+    icon: Zap,
+    title: "问题优先解答",
+    description: "遇到问题时获得优先技术支持",
+  },
+  {
+    icon: Crown,
+    title: "新课程优先体验",
+    description: "新推出的实战课程可优先试听体验",
+  },
+];
 
-  // 检查是否已是会员
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_member, membership_expires_at')
-    .eq('id', user.id)
-    .single()
+const pricingComparison = [
+  { feature: "免费教程", free: true, member: true },
+  { feature: "进阶教程（30+ 篇）", free: false, member: true },
+  { feature: "每月最新教程（2-3篇）", free: false, member: true },
+  { feature: "会员专属社群", free: false, member: true },
+  { feature: "问题优先解答", free: false, member: true },
+  { feature: "新课程优先体验", free: false, member: true },
+];
 
-  const isMember = profile?.is_member && new Date(profile.membership_expires_at) > new Date()
+export default function MembershipPage() {
+  const [showPayment, setShowPayment] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const mockEmail = "user@example.com";
+    setUserEmail(mockEmail);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">年度会员</h1>
-          <p className="text-xl text-gray-600">解锁所有进阶教程和专属权益</p>
-        </div>
-
-        {isMember ? (
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <div className="mb-4 text-6xl">🎉</div>
-            <h2 className="text-2xl font-bold mb-2">您已是会员</h2>
-            <p className="text-gray-600 mb-4">
-              会员有效期至：{new Date(profile.membership_expires_at).toLocaleDateString()}
-            </p>
-            <a href="/guide" className="text-blue-600 hover:underline">
-              前往教程区学习 →
-            </a>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* 左侧：会员权益 */}
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold mb-6">会员权益</h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <div>
-                    <h3 className="font-semibold">所有进阶教程</h3>
-                    <p className="text-sm text-gray-600">解锁全部付费内容，持续更新</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <div>
-                    <h3 className="font-semibold">每月最新教程</h3>
-                    <p className="text-sm text-gray-600">Agent Teams、Clawdbot、最新 MCP 等热门话题</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <div>
-                    <h3 className="font-semibold">会员专属社群</h3>
-                    <p className="text-sm text-gray-600">加入微信群，与同行交流</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <div>
-                    <h3 className="font-semibold">问题优先解答</h3>
-                    <p className="text-sm text-gray-600">遇到问题，优先得到回复</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <div>
-                    <h3 className="font-semibold">新课程优先体验</h3>
-                    <p className="text-sm text-gray-600">第一时间体验新推出的实战课程</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="text-3xl font-bold text-blue-600">¥499</div>
-                <div className="text-sm text-gray-600">一年 / 365天</div>
-                <div className="text-xs text-gray-500 mt-2">平均每天不到 1.4 元</div>
-              </div>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 mb-6">
+              <Crown className="h-4 w-4" />
+              年度会员
             </div>
 
-            {/* 右侧：支付表单 */}
-            <PaymentForm userEmail={user.email || ''} />
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl mb-6">
+              解锁全部进阶内容
+              <br />
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                持续学习，快速成长
+              </span>
+            </h1>
+
+            <p className="text-xl text-gray-600 mb-8">
+              一次订阅，全年无限访问所有会员内容
+            </p>
+
+            <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-200 max-w-md mx-auto mb-8">
+              <div className="mb-6">
+                <div className="flex items-baseline justify-center gap-2">
+                  <span className="text-5xl font-bold text-gray-900">¥499</span>
+                  <span className="text-gray-500">/年</span>
+                </div>
+              </div>
+
+              {!showPayment ? (
+                <Button
+                  size="lg"
+                  className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600"
+                  onClick={() => setShowPayment(true)}
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  立即开通会员
+                </Button>
+              ) : (
+                <PaymentForm userEmail={userEmail} />
+              )}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
     </div>
-  )
+  );
 }

@@ -98,10 +98,11 @@ export default function TutorialPage({ params }: TutorialPageProps) {
               remarkPlugins={[remarkGfm]}
               components={{
                 // 自定义代码块渲染
-                code({ node, inline, className, children, ...props }) {
+                code({ node, className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '')
                   const language = match ? match[1] : ''
                   const code = String(children).replace(/\n$/, '')
+                  const inline = !className
 
                   if (!inline && language) {
                     return <CodeBlock language={language} code={code} />

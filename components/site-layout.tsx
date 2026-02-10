@@ -24,6 +24,12 @@ export default function MarketingLayout({
               <Link href="/membership" className="text-sm font-medium hover:text-blue-600 transition">
                 会员
               </Link>
+              <Link href="/shop" className="text-sm font-medium hover:text-blue-600 transition">
+                商城
+              </Link>
+              <Link href="/enterprise" className="text-sm font-medium hover:text-blue-600 transition">
+                企业服务
+              </Link>
               <Link href="/about" className="text-sm font-medium hover:text-blue-600 transition">
                 关于
               </Link>
