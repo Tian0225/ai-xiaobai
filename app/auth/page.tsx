@@ -1,5 +1,8 @@
 import AuthForm from '@/components/auth/auth-form'
 
+// 强制动态渲染，避免在构建时访问 Supabase
+export const dynamic = 'force-dynamic'
+
 export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100">

@@ -1,0 +1,30 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build
+.next
+out
+dist
+
+# Environment
+.env.local
+.env*.local
+
+# IDE
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Docs
+docs
+README.md
+
+# Scripts (不需要部署)
+scripts
+
+# Source content (符号链接，不部署)
+content/source
