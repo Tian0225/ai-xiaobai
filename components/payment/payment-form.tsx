@@ -10,6 +10,10 @@ interface PaymentFormProps {
 }
 
 const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499)
+const PAYMENT_METHOD_TEXT = {
+  wechat: '微信支付',
+  alipay: '支付宝支付',
+} as const
 
 export default function PaymentForm({ userEmail }: PaymentFormProps) {
   const [orderId, setOrderId] = useState('')
@@ -125,43 +129,58 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
 
   if (!showQR) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>选择支付方式</CardTitle>
-          <CardDescription>支持微信和支付宝</CardDescription>
+      <Card className="border-[#c9ddd6] shadow-[0_20px_46px_-30px_rgba(13,59,58,0.45)]">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl font-display text-[var(--brand-ink)]">选择支付方式</CardTitle>
+          <CardDescription>支持微信和支付宝，推荐手机扫码完成支付。</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className="space-y-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button
               onClick={() => setPaymentMethod('wechat')}
-              className={`p-4 border-2 rounded-lg transition ${paymentMethod === 'wechat'
-                  ? 'border-green-500 bg-green-50'
-                  : 'border-gray-200 hover:border-gray-300'
+              className={`rounded-2xl border-2 p-4 text-left transition ${paymentMethod === 'wechat'
+                  ? 'border-[#2db86f] bg-[#ebf8f1]'
+                  : 'border-[#d8e6df] bg-white hover:border-[#9bc6b7]'
                 }`}
             >
-              <div className="text-2xl mb-2">💚</div>
-              <div className="font-semibold">微信支付</div>
+              <div className="mb-2 text-2xl">💚</div>
+              <div className="font-semibold text-slate-900">微信支付</div>
+              <div className="mt-1 text-xs text-slate-500">扫码后在备注里填写订单号</div>
             </button>
             <button
               onClick={() => setPaymentMethod('alipay')}
-              className={`p-4 border-2 rounded-lg transition ${paymentMethod === 'alipay'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+              className={`rounded-2xl border-2 p-4 text-left transition ${paymentMethod === 'alipay'
+                  ? 'border-[#5aa8ff] bg-[#eef6ff]'
+                  : 'border-[#d8e6df] bg-white hover:border-[#9bc6b7]'
                 }`}
             >
-              <div className="text-2xl mb-2">💙</div>
-              <div className="font-semibold">支付宝</div>
+              <div className="mb-2 text-2xl">💙</div>
+              <div className="font-semibold text-slate-900">支付宝</div>
+              <div className="mt-1 text-xs text-slate-500">扫码后在备注里填写订单号</div>
             </button>
           </div>
 
-          <Button onClick={handleCreateOrder} className="w-full" size="lg" disabled={creatingOrder}>
+          <div className="rounded-2xl border border-[#d8e6df] bg-[#f6faf8] p-4 text-sm text-slate-600">
+            <p>
+              当前账号：<span className="font-medium text-slate-800">{userEmail}</span>
+            </p>
+            <p className="mt-1">
+              本次支付金额：<span className="font-semibold text-[var(--brand-fresh)]">¥{MEMBERSHIP_PRICE}</span>
+            </p>
+          </div>
+
+          <Button
+            onClick={handleCreateOrder}
+            className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+            size="lg"
+            disabled={creatingOrder}
+          >
             {creatingOrder ? '生成中...' : `生成收款码（¥${MEMBERSHIP_PRICE}）`}
           </Button>
 
-          <div className="text-xs text-gray-500 text-center space-y-1">
-            <p>点击后将生成专属收款码</p>
-            <p>支付时请务必填写订单备注</p>
-            <p>当前账户：{userEmail}</p>
+          <div className="space-y-1 text-center text-xs text-slate-500">
+            <p>生成后有效期 10 分钟</p>
+            <p>支付时请务必备注订单号，便于人工核销</p>
           </div>
 
           {errorMessage && (
@@ -173,75 +192,91 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>扫码支付</CardTitle>
-        <CardDescription>
-          {polling ? '正在检测支付...' : '请使用手机扫码支付'}
-        </CardDescription>
+    <Card className="border-[#c9ddd6] shadow-[0_20px_46px_-30px_rgba(13,59,58,0.45)]">
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-2xl font-display text-[var(--brand-ink)]">扫码支付</CardTitle>
+        <CardDescription>请在 10 分钟内完成支付并备注订单号。</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* 收款码 */}
-        <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="relative aspect-square w-full max-w-xs mx-auto bg-white rounded overflow-hidden">
-            {paymentMethod === 'wechat' ? (
-              <Image
-                src="/payment/wechat-qr.png"
-                alt="微信收款码"
-                fill
-                className="object-contain p-2"
-              />
+      <CardContent>
+        <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <section className="rounded-2xl border border-[#d2e4dc] bg-[linear-gradient(165deg,#ffffff,#eef8f3)] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-800">{PAYMENT_METHOD_TEXT[paymentMethod]}</p>
+              <span className="rounded-full border border-[#d8e6df] bg-white px-2.5 py-1 text-xs text-slate-500">
+                扫码付款
+              </span>
+            </div>
+            <div className="relative mx-auto h-56 w-56 rounded-2xl bg-white p-3 shadow-[inset_0_0_0_1px_rgba(13,59,58,0.08)]">
+              {paymentMethod === 'wechat' ? (
+                <Image src="/payment/wechat-qr.png" alt="微信收款码" fill className="object-contain p-2" />
+              ) : (
+                <Image src="/payment/alipay-qr.png" alt="支付宝收款码" fill className="object-contain p-2" />
+              )}
+            </div>
+            <p className="mt-3 text-center text-xs text-slate-500">请打开手机 {PAYMENT_METHOD_TEXT[paymentMethod]} 扫码</p>
+          </section>
+
+          <section className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.15em] text-slate-500">金额</p>
+                <p className="mt-1 text-3xl font-display text-[var(--brand-fresh)]">¥{MEMBERSHIP_PRICE}</p>
+              </article>
+              <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.15em] text-slate-500">剩余时间</p>
+                <p className="mt-1 text-3xl font-display text-[var(--brand-ink)]">
+                  {countdown > 0 ? formatTime(countdown) : "已过期"}
+                </p>
+              </article>
+            </div>
+
+            <article className="rounded-2xl border border-[#f0d88d] bg-[#fff9e8] p-4">
+              <p className="text-sm font-semibold text-slate-900">订单信息</p>
+              <p className="mt-2 text-xs text-slate-600">订单编号（备注必填）</p>
+              <p className="mt-1 break-all rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900">{orderId}</p>
+              <p className="mt-2 text-sm font-semibold text-red-600">请务必在支付备注中填写订单编号</p>
+            </article>
+
+            {polling ? (
+              <div className="flex items-center gap-2 rounded-xl border border-[#bfe2d2] bg-[#eef8f3] px-3 py-2 text-sm text-[var(--brand-fresh)]">
+                <div className="h-4 w-4 rounded-full border-2 border-[var(--brand-fresh)] border-t-transparent animate-spin" />
+                正在检测支付状态...
+              </div>
             ) : (
-              <Image
-                src="/payment/alipay-qr.png"
-                alt="支付宝收款码"
-                fill
-                className="object-contain p-2"
-              />
+              <div className="rounded-xl border border-[#d8e6df] bg-white px-3 py-2 text-sm text-slate-600">
+                请完成支付后等待系统刷新
+              </div>
             )}
-          </div>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowQR(false)
+                  setCountdown(0)
+                  stopPolling()
+                }}
+                className="flex-1"
+              >
+                取消订单
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowQR(false)
+                  setCountdown(0)
+                  stopPolling()
+                }}
+                className="flex-1 rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+              >
+                重新生成
+              </Button>
+            </div>
+          </section>
         </div>
 
-        {/* 订单信息 */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="font-semibold text-sm mb-2">⚠️ 重要提示</div>
-          <div className="text-sm space-y-1">
-            <p>支付金额：<span className="font-bold text-red-600">¥{MEMBERSHIP_PRICE}</span></p>
-            <p>订单编号：<span className="font-mono text-xs bg-white px-2 py-1 rounded">{orderId}</span></p>
-            <p className="text-red-600 font-semibold">请务必在支付备注中填写订单编号！</p>
-          </div>
-        </div>
-
-        {/* 倒计时 */}
-        <div className="text-center">
-          <div className="text-sm text-gray-600">
-            {countdown > 0 ? (
-              <>订单有效期：<span className="font-mono font-semibold">{formatTime(countdown)}</span></>
-            ) : (
-              <span className="text-red-600">订单已过期，请重新生成</span>
-            )}
-          </div>
-        </div>
-
-        {/* 状态指示 */}
-        {polling && (
-          <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
-            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <span>正在检测支付，请稍候...</span>
-          </div>
+        {errorMessage && (
+          <p className="mt-4 text-center text-sm text-red-600">{errorMessage}</p>
         )}
-
-        <Button
-          variant="outline"
-          onClick={() => {
-            setShowQR(false)
-            setCountdown(0)
-            stopPolling()
-          }}
-          className="w-full"
-        >
-          取消订单
-        </Button>
       </CardContent>
     </Card>
   )

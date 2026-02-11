@@ -38,6 +38,28 @@ export default async function AdminOrdersPage() {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-full border border-[#c8ddd6] bg-white/85 px-4 py-2 text-sm text-slate-700 transition hover:border-[var(--brand-fresh)] hover:text-[var(--brand-fresh)]"
+        >
+          ← 返回主站
+        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/membership"
+            className="inline-flex items-center rounded-full border border-[#c8ddd6] bg-white/85 px-4 py-2 text-sm text-slate-700 transition hover:border-[var(--brand-fresh)] hover:text-[var(--brand-fresh)]"
+          >
+            会员页
+          </Link>
+          <Link
+            href="/guide"
+            className="inline-flex items-center rounded-full border border-[#c8ddd6] bg-white/85 px-4 py-2 text-sm text-slate-700 transition hover:border-[var(--brand-fresh)] hover:text-[var(--brand-fresh)]"
+          >
+            教程页
+          </Link>
+        </div>
+      </div>
       <OrdersDashboard adminEmail={user.email ?? ""} />
     </main>
   );

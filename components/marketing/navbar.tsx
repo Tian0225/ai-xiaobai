@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, Search, ArrowRight } from "lucide-react";
+import { Menu, X, Search, ArrowRight, ChevronDown, LayoutDashboard, LogOut, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -15,12 +15,19 @@ const navigation = [
   { name: "企业服务", href: "/enterprise" },
 ];
 
+interface CurrentUser {
+  email: string;
+  isAdmin: boolean;
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
-  const [userEmail, setUserEmail] = React.useState<string | null>(null);
   const [loadingUser, setLoadingUser] = React.useState(true);
+  const [currentUser, setCurrentUser] = React.useState<CurrentUser | null>(null);
+  const [accountOpen, setAccountOpen] = React.useState(false);
   const [supabase] = React.useState(() => createClient());
+  const accountMenuRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -30,53 +37,80 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const loadCurrentUser = React.useCallback(async () => {
+    try {
+      const response = await fetch("/api/auth/me", { cache: "no-store" });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setCurrentUser(null);
+        return;
+      }
+
+      setCurrentUser(payload.user ?? null);
+    } catch {
+      setCurrentUser(null);
+    } finally {
+      setLoadingUser(false);
+    }
+  }, []);
+
   React.useEffect(() => {
     let active = true;
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!active) return;
-      setUserEmail(user?.email ?? null);
-      setLoadingUser(false);
-    });
+    if (active) {
+      void loadCurrentUser();
+    }
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user?.email ?? null);
-      setLoadingUser(false);
+    } = supabase.auth.onAuthStateChange(() => {
+      setLoadingUser(true);
+      void loadCurrentUser();
     });
 
     return () => {
       active = false;
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [loadCurrentUser, supabase]);
+
+  React.useEffect(() => {
+    if (!accountOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [accountOpen]);
 
   const handleSignOut = async () => {
+    setAccountOpen(false);
+    setIsOpen(false);
     await supabase.auth.signOut();
     window.location.href = "/";
   };
 
+  const emailPrefix = currentUser?.email?.split("@")[0] ?? "用户";
+  const avatarLabel = emailPrefix.slice(0, 1).toUpperCase();
+
   return (
     <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        scrolled
-          ? "px-3 pt-3 sm:px-6"
-          : "px-0 pt-0"
-      )}
+      className={cn("fixed inset-x-0 top-0 z-50 transition-all duration-300", scrolled ? "px-3 pt-3 sm:px-6" : "px-0 pt-0")}
     >
       <nav
         className={cn(
           "mx-auto max-w-7xl transition-all duration-300",
-          scrolled
-            ? "surface-glass rounded-2xl px-4 sm:px-6 lg:px-8"
-            : "px-4 sm:px-6 lg:px-8"
+          scrolled ? "surface-glass rounded-2xl px-4 sm:px-6 lg:px-8" : "px-4 sm:px-6 lg:px-8"
         )}
       >
         <div className="flex h-[4.5rem] items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-[linear-gradient(135deg,#0d3b3a,#3a7d6b)] text-white grid place-items-center text-lg font-display shadow-sm">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[linear-gradient(135deg,#0d3b3a,#3a7d6b)] text-lg text-white shadow-sm">
               AI
             </div>
             <div>
@@ -85,7 +119,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          <div className="hidden md:flex md:items-center md:space-x-7">
+          <div className="hidden items-center space-x-7 md:flex">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -97,35 +131,76 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex md:items-center md:space-x-4">
+          <div className="hidden items-center space-x-4 md:flex">
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-600 gap-2 rounded-full"
+              className="gap-2 rounded-full text-slate-600"
               onClick={() => {
                 document.dispatchEvent(
-                  new KeyboardEvent('keydown', {
-                    key: 'k',
+                  new KeyboardEvent("keydown", {
+                    key: "k",
                     metaKey: true,
                   })
-                )
+                );
               }}
             >
               <Search className="h-4 w-4" />
-              <span className="text-xs border rounded px-1.5 py-0.5 border-slate-300">⌘K</span>
+              <span className="rounded border border-slate-300 px-1.5 py-0.5 text-xs">⌘K</span>
             </Button>
+
             {loadingUser ? (
-              <div className="h-8 w-28 animate-pulse rounded-full bg-[#d7e5df]" />
-            ) : userEmail ? (
-              <>
-                <span className="max-w-[180px] truncate text-sm text-slate-600">{userEmail}</span>
-                <Button variant="outline" size="sm" className="rounded-full" asChild>
-                  <Link href="/admin/orders">后台</Link>
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  退出
-                </Button>
-              </>
+              <div className="h-9 w-32 animate-pulse rounded-full bg-[#d7e5df]" />
+            ) : currentUser ? (
+              <div className="relative" ref={accountMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((prev) => !prev)}
+                  className="flex items-center gap-2 rounded-full border border-[#c7ddd5] bg-white/80 px-2 py-1.5 transition hover:border-[var(--brand-fresh)]"
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[#e3f0eb] text-xs font-semibold text-[var(--brand-fresh)]">
+                    {avatarLabel}
+                  </span>
+                  <span className="max-w-[98px] truncate text-sm text-slate-700">{emailPrefix}</span>
+                  <ChevronDown className={cn("h-4 w-4 text-slate-500 transition", accountOpen && "rotate-180")} />
+                </button>
+
+                {accountOpen && (
+                  <div className="absolute right-0 top-12 w-64 rounded-2xl border border-[#c7ddd5] bg-white p-3 shadow-[0_24px_48px_-30px_rgba(13,59,58,0.55)]">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">已登录账号</p>
+                    <p className="mt-1 truncate text-sm font-medium text-slate-800">{currentUser.email}</p>
+
+                    <div className="mt-3 space-y-1 border-t border-[#dce8e3] pt-3">
+                      <Link
+                        href="/membership"
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-[#edf7f2]"
+                        onClick={() => setAccountOpen(false)}
+                      >
+                        <UserCircle2 className="h-4 w-4" />
+                        会员中心
+                      </Link>
+                      {currentUser.isAdmin && (
+                        <Link
+                          href="/admin/orders"
+                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-[#edf7f2]"
+                          onClick={() => setAccountOpen(false)}
+                        >
+                          <LayoutDashboard className="h-4 w-4" />
+                          管理后台
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-rose-600 transition hover:bg-rose-50"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        退出登录
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
@@ -143,26 +218,22 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="md:hidden rounded-md p-2 text-slate-700 hover:bg-white/70"
+            className="rounded-md p-2 text-slate-700 hover:bg-white/70 md:hidden"
             onClick={() => setIsOpen(!isOpen)}
           >
             <span className="sr-only">打开菜单</span>
-            {isOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
         {isOpen && (
-          <div className="md:hidden py-4 reveal-up">
-            <div className="space-y-1 surface-glass rounded-2xl p-3">
+          <div className="reveal-up py-4 md:hidden">
+            <div className="surface-glass space-y-1 rounded-2xl p-3">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-slate-700 hover:bg-white/80 rounded-xl"
+                  className="block rounded-xl px-3 py-2 text-base font-medium text-slate-700 hover:bg-white/80"
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
@@ -172,20 +243,25 @@ export default function Navbar() {
             <div className="mt-4 space-y-2 px-3">
               {loadingUser ? (
                 <div className="h-10 w-full animate-pulse rounded-full bg-[#d7e5df]" />
-              ) : userEmail ? (
+              ) : currentUser ? (
                 <>
-                  <p className="px-1 text-sm text-slate-600">{userEmail}</p>
+                  <div className="rounded-2xl border border-[#d8e6df] bg-white/85 p-3">
+                    <p className="text-xs text-slate-500">当前账号</p>
+                    <p className="mt-1 truncate text-sm text-slate-700">{currentUser.email}</p>
+                  </div>
                   <Button variant="outline" className="w-full" asChild>
-                    <Link href="/admin/orders" onClick={() => setIsOpen(false)}>进入后台</Link>
+                    <Link href="/membership" onClick={() => setIsOpen(false)}>
+                      会员中心
+                    </Link>
                   </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full"
-                    onClick={async () => {
-                      setIsOpen(false);
-                      await handleSignOut();
-                    }}
-                  >
+                  {currentUser.isAdmin && (
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/admin/orders" onClick={() => setIsOpen(false)}>
+                        管理后台
+                      </Link>
+                    </Button>
+                  )}
+                  <Button variant="ghost" className="w-full text-rose-600 hover:text-rose-700" onClick={handleSignOut}>
                     退出登录
                   </Button>
                 </>

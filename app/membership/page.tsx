@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import PaymentForm from "@/components/payment/payment-form";
 import { createClient } from "@/lib/supabase/client";
 
+const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499);
+
 const benefits = [
   {
     icon: BookOpen,
@@ -35,6 +37,9 @@ export default function MembershipPage() {
   const [showPayment, setShowPayment] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const monthlyPrice = Number.isFinite(MEMBERSHIP_PRICE)
+    ? (MEMBERSHIP_PRICE / 12).toFixed(1)
+    : "41.6";
 
   useEffect(() => {
     const supabase = createClient();
@@ -88,9 +93,9 @@ export default function MembershipPage() {
         <div className="surface-card rounded-3xl border border-[#d8e6df] p-6 sm:p-8 reveal-up reveal-delay-1">
           <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Membership</p>
           <div className="mt-3 text-5xl font-display text-[var(--brand-ink)]">
-            ¥499<span className="text-lg text-slate-500">/年</span>
+            ¥{MEMBERSHIP_PRICE}<span className="text-lg text-slate-500">/年</span>
           </div>
-          <p className="mt-2 text-sm text-slate-600">平均每月 ¥41.6，持续获得增量内容。</p>
+          <p className="mt-2 text-sm text-slate-600">平均每月 ¥{monthlyPrice}，持续获得增量内容。</p>
 
           <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
             {!showPayment ? (
@@ -111,7 +116,7 @@ export default function MembershipPage() {
           </div>
 
           <p className="mt-4 text-xs text-slate-500">
-            支付完成后系统自动检测到账并开通会员权益。
+            支付完成后系统会检测到账；如未自动开通，可在后台人工核销。
           </p>
         </div>
       </section>
