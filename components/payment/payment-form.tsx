@@ -24,6 +24,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
   const [countdown, setCountdown] = useState(0)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [redirectCountdown, setRedirectCountdown] = useState(3)
+  const [loadingDots, setLoadingDots] = useState(1)
   const [creatingOrder, setCreatingOrder] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const pollingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -136,6 +137,19 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
   }, [paymentSuccess, redirectCountdown])
 
   useEffect(() => {
+    if (!creatingOrder) {
+      setLoadingDots(1)
+      return
+    }
+
+    const timer = setInterval(() => {
+      setLoadingDots((prev) => (prev >= 3 ? 1 : prev + 1))
+    }, 360)
+
+    return () => clearInterval(timer)
+  }, [creatingOrder])
+
+  useEffect(() => {
     return () => {
       stopPolling()
     }
@@ -195,7 +209,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
             size="lg"
             disabled={creatingOrder}
           >
-            {creatingOrder ? '创建订单中...' : `创建订单并展示收款码（¥${MEMBERSHIP_PRICE}）`}
+            {creatingOrder ? `创建订单中${'.'.repeat(loadingDots)}` : `创建订单并展示收款码（¥${MEMBERSHIP_PRICE}）`}
           </Button>
 
           <div className="space-y-1 text-center text-xs text-slate-500">

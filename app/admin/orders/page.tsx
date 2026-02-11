@@ -3,8 +3,13 @@ import { redirect } from "next/navigation";
 import OrdersDashboard from "@/components/admin/orders-dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "【后台】订单核销中心 - AI-xiaobai",
+  description: "AI-xiaobai 管理后台：订单核销与会员管理",
+};
 
 export default async function AdminOrdersPage() {
   const supabase = await createClient();
@@ -38,6 +43,10 @@ export default async function AdminOrdersPage() {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-4 rounded-2xl border border-[#c2d7d0] bg-[linear-gradient(100deg,#0d3b3a,#225f56)] px-5 py-4 text-white shadow-[0_18px_46px_-28px_rgba(9,36,34,0.9)]">
+        <p className="text-xs uppercase tracking-[0.24em] text-emerald-100">ADMIN BACKSTAGE</p>
+        <p className="mt-1 text-lg font-semibold">管理后台 · 订单核销与会员权限</p>
+      </div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/"
