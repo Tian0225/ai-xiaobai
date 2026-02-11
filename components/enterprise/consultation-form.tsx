@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, CheckCircle2 } from "lucide-react";
 
 export default function ConsultationForm() {
   const [formData, setFormData] = useState({
@@ -17,10 +17,12 @@ export default function ConsultationForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
       const response = await fetch("/api/enterprise/consultation", {
@@ -29,55 +31,49 @@ export default function ConsultationForm() {
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        setIsSubmitted(true);
-        setFormData({
-          company: "",
-          name: "",
-          phone: "",
-          email: "",
-          employees: "",
-          needs: "",
-        });
-      } else {
-        alert("提交失败，请稍后重试");
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || "提交失败，请稍后重试");
       }
-    } catch {
-      alert("提交失败，请稍后重试");
+
+      setIsSubmitted(true);
+      setFormData({
+        company: "",
+        name: "",
+        phone: "",
+        email: "",
+        employees: "",
+        needs: "",
+      });
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "提交失败，请稍后重试");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({
-      ...formData,
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   if (isSubmitted) {
     return (
-      <section id="consultation-form" className="py-20 bg-white">
+      <section id="consultation-form" className="py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="mb-6 flex justify-center">
-              <div className="rounded-full bg-green-100 p-4">
-                <CheckCircle2 className="h-16 w-16 text-green-600" />
-              </div>
+          <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 text-center sm:p-10">
+            <div className="mx-auto mb-6 inline-flex rounded-full bg-[#e3f0eb] p-4">
+              <CheckCircle2 className="h-12 w-12 text-[var(--brand-fresh)]" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              预约成功！
-            </h3>
-            <p className="text-gray-600 mb-8">
+            <h3 className="font-display text-3xl text-[var(--brand-ink)]">预约成功</h3>
+            <p className="mt-4 text-slate-600">
               我们已收到您的咨询申请，将在 24 小时内与您联系。
-              <br />
-              感谢您的信任！
             </p>
             <Button
               variant="outline"
+              className="mt-8 rounded-full border-[#b9d1c9] bg-white/80"
               onClick={() => setIsSubmitted(false)}
             >
               继续预约
@@ -89,142 +85,139 @@ export default function ConsultationForm() {
   }
 
   return (
-    <section id="consultation-form" className="py-20 bg-white">
+    <section id="consultation-form" className="py-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            预约免费诊断
-          </h2>
-          <p className="mt-4 text-lg text-gray-600">
-            填写表单，我们将在 24 小时内联系您
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                公司名称 <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="company"
-                name="company"
-                type="text"
-                required
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="例：XX科技有限公司"
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                您的姓名 <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="例：张三"
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                联系电话 <span className="text-red-500">*</span>
-              </label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="例：13800138000"
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                邮箱地址
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="例：example@company.com"
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="employees" className="block text-sm font-medium text-gray-700 mb-2">
-                公司规模
-              </label>
-              <Input
-                id="employees"
-                name="employees"
-                type="text"
-                value={formData.employees}
-                onChange={handleChange}
-                placeholder="例：50-200人"
-                className="w-full"
-              />
-            </div>
+        <div className="surface-card rounded-3xl border border-[#d8e6df] p-7 sm:p-10">
+          <div className="mb-8 text-center">
+            <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">预约免费诊断</h2>
+            <p className="mt-3 text-lg text-slate-600">填写关键信息，我们会给出可执行的初步路线建议。</p>
           </div>
 
-          <div>
-            <label htmlFor="needs" className="block text-sm font-medium text-gray-700 mb-2">
-              您的需求 <span className="text-red-500">*</span>
-            </label>
-            <Textarea
-              id="needs"
-              name="needs"
-              required
-              value={formData.needs}
-              onChange={handleChange}
-              rows={5}
-              placeholder="请简单描述您的需求，例如：&#10;· 希望用 AI 提升客服效率&#10;· 需要自动化处理大量文档&#10;· 想了解 AI 如何帮助我们的业务"
-              className="w-full"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label htmlFor="company" className="mb-2 block text-sm font-medium text-slate-700">
+                  公司名称 <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="company"
+                  name="company"
+                  type="text"
+                  required
+                  value={formData.company}
+                  onChange={handleChange}
+                  placeholder="例：XX科技有限公司"
+                  className="bg-white/90"
+                />
+              </div>
 
-          <div className="rounded-lg bg-blue-50 p-4">
-            <p className="text-sm text-blue-900">
-              <strong>我们承诺：</strong>
-              <br />
-              ✓ 您的信息将严格保密，仅用于沟通联系
-              <br />
-              ✓ 24 小时内响应，1-3 天内完成初步诊断
-              <br />
-              ✓ 免费诊断，无任何隐性费用
-            </p>
-          </div>
+              <div>
+                <label htmlFor="name" className="mb-2 block text-sm font-medium text-slate-700">
+                  联系人 <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="例：张三"
+                  className="bg-white/90"
+                />
+              </div>
 
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>提交中...</>
-            ) : (
-              <>
-                提交预约
-                <Send className="ml-2 h-4 w-4" />
-              </>
+              <div>
+                <label htmlFor="phone" className="mb-2 block text-sm font-medium text-slate-700">
+                  联系电话 <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="例：13800138000"
+                  className="bg-white/90"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
+                  邮箱地址
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="例：example@company.com"
+                  className="bg-white/90"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="employees" className="mb-2 block text-sm font-medium text-slate-700">
+                  公司规模
+                </label>
+                <Input
+                  id="employees"
+                  name="employees"
+                  type="text"
+                  value={formData.employees}
+                  onChange={handleChange}
+                  placeholder="例：50-200人"
+                  className="bg-white/90"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="needs" className="mb-2 block text-sm font-medium text-slate-700">
+                您的需求 <span className="text-red-500">*</span>
+              </label>
+              <Textarea
+                id="needs"
+                name="needs"
+                required
+                value={formData.needs}
+                onChange={handleChange}
+                rows={5}
+                placeholder="请描述您的业务目标、当前流程和希望优先解决的问题"
+                className="bg-white/90"
+              />
+            </div>
+
+            {errorMessage && (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMessage}
+              </p>
             )}
-          </Button>
-        </form>
+
+            <div className="rounded-xl border border-[#c8ddd6] bg-[#f8fbf9] p-4 text-sm text-slate-600">
+              <p className="font-semibold text-slate-800">我们承诺</p>
+              <p className="mt-1">信息仅用于咨询沟通，24 小时内响应，免费诊断无隐藏费用。</p>
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                "提交中..."
+              ) : (
+                <>
+                  提交预约
+                  <Send className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </form>
+        </div>
       </div>
     </section>
   );

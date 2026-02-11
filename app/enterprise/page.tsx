@@ -13,19 +13,10 @@ export const metadata = {
 export default function EnterprisePage() {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
       <EnterpriseHero />
-
-      {/* 核心特点 */}
       <EnterpriseFeatures />
-
-      {/* 服务套餐 */}
       <PricingPlans />
-
-      {/* 案例展示 */}
       <CaseStudies />
-
-      {/* 预约咨询表单 */}
       <ConsultationForm />
     </div>
   );

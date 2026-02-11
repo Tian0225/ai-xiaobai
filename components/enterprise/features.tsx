@@ -1,71 +1,65 @@
 "use client";
 
-import { Shield, Zap, Users, Headphones, Lock, TrendingUp } from "lucide-react";
+import { Headphones, Lock, Shield, TrendingUp, Users, Zap } from "lucide-react";
 
 const features = [
   {
     icon: Shield,
     title: "数据安全保障",
-    description: "私有化部署方案，您的数据永不出域，符合国家数据安全法规要求",
+    description: "支持私有化部署与访问权限隔离，满足企业内部合规要求。",
   },
   {
     icon: Zap,
     title: "快速落地",
-    description: "经验丰富的团队，3-6个月完成从诊断到上线的全流程",
+    description: "以可执行路线图推进，避免陷入“只做 demo 不上生产”。",
   },
   {
     icon: Users,
     title: "全员培训",
-    description: "不只是交付系统，更培训您的团队真正用起来",
+    description: "不仅交付系统，也建立业务方可持续使用能力。",
   },
   {
     icon: Headphones,
     title: "长期支持",
-    description: "项目结束后持续技术支持，确保系统稳定运行",
+    description: "上线后持续优化关键流程，保障稳定运行与迭代。",
   },
   {
     icon: Lock,
     title: "合规审计",
-    description: "协助完成企业内部合规审批，提供完整的技术文档",
+    description: "输出技术文档与审批材料，降低企业审批阻力。",
   },
   {
     icon: TrendingUp,
-    title: "持续优化",
-    description: "根据使用数据持续优化模型效果，让 AI 越用越好",
+    title: "效果追踪",
+    description: "建立指标看板，持续验证 AI 投入的真实产出。",
   },
 ];
 
 export default function EnterpriseFeatures() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            为什么选择我们？
+        <div className="mb-14">
+          <p className="text-sm font-semibold text-[var(--brand-fresh)]">Execution Principles</p>
+          <h2 className="mt-2 font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">
+            关注可交付结果，而不是演示效果
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
-            不是简单的技术服务商，而是您的 AI 转型伙伴
+          <p className="mt-3 max-w-2xl text-lg text-slate-600">
+            从需求澄清到上线运营，每个阶段都有明确输出和验收标准。
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => {
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <div
-                key={index}
-                className="group relative rounded-2xl border border-gray-200 p-8 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="mb-4 inline-flex rounded-lg bg-blue-50 p-3 text-blue-600 group-hover:bg-blue-100 transition-colors">
-                  <Icon className="h-6 w-6" />
+              <article key={feature.title} className="surface-card rounded-2xl border border-[#d8e6df] p-7">
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#e3f0eb] text-[var(--brand-fresh)]">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
+                <h3 className="text-lg font-semibold text-slate-900">{feature.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{feature.description}</p>
+              </article>
             );
           })}
         </div>

@@ -1,70 +1,34 @@
 "use client";
 
+import { ArrowRight, Check, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const plans = [
   {
     name: "AI 咨询诊断",
     price: "¥19,999",
-    description: "快速了解 AI 如何帮助您的业务",
-    features: [
-      "企业 AI 需求调研（2天）",
-      "AI 应用场景分析报告",
-      "技术选型建议（Claude/GPT/国产模型）",
-      "成本预算方案",
-      "ROI 评估",
-    ],
-    deliverables: [
-      "30页诊断报告",
-      "技术方案 PPT",
-      "1次高管汇报",
-    ],
+    description: "快速识别 AI 落地机会和优先路径",
+    features: ["需求调研", "场景分析", "技术选型建议", "预算与 ROI 评估"],
+    deliverables: ["30页诊断报告", "技术方案PPT", "高管汇报"],
     duration: "1-2周",
     popular: false,
   },
   {
     name: "AI 系统落地",
     price: "¥69,999",
-    description: "从零到一搭建您的 AI 系统",
-    features: [
-      "包含套餐1所有内容",
-      "定制开发 AI 工具/系统",
-      "  · 智能客服",
-      "  · 文档自动化",
-      "  · 数据分析助手",
-      "  · 内容生成工具",
-      "员工培训（2-3场）",
-      "3个月技术支持",
-    ],
-    deliverables: [
-      "完整源代码",
-      "部署文档",
-      "操作手册",
-      "培训视频",
-    ],
+    description: "从方案到系统上线的完整实施",
+    features: ["含咨询诊断", "定制工具开发", "员工培训", "3个月技术支持"],
+    deliverables: ["完整源代码", "部署文档", "操作手册", "培训材料"],
     duration: "1-3个月",
     popular: true,
   },
   {
     name: "AI 全面升级",
     price: "¥299,999",
-    description: "企业级 AI 能力全面升级",
-    features: [
-      "包含套餐2所有内容",
-      "多部门 AI 系统打通",
-      "私有化部署（数据安全）",
-      "定制化模型训练（如有需要）",
-      "1年技术支持",
-      "按需迭代升级",
-    ],
-    deliverables: [
-      "企业级 AI 平台",
-      "私有化部署方案",
-      "SOP 文档",
-      "长期技术保障",
-    ],
+    description: "多部门协同与企业级能力建设",
+    features: ["含系统落地", "多部门打通", "私有化部署", "一年持续优化"],
+    deliverables: ["企业级平台", "私有化方案", "SOP文档", "长期保障"],
     duration: "3-6个月",
     popular: false,
   },
@@ -77,95 +41,69 @@ export default function PricingPlans() {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-gray-50">
+    <section id="pricing" className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            服务套餐
-          </h2>
-          <p className="mt-4 text-lg text-gray-600">
-            灵活的服务方案，满足不同阶段的企业需求
-          </p>
+        <div className="mb-14 text-center">
+          <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">服务套餐</h2>
+          <p className="mt-3 text-lg text-slate-600">按企业阶段分层配置，支持定制化扩展。</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {plans.map((plan) => (
+            <article
+              key={plan.name}
               className={cn(
-                "relative rounded-3xl border bg-white p-8 shadow-sm transition-all duration-300 hover:shadow-xl",
-                plan.popular
-                  ? "border-blue-500 ring-2 ring-blue-500 scale-105"
-                  : "border-gray-200"
+                "surface-card relative rounded-3xl border border-[#d8e6df] p-7",
+                plan.popular && "ring-2 ring-[#80b7a8]"
               )}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white">
-                    <Star className="h-4 w-4" />
-                    最受欢迎
-                  </span>
-                </div>
+                <span className="absolute -top-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] px-4 py-1.5 text-xs font-semibold text-white">
+                  <Star className="h-3.5 w-3.5" />
+                  推荐方案
+                </span>
               )}
 
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
-                <p className="mt-2 text-sm text-gray-600">{plan.description}</p>
-                <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-sm text-gray-500">起</span>
-                </div>
-              </div>
+              <h3 className="font-display text-2xl text-[var(--brand-ink)]">{plan.name}</h3>
+              <p className="mt-2 text-sm text-slate-600">{plan.description}</p>
+              <div className="mt-4 text-4xl font-display text-slate-900">{plan.price}</div>
+              <p className="mt-1 text-sm text-slate-500">周期：{plan.duration}</p>
 
-              <div className="mb-6">
-                <div className="text-sm font-semibold text-gray-900 mb-3">服务内容：</div>
-                <ul className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700">{feature}</span>
+              <div className="mt-6">
+                <p className="text-sm font-semibold text-slate-900">服务内容</p>
+                <ul className="mt-3 space-y-2">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
+                      <Check className="mt-0.5 h-4 w-4 text-[var(--brand-fresh)]" />
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mb-6 border-t pt-6">
-                <div className="text-sm font-semibold text-gray-900 mb-3">交付物：</div>
-                <ul className="space-y-2">
-                  {plan.deliverables.map((item, idx) => (
-                    <li key={idx} className="text-sm text-gray-600">
-                      · {item}
-                    </li>
+              <div className="mt-6 border-t border-[#d8e6df] pt-5">
+                <p className="text-sm font-semibold text-slate-900">交付物</p>
+                <ul className="mt-3 space-y-1 text-sm text-slate-600">
+                  {plan.deliverables.map((item) => (
+                    <li key={item}>· {item}</li>
                   ))}
                 </ul>
-              </div>
-
-              <div className="mb-6">
-                <div className="text-sm text-gray-500">
-                  周期：<span className="font-semibold text-gray-900">{plan.duration}</span>
-                </div>
               </div>
 
               <Button
                 className={cn(
-                  "w-full",
+                  "mt-7 w-full rounded-full",
                   plan.popular
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    : ""
+                    ? "bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                    : "bg-white text-slate-900 border border-[#b9d1c9] hover:bg-[#f7fbf9]"
                 )}
                 onClick={scrollToForm}
               >
                 立即咨询
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </div>
+            </article>
           ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <p className="text-sm text-gray-600">
-            💡 所有套餐均支持定制化调整，具体价格以实际需求为准
-          </p>
         </div>
       </div>
     </section>

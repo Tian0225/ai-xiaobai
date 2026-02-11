@@ -1,123 +1,93 @@
 "use client";
 
-import { Building, TrendingUp, Clock, Users } from "lucide-react";
+import { Building, Clock, TrendingUp, Users } from "lucide-react";
 
 const cases = [
   {
     industry: "制造业",
     company: "某传统制造企业",
-    challenge: "生产文档管理混乱，查找效率低",
-    solution: "AI 文档智能检索 + 自动分类系统",
+    challenge: "生产文档分散，知识复用率低",
+    solution: "AI 文档检索 + 自动分类工作流",
     results: [
-      { icon: Clock, label: "文档检索时间", value: "减少 80%" },
-      { icon: TrendingUp, label: "工作效率", value: "提升 60%" },
+      { icon: Clock, label: "检索时间", value: "减少 80%" },
+      { icon: TrendingUp, label: "效率提升", value: "提升 60%" },
       { icon: Users, label: "覆盖员工", value: "200+ 人" },
     ],
   },
   {
     industry: "教育培训",
     company: "某在线教育平台",
-    challenge: "学员咨询量大，客服压力大",
-    solution: "AI 智能客服 + 知识库问答系统",
+    challenge: "咨询量增长导致人工客服压力过高",
+    solution: "智能客服 + 业务知识库问答",
     results: [
-      { icon: Clock, label: "响应时间", value: "从 5 分钟到 10 秒" },
+      { icon: Clock, label: "响应时延", value: "5分钟→10秒" },
       { icon: TrendingUp, label: "客服成本", value: "降低 50%" },
-      { icon: Users, label: "服务学员", value: "10000+ 人/月" },
+      { icon: Users, label: "服务学员", value: "10000+/月" },
     ],
   },
   {
     industry: "金融服务",
     company: "某金融科技公司",
-    challenge: "合同审核耗时，法律风险高",
+    challenge: "合同审核流程慢，风险识别依赖人工",
     solution: "AI 合同审核 + 风险预警系统",
     results: [
-      { icon: Clock, label: "审核时间", value: "从 2 天到 1 小时" },
-      { icon: TrendingUp, label: "准确率", value: "提升到 99%" },
-      { icon: Users, label: "处理合同", value: "1000+ 份/月" },
+      { icon: Clock, label: "审核周期", value: "2天→1小时" },
+      { icon: TrendingUp, label: "审核准确率", value: "提升至 99%" },
+      { icon: Users, label: "月处理量", value: "1000+ 份" },
     ],
   },
 ];
 
 export default function CaseStudies() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            成功案例
-          </h2>
-          <p className="mt-4 text-lg text-gray-600">
-            真实客户案例（已脱敏处理）
-          </p>
+        <div className="mb-14 text-center">
+          <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">行业案例</h2>
+          <p className="mt-3 text-lg text-slate-600">真实项目脱敏后整理，可用于评估落地预期。</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {cases.map((caseStudy, index) => (
-            <div
-              key={index}
-              className="rounded-2xl border border-gray-200 bg-white p-8 hover:shadow-lg transition-shadow"
-            >
-              {/* Header */}
-              <div className="mb-6">
-                <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 mb-4">
-                  <Building className="h-4 w-4" />
-                  {caseStudy.industry}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {cases.map((caseStudy) => (
+            <article key={caseStudy.company} className="surface-card rounded-2xl border border-[#d8e6df] p-7">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#e6f2ec] px-3 py-1 text-sm font-medium text-[var(--brand-fresh)]">
+                <Building className="h-4 w-4" />
+                {caseStudy.industry}
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900">{caseStudy.company}</h3>
+
+              <div className="mt-5 space-y-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">挑战</p>
+                  <p className="mt-1 text-sm text-slate-700">{caseStudy.challenge}</p>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {caseStudy.company}
-                </h3>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">解决方案</p>
+                  <p className="mt-1 text-sm text-slate-700">{caseStudy.solution}</p>
+                </div>
               </div>
 
-              {/* Challenge */}
-              <div className="mb-6">
-                <div className="text-sm font-semibold text-gray-700 mb-2">
-                  挑战：
-                </div>
-                <p className="text-sm text-gray-600">{caseStudy.challenge}</p>
-              </div>
-
-              {/* Solution */}
-              <div className="mb-6">
-                <div className="text-sm font-semibold text-gray-700 mb-2">
-                  解决方案：
-                </div>
-                <p className="text-sm text-gray-600">{caseStudy.solution}</p>
-              </div>
-
-              {/* Results */}
-              <div className="border-t pt-6">
-                <div className="text-sm font-semibold text-gray-700 mb-4">
-                  效果：
-                </div>
-                <div className="space-y-3">
-                  {caseStudy.results.map((result, idx) => {
+              <div className="mt-6 border-t border-[#d8e6df] pt-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">结果</p>
+                <div className="mt-3 space-y-3">
+                  {caseStudy.results.map((result) => {
                     const Icon = result.icon;
                     return (
-                      <div key={idx} className="flex items-center gap-3">
-                        <div className="rounded-lg bg-green-50 p-2">
-                          <Icon className="h-4 w-4 text-green-600" />
+                      <div key={result.label} className="flex items-center gap-3 rounded-xl bg-white/90 p-3">
+                        <div className="rounded-lg bg-[#e3f0eb] p-2">
+                          <Icon className="h-4 w-4 text-[var(--brand-fresh)]" />
                         </div>
-                        <div className="flex-1">
-                          <div className="text-xs text-gray-500">
-                            {result.label}
-                          </div>
-                          <div className="text-sm font-semibold text-gray-900">
-                            {result.value}
-                          </div>
+                        <div>
+                          <div className="text-xs text-slate-500">{result.label}</div>
+                          <div className="text-sm font-semibold text-slate-900">{result.value}</div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-            </div>
+            </article>
           ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <p className="text-sm text-gray-500">
-            * 案例数据经过脱敏处理，实际效果因企业具体情况而异
-          </p>
         </div>
       </div>
     </section>
