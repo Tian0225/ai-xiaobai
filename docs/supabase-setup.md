@@ -131,6 +131,13 @@ CREATE POLICY "Service can manage enterprise consultations"
   WITH CHECK (true);
 ```
 
+如果你不熟 SQL，直接用这份文件：
+
+- 打开 `/Users/jitian/Documents/ai-xiaobai/docs/sql/enterprise_consultations.sql`
+- 全选复制
+- 粘贴到 Supabase SQL Editor
+- 点击 Run（执行一次即可）
+
 ## 4. 配置认证
 
 ### 4.1 启用邮箱认证
@@ -193,3 +200,22 @@ npm run dev
 - 触发方式：
   - Vercel Cron（GET + `Authorization: Bearer ${CRON_SECRET}`）
   - 手动触发（POST + `x-order-reconcile-token`）
+
+## 9. 人工确认支付（经营码模式）
+
+你只有经营码、没有账单 API 时，建议人工核对到账后执行：
+
+```bash
+npm run order:verify -- ORDER_20260211_123456
+```
+
+可选参数：
+
+```bash
+npm run order:verify -- ORDER_20260211_123456 MANUAL_TXN_001 https://ai-xiaobai.vercel.app
+```
+
+要求：
+
+- `.env.local` 里有 `PAYMENT_VERIFY_TOKEN`
+- 订单号必须存在且状态为 `pending`
