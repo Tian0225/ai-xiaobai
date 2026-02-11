@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,9 @@ import { useSearchParams } from 'next/navigation'
 export default function AuthForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -26,8 +30,14 @@ export default function AuthForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setMessage(null)
+
+    if (!isLogin && password !== confirmPassword) {
+      setMessage({ type: 'error', text: '两次输入的密码不一致，请重新确认。' })
+      return
+    }
+
+    setLoading(true)
 
     try {
       if (isLogin) {
@@ -89,17 +99,60 @@ export default function AuthForm() {
             <label htmlFor="password" className="text-sm font-medium">
               密码
             </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              disabled={loading}
-              minLength={6}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={loading}
+                minLength={6}
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                className="pr-11"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-500 transition hover:text-slate-900"
+                disabled={loading}
+                aria-label={showPassword ? '隐藏密码' : '显示密码'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
+          {!isLogin && (
+            <div className="space-y-2">
+              <label htmlFor="confirmPassword" className="text-sm font-medium">
+                确认密码
+              </label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="再次输入密码"
+                  required
+                  disabled={loading}
+                  minLength={6}
+                  autoComplete="new-password"
+                  className="pr-11"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-500 transition hover:text-slate-900"
+                  disabled={loading}
+                  aria-label={showConfirmPassword ? '隐藏确认密码' : '显示确认密码'}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+          )}
 
           {message && (
             <div
@@ -122,6 +175,10 @@ export default function AuthForm() {
               type="button"
               onClick={() => {
                 setIsLogin(!isLogin)
+                setPassword('')
+                setConfirmPassword('')
+                setShowPassword(false)
+                setShowConfirmPassword(false)
                 setMessage(null)
               }}
               className="text-blue-600 hover:underline"
