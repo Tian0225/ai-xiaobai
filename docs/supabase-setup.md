@@ -101,6 +101,36 @@ CREATE POLICY "Service can update orders"
   USING (true);
 ```
 
+### 3.3 创建 enterprise_consultations 表
+
+```sql
+-- 创建企业咨询表
+CREATE TABLE enterprise_consultations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company TEXT NOT NULL,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT,
+  employees TEXT,
+  needs TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_enterprise_consultations_created_at
+  ON enterprise_consultations(created_at DESC);
+
+-- 启用 RLS
+ALTER TABLE enterprise_consultations ENABLE ROW LEVEL SECURITY;
+
+-- 仅允许服务端（service_role）写入/读取
+CREATE POLICY "Service can manage enterprise consultations"
+  ON enterprise_consultations
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
+```
+
 ## 4. 配置认证
 
 ### 4.1 启用邮箱认证

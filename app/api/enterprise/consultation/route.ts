@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { company, name, phone, email, employees, needs } = body;
+    const company = typeof body.company === "string" ? body.company.trim() : "";
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+    const email = typeof body.email === "string" ? body.email.trim() : "";
+    const employees = typeof body.employees === "string" ? body.employees.trim() : "";
+    const needs = typeof body.needs === "string" ? body.needs.trim() : "";
 
     // 验证必填字段
     if (!company || !name || !phone || !needs) {
@@ -33,46 +39,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // TODO: 实际项目中，这里应该：
-    // 1. 保存到数据库（Supabase）
-    // 2. 发送通知邮件给销售团队
-    // 3. 发送确认短信给客户
-    // 4. 集成到 CRM 系统
+    const supabase = createAdminClient();
 
-    // 模拟保存到数据库
-    const consultation = {
-      id: Date.now(),
-      company,
-      name,
-      phone,
-      email: email || null,
-      employees: employees || null,
-      needs,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-    };
+    const { data, error } = await supabase
+      .from("enterprise_consultations")
+      .insert({
+        company,
+        name,
+        phone,
+        email: email || null,
+        employees: employees || null,
+        needs,
+        status: "pending",
+      })
+      .select("id, company, name, phone, email, employees, needs, status, created_at")
+      .single();
 
-    console.log("New enterprise consultation request:", consultation);
-
-    // 这里可以添加邮件通知逻辑
-    // await sendNotificationEmail({
-    //   to: "sales@ai-xiaobai.com",
-    //   subject: `新的企业咨询 - ${company}`,
-    //   body: `
-    //     公司：${company}
-    //     联系人：${name}
-    //     电话：${phone}
-    //     邮箱：${email || '未提供'}
-    //     规模：${employees || '未提供'}
-    //     需求：${needs}
-    //   `,
-    // });
+    if (error) {
+      console.error("保存企业咨询失败:", error);
+      return NextResponse.json(
+        { error: "咨询通道暂不可用，请稍后重试" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {
         success: true,
         message: "预约成功，我们将在 24 小时内与您联系",
-        data: consultation,
+        data,
       },
       { status: 200 }
     );
