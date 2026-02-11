@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSearchParams } from 'next/navigation'
 
 export default function AuthForm() {
   const [email, setEmail] = useState('')
@@ -13,6 +14,15 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const supabase = createClient()
+  const searchParams = useSearchParams()
+
+  const getRedirectPath = () => {
+    const nextPath = searchParams.get('next')
+    if (!nextPath || !nextPath.startsWith('/')) {
+      return '/'
+    }
+    return nextPath
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +38,9 @@ export default function AuthForm() {
         })
         if (error) throw error
         setMessage({ type: 'success', text: '登录成功！正在跳转...' })
-        setTimeout(() => window.location.href = '/', 1000)
+        setTimeout(() => {
+          window.location.href = getRedirectPath()
+        }, 1000)
       } else {
         // 注册
         const { error } = await supabase.auth.signUp({

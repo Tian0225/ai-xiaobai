@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
 
   // 需要登录的路径
-  const protectedPaths = ['/membership', '/api/orders']
+  const protectedPaths = ['/membership', '/admin', '/api/orders', '/api/admin']
   const isProtectedPath = protectedPaths.some(path =>
     request.nextUrl.pathname.startsWith(path)
   )

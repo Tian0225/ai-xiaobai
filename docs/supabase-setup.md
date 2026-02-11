@@ -12,6 +12,7 @@
 - `NEXT_PUBLIC_SUPABASE_URL`: 你的项目 URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: 公开的匿名密钥
 - `SUPABASE_SERVICE_ROLE_KEY`: 服务端密钥（保密）
+- `ADMIN_EMAILS`: 允许访问后台核销页面的管理员邮箱（多个用英文逗号分隔）
 
 将这些值填入 `.env.local` 文件。
 
@@ -170,6 +171,7 @@ npm run dev
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_EMAILS`
 
 ## 7. 支付集成（待完成）
 
@@ -201,9 +203,22 @@ npm run dev
   - Vercel Cron（GET + `Authorization: Bearer ${CRON_SECRET}`）
   - 手动触发（POST + `x-order-reconcile-token`）
 
-## 9. 人工确认支付（经营码模式）
+## 9. 后台人工确认支付（推荐，经营码模式）
 
-你只有经营码、没有账单 API 时，建议人工核对到账后执行：
+你只有经营码、没有账单 API 时，建议使用网页后台核销：
+
+1. 登录网站账号（邮箱必须在 `ADMIN_EMAILS` 中）
+2. 访问：`/admin/orders`
+3. 在微信/支付宝确认到账
+4. 点击对应订单的“确认支付”
+
+这会自动完成：
+- 订单状态更新为 `paid`
+- 开通会员并写入到期时间
+
+## 10. 命令行人工确认（备用）
+
+如果你暂时不方便登录后台，也可以用命令行执行：
 
 ```bash
 npm run order:verify -- ORDER_20260211_123456
