@@ -175,3 +175,21 @@ npm run dev
 参考文档：
 - 微信支付: https://pay.weixin.qq.com/wiki/doc/api/native.php
 - 支付宝: https://opendocs.alipay.com/
+
+## 8. 对账定时任务（Vercel Cron）
+
+### 8.1 在 Vercel 环境变量中配置
+
+- `CRON_SECRET`
+- `ORDER_RECONCILE_TOKEN`（用于手动触发，可选但建议配置）
+- `WECHAT_BILL_API_URL`
+- `WECHAT_BILL_API_TOKEN`
+- `ALIPAY_BILL_API_URL`
+- `ALIPAY_BILL_API_TOKEN`
+
+### 8.2 定时任务入口
+
+- 路径：`/api/orders/reconcile`
+- 触发方式：
+  - Vercel Cron（GET + `Authorization: Bearer ${CRON_SECRET}`）
+  - 手动触发（POST + `x-order-reconcile-token`）

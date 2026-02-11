@@ -4,6 +4,7 @@ import { checkPaymentStatus } from '@/lib/payment/polling'
 import type { Database } from '@/lib/database.types'
 
 const ORDER_RECONCILE_TOKEN = process.env.ORDER_RECONCILE_TOKEN
+const CRON_SECRET = process.env.CRON_SECRET
 const RECONCILE_BATCH_SIZE = 50
 
 type PendingOrder = Pick<
@@ -11,25 +12,33 @@ type PendingOrder = Pick<
   'order_id' | 'user_id' | 'amount' | 'payment_method' | 'status' | 'expires_at'
 >
 
-/**
- * 定时对账接口（建议由 Vercel Cron 调用）。
- *
- * 流程：
- * 1) 拉取待支付订单
- * 2) 过期订单标记 expired
- * 3) 调用支付轮询能力检查到账记录
- * 4) 到账后开通会员
- */
-export async function POST(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get('x-order-reconcile-token')
-    if (!ORDER_RECONCILE_TOKEN) {
-      return NextResponse.json({ error: 'ORDER_RECONCILE_TOKEN 未配置' }, { status: 503 })
-    }
-    if (!authHeader || authHeader !== ORDER_RECONCILE_TOKEN) {
-      return NextResponse.json({ error: '无权限执行对账任务' }, { status: 401 })
-    }
+function isAuthorized(request: NextRequest) {
+  const authorization = request.headers.get('authorization')
+  if (CRON_SECRET && authorization === `Bearer ${CRON_SECRET}`) {
+    return true
+  }
 
+  const manualToken = request.headers.get('x-order-reconcile-token')
+  if (ORDER_RECONCILE_TOKEN && manualToken === ORDER_RECONCILE_TOKEN) {
+    return true
+  }
+
+  return false
+}
+
+async function reconcileOrders(request: NextRequest) {
+  if (!CRON_SECRET && !ORDER_RECONCILE_TOKEN) {
+    return NextResponse.json(
+      { error: 'CRON_SECRET 或 ORDER_RECONCILE_TOKEN 至少配置一个' },
+      { status: 503 }
+    )
+  }
+
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: '无权限执行对账任务' }, { status: 401 })
+  }
+
+  try {
     const supabase = createAdminClient()
     const now = new Date()
 
@@ -129,9 +138,24 @@ export async function POST(request: NextRequest) {
       expiredCount,
       failedCount: failedOrders.length,
       failedOrders,
+      executedAt: now.toISOString(),
     })
   } catch (error) {
     console.error('订单对账任务失败:', error)
     return NextResponse.json({ error: '服务器错误' }, { status: 500 })
   }
+}
+
+/**
+ * 定时对账接口（建议由 Vercel Cron 调用）。
+ *
+ * GET: Vercel Cron（Authorization: Bearer ${CRON_SECRET}）
+ * POST: 手动触发（x-order-reconcile-token）
+ */
+export async function GET(request: NextRequest) {
+  return reconcileOrders(request)
+}
+
+export async function POST(request: NextRequest) {
+  return reconcileOrders(request)
 }

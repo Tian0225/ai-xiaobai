@@ -3,10 +3,10 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "rewrites": [
+  "crons": [
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "path": "/api/orders/reconcile",
+      "schedule": "*/5 * * * *"
     }
   ],
   "headers": [
