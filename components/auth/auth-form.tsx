@@ -90,7 +90,7 @@ export default function AuthForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder="请输入邮箱"
               required
               disabled={loading}
             />
@@ -105,21 +105,22 @@ export default function AuthForm() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="请输入密码"
                 required
                 disabled={loading}
                 minLength={6}
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
-                className="pr-11"
+                className="pr-24"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-500 transition hover:text-slate-900"
+                className="absolute inset-y-0 right-2 flex items-center justify-center gap-1 text-slate-500 transition hover:text-slate-900"
                 disabled={loading}
-                aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                aria-label={showPassword ? '切换为隐藏密码' : '切换为显示密码'}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                <span className="text-[11px]">{showPassword ? '已显示' : '已隐藏'}</span>
               </button>
             </div>
           </div>
@@ -134,21 +135,22 @@ export default function AuthForm() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="再次输入密码"
+                  placeholder="请再次输入密码"
                   required
                   disabled={loading}
                   minLength={6}
                   autoComplete="new-password"
-                  className="pr-11"
+                  className="pr-24"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-500 transition hover:text-slate-900"
+                  className="absolute inset-y-0 right-2 flex items-center justify-center gap-1 text-slate-500 transition hover:text-slate-900"
                   disabled={loading}
-                  aria-label={showConfirmPassword ? '隐藏确认密码' : '显示确认密码'}
+                  aria-label={showConfirmPassword ? '切换为隐藏确认密码' : '切换为显示确认密码'}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  <span className="text-[11px]">{showConfirmPassword ? '已显示' : '已隐藏'}</span>
                 </button>
               </div>
             </div>

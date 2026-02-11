@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X, Search, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 const navigation = [
   { name: "首页", href: "/" },
@@ -17,6 +18,9 @@ const navigation = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
+  const [loadingUser, setLoadingUser] = React.useState(true);
+  const [supabase] = React.useState(() => createClient());
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +29,33 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  React.useEffect(() => {
+    let active = true;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!active) return;
+      setUserEmail(user?.email ?? null);
+      setLoadingUser(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email ?? null);
+      setLoadingUser(false);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   return (
     <header
@@ -83,15 +114,31 @@ export default function Navbar() {
               <Search className="h-4 w-4" />
               <span className="text-xs border rounded px-1.5 py-0.5 border-slate-300">⌘K</span>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/auth">登录</Link>
-            </Button>
-            <Button size="sm" className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
-              <Link href="/guide">
-                开始学习
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
+            {loadingUser ? (
+              <div className="h-8 w-28 animate-pulse rounded-full bg-[#d7e5df]" />
+            ) : userEmail ? (
+              <>
+                <span className="max-w-[180px] truncate text-sm text-slate-600">{userEmail}</span>
+                <Button variant="outline" size="sm" className="rounded-full" asChild>
+                  <Link href="/admin/orders">后台</Link>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  退出
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/auth">登录</Link>
+                </Button>
+                <Button size="sm" className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
+                  <Link href="/guide">
+                    开始学习
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <button
@@ -123,15 +170,38 @@ export default function Navbar() {
               ))}
             </div>
             <div className="mt-4 space-y-2 px-3">
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/auth">登录</Link>
-              </Button>
-              <Button className="w-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
-                <Link href="/guide">
-                  开始学习
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
+              {loadingUser ? (
+                <div className="h-10 w-full animate-pulse rounded-full bg-[#d7e5df]" />
+              ) : userEmail ? (
+                <>
+                  <p className="px-1 text-sm text-slate-600">{userEmail}</p>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/admin/orders" onClick={() => setIsOpen(false)}>进入后台</Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={async () => {
+                      setIsOpen(false);
+                      await handleSignOut();
+                    }}
+                  >
+                    退出登录
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/auth">登录</Link>
+                  </Button>
+                  <Button className="w-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
+                    <Link href="/guide">
+                      开始学习
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}
