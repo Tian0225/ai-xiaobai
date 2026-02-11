@@ -1,55 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, Sparkles, Zap, Users, BookOpen, Crown } from "lucide-react";
+import { Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PaymentForm from "@/components/payment/payment-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-const membershipBenefits = [
-  {
-    icon: BookOpen,
-    title: "所有进阶教程",
-    description: "解锁全部会员专属教程，持续更新中",
-  },
-  {
-    icon: Sparkles,
-    title: "每月最新教程",
-    description: "Agent Teams、Clawdbot、最新 MCP 等热门话题",
-  },
-  {
-    icon: Users,
-    title: "专属社群",
-    description: "加入微信会员群，与其他开发者交流学习",
-  },
-  {
-    icon: Zap,
-    title: "问题优先解答",
-    description: "遇到问题时获得优先技术支持",
-  },
-  {
-    icon: Crown,
-    title: "新课程优先体验",
-    description: "新推出的实战课程可优先试听体验",
-  },
-];
-
-const pricingComparison = [
-  { feature: "免费教程", free: true, member: true },
-  { feature: "进阶教程（30+ 篇）", free: false, member: true },
-  { feature: "每月最新教程（2-3篇）", free: false, member: true },
-  { feature: "会员专属社群", free: false, member: true },
-  { feature: "问题优先解答", free: false, member: true },
-  { feature: "新课程优先体验", free: false, member: true },
-];
+import { createClient } from "@/lib/supabase/client";
 
 export default function MembershipPage() {
   const [showPayment, setShowPayment] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
-    const mockEmail = "user@example.com";
-    setUserEmail(mockEmail);
+    const supabase = createClient();
+    let active = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      setUserEmail(data.user?.email ?? null);
+      setLoadingUser(false);
+    });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -86,11 +60,14 @@ export default function MembershipPage() {
                 <Button
                   size="lg"
                   className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600"
+                  disabled={loadingUser || !userEmail}
                   onClick={() => setShowPayment(true)}
                 >
                   <Sparkles className="mr-2 h-5 w-5" />
-                  立即开通会员
+                  {loadingUser ? "加载账户中..." : userEmail ? "立即开通会员" : "请先登录"}
                 </Button>
+              ) : !userEmail ? (
+                <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
               ) : (
                 <PaymentForm userEmail={userEmail} />
               )}

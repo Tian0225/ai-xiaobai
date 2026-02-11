@@ -21,9 +21,12 @@ interface Transaction {
  * 需要配置微信商户API
  */
 export async function getWechatTransactions(
-  startTime: Date,
-  endTime: Date
+  _startTime: Date,
+  _endTime: Date
 ): Promise<Transaction[]> {
+  void _startTime
+  void _endTime
+
   // TODO: 实际实现需要调用微信支付API
   // 文档: https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=9_5
 
@@ -42,9 +45,12 @@ export async function getWechatTransactions(
  * 需要配置支付宝开放平台API
  */
 export async function getAlipayTransactions(
-  startTime: Date,
-  endTime: Date
+  _startTime: Date,
+  _endTime: Date
 ): Promise<Transaction[]> {
+  void _startTime
+  void _endTime
+
   // TODO: 实际实现需要调用支付宝API
   // 文档: https://opendocs.alipay.com/open/028woa
 

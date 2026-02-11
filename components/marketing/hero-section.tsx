@@ -46,7 +46,7 @@ export default function HeroSection() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="text-base px-8" asChild>
-              <Link href="/guide/opus-proxy">查看省钱方案</Link>
+              <Link href="/guide/opus-proxy-guide">查看省钱方案</Link>
             </Button>
           </div>
 

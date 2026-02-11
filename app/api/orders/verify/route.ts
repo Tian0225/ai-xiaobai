@@ -1,9 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+const PAYMENT_VERIFY_TOKEN = process.env.PAYMENT_VERIFY_TOKEN
+
 // 这个 API 用于手动验证支付或者由支付平台的 webhook 调用
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('x-payment-verify-token')
+    if (!PAYMENT_VERIFY_TOKEN) {
+      return NextResponse.json({ error: 'PAYMENT_VERIFY_TOKEN 未配置' }, { status: 503 })
+    }
+    if (!authHeader || authHeader !== PAYMENT_VERIFY_TOKEN) {
+      return NextResponse.json({ error: '无权限调用验证接口' }, { status: 401 })
+    }
+
     const { orderId, transactionId } = await request.json()
 
     if (!orderId) {
@@ -26,6 +36,9 @@ export async function POST(request: NextRequest) {
     // 检查订单是否已经处理过
     if (order.status === 'paid') {
       return NextResponse.json({ success: true, message: '订单已支付' })
+    }
+    if (order.status !== 'pending') {
+      return NextResponse.json({ error: `订单状态不可验证: ${order.status}` }, { status: 400 })
     }
 
     // 更新订单状态

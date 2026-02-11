@@ -1,13 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499)
+const PAYMENT_METHODS = ['wechat', 'alipay'] as const
+type PaymentMethod = (typeof PAYMENT_METHODS)[number]
+
 export async function POST(request: NextRequest) {
   try {
-    const { orderId, amount, userEmail, paymentMethod } = await request.json()
+    const body = await request.json()
+    const orderId = typeof body.orderId === 'string' ? body.orderId.trim() : ''
+    const paymentMethod = body.paymentMethod as PaymentMethod
 
     // 验证参数
-    if (!orderId || !amount || !userEmail || !paymentMethod) {
+    if (!orderId || !paymentMethod) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 })
+    }
+    if (!PAYMENT_METHODS.includes(paymentMethod)) {
+      return NextResponse.json({ error: '支付方式无效' }, { status: 400 })
+    }
+    if (!Number.isFinite(MEMBERSHIP_PRICE) || MEMBERSHIP_PRICE <= 0) {
+      return NextResponse.json({ error: '会员价格配置错误' }, { status: 500 })
     }
 
     const supabase = await createClient()
@@ -17,6 +29,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: '未登录' }, { status: 401 })
     }
+    if (!user.email) {
+      return NextResponse.json({ error: '用户邮箱缺失' }, { status: 400 })
+    }
 
     // 创建订单记录
     const { data, error } = await supabase
@@ -24,8 +39,8 @@ export async function POST(request: NextRequest) {
       .insert({
         order_id: orderId,
         user_id: user.id,
-        user_email: userEmail,
-        amount,
+        user_email: user.email,
+        amount: MEMBERSHIP_PRICE,
         payment_method: paymentMethod,
         status: 'pending',
         created_at: new Date().toISOString(),

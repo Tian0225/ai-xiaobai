@@ -41,8 +41,9 @@ export default function AuthForm() {
         if (error) throw error
         setMessage({ type: 'success', text: '注册成功！请查收邮件验证。' })
       }
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || '操作失败，请重试' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : '操作失败，请重试'
+      setMessage({ type: 'error', text: message })
     } finally {
       setLoading(false)
     }

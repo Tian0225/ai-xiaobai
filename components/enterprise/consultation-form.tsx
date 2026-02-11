@@ -42,7 +42,7 @@ export default function ConsultationForm() {
       } else {
         alert("提交失败，请稍后重试");
       }
-    } catch (error) {
+    } catch {
       alert("提交失败，请稍后重试");
     } finally {
       setIsSubmitting(false);
