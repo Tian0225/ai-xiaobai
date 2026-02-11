@@ -1,0 +1,74 @@
+---
+title: "Antigravity 配置指南"
+description: "完整的 Antigravity 配置教程，从安装到高级配置，让你的 Claude Code 开发效率翻倍。"
+difficulty: beginner
+readTime: 10
+tags: ["Antigravity", "配置", "入门", "VSCode"]
+category: "Claude Code"
+featured: true
+publishedAt: "2026-02-11"
+updatedAt: "2026-02-11"
+---
+
+# Antigravity 配置指南
+
+> **难度**：入门 | **阅读时间**：10 分钟
+
+## 什么是 Antigravity？
+
+Antigravity 是一个强大的 Claude Code 增强工具，提供了智能提示、代码补全、项目管理等功能。
+
+## 安装步骤
+
+### 1. 安装 VSCode 扩展
+
+```bash
+# 在 VSCode 中搜索 "Antigravity"
+# 或使用命令行安装
+code --install-extension antigravity.antigravity-vscode
+```
+
+### 2. 配置 API
+
+在 VSCode 设置中配置：
+
+```json
+{
+  "antigravity.apiKey": "your-api-key",
+  "antigravity.model": "claude-sonnet-4-5",
+  "antigravity.enableAutoCompletion": true
+}
+```
+
+## 核心功能
+
+### 1. 智能代码补全
+
+按 `Tab` 键即可使用 AI 补全代码。
+
+### 2. 快速重构
+
+选中代码后，使用 `Cmd+Shift+P` 调出命令面板，选择 "Antigravity: Refactor"。
+
+### 3. 代码解释
+
+```typescript
+// 选中代码后右键 -> "Antigravity: Explain Code"
+function complexFunction() {
+  // AI 会自动解释这段代码的作用
+}
+```
+
+## 最佳实践
+
+1. **合理使用自动补全**：不要过度依赖，保持思考
+2. **定期更新**：Antigravity 经常发布新功能
+3. **自定义快捷键**：提高开发效率
+
+## 总结
+
+Antigravity 是 Claude Code 开发者的必备工具，能显著提升开发效率。
+
+**相关教程**：
+- [教你反代使用最强模型 Opus 4.6](/guide/opus-proxy-guide)
+- [Everything Claude Code 配置](/guide/everything-claude-code)

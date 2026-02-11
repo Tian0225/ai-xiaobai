@@ -4,17 +4,15 @@ import { Separator } from "@/components/ui/separator";
 const footerLinks = {
   product: [
     { name: "免费教程", href: "/guide" },
-    { name: "会员服务", href: "/pricing" },
+    { name: "会员服务", href: "/membership" },
     { name: "企业服务", href: "/enterprise" },
   ],
   resources: [
-    { name: "省钱方案", href: "/guide/opus-proxy" },
-    { name: "常见问题", href: "/faq" },
-    { name: "更新日志", href: "/changelog" },
+    { name: "省钱方案", href: "/guide/opus-proxy-guide" },
+    { name: "服务商城", href: "/shop" },
   ],
-  company: [
-    { name: "关于我们", href: "/about" },
-    { name: "联系方式", href: "/contact" },
+  community: [
+    { name: "GitHub", href: "https://github.com/Tian0225/ai-xiaobai" },
   ],
 };
 
@@ -69,11 +67,11 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Community */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">公司</h3>
+            <h3 className="text-sm font-semibold text-gray-900">社区</h3>
             <ul className="mt-4 space-y-3">
-              {footerLinks.company.map((link) => (
+              {footerLinks.community.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}

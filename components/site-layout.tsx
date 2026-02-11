@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import UserNav from '@/components/auth/user-nav'
 
 export default function MarketingLayout({
@@ -29,9 +28,6 @@ export default function MarketingLayout({
               </Link>
               <Link href="/enterprise" className="text-sm font-medium hover:text-blue-600 transition">
                 企业服务
-              </Link>
-              <Link href="/about" className="text-sm font-medium hover:text-blue-600 transition">
-                关于
               </Link>
             </nav>
           </div>

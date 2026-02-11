@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { getAllTutorials } from "@/lib/mdx";
+import SearchDialog from "@/components/search/search-dialog";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,11 +31,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 服务端读取教程数据，传入搜索组件
+  const tutorials = getAllTutorials().map(t => ({
+    slug: t.slug,
+    title: t.title,
+    description: t.description,
+    difficulty: t.difficulty,
+    tags: t.tags,
+  }))
+
   return (
     <html lang="zh-CN" className="scroll-smooth">
       <body className={cn(inter.variable, "font-sans antialiased")}>
         {children}
+        <SearchDialog tutorials={tutorials} />
       </body>
     </html>
   );
 }
+

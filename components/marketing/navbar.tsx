@@ -2,15 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "首页", href: "/" },
   { name: "教程", href: "/guide" },
+  { name: "会员", href: "/membership" },
+  { name: "商城", href: "/shop" },
   { name: "企业服务", href: "/enterprise" },
-  { name: "关于", href: "/about" },
 ];
 
 export default function Navbar() {
@@ -58,8 +59,24 @@ export default function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex md:items-center md:space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 gap-2"
+              onClick={() => {
+                document.dispatchEvent(
+                  new KeyboardEvent('keydown', {
+                    key: 'k',
+                    metaKey: true,
+                  })
+                )
+              }}
+            >
+              <Search className="h-4 w-4" />
+              <span className="text-xs border rounded px-1.5 py-0.5">⌘K</span>
+            </Button>
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">登录</Link>
+              <Link href="/auth">登录</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/guide">开始学习</Link>
@@ -98,7 +115,7 @@ export default function Navbar() {
             </div>
             <div className="mt-4 space-y-2 px-3">
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/login">登录</Link>
+                <Link href="/auth">登录</Link>
               </Button>
               <Button className="w-full" asChild>
                 <Link href="/guide">开始学习</Link>

@@ -1,0 +1,196 @@
+---
+title: "Everything Claude Code 配置"
+description: "最强 Claude Code 配置集合，包含所有实用技巧、最佳实践和高级配置。从入门到精通的完整指南。"
+difficulty: intermediate
+readTime: 20
+tags: ["Claude Code", "配置", "最佳实践", "高级"]
+category: "Claude Code"
+featured: true
+publishedAt: "2026-02-11"
+updatedAt: "2026-02-11"
+---
+
+# Everything Claude Code 配置
+
+> **难度**：中级 | **阅读时间**：20 分钟
+
+## 前言
+
+这是一份完整的 Claude Code 配置指南，汇集了所有最佳实践和高级技巧。
+
+## 核心配置
+
+### 1. Slash Commands（斜杠命令）
+
+创建自定义命令来提升效率：
+
+```bash
+# 在 .claude/commands/ 目录下创建命令
+echo "Review this code for security issues" > .claude/commands/security-check.md
+```
+
+使用：
+```
+/security-check
+```
+
+### 2. Agent Teams
+
+配置多个专业 Agent 协同工作：
+
+```json
+{
+  "agents": {
+    "architect": {
+      "role": "系统架构师",
+      "tools": ["Read", "Grep", "Glob"]
+    },
+    "frontend-designer": {
+      "role": "前端设计师",
+      "tools": ["Read", "Write", "Edit"]
+    }
+  }
+}
+```
+
+### 3. MCP Servers
+
+集成 Model Context Protocol 服务器：
+
+```bash
+# 安装 Stitch MCP
+npm install @anthropic-ai/mcp-stitch
+
+# 配置
+claude mcp add stitch
+```
+
+## 高级技巧
+
+### 1. 项目级配置
+
+在项目根目录创建 `.claude`：
+
+```json
+{
+  "name": "My Project",
+  "description": "项目描述",
+  "rules": [
+    "Always write tests first",
+    "Use TypeScript strict mode"
+  ]
+}
+```
+
+### 2. 自定义 Prompts
+
+```markdown
+<!-- .claude/prompts/review.md -->
+Review this code with focus on:
+1. Performance
+2. Security
+3. Maintainability
+```
+
+### 3. Git Hooks 集成
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+
+# 自动运行代码审查
+claude /security-check
+```
+
+## 常用工作流
+
+### 工作流 1：TDD 开发
+
+```bash
+1. /plan "实现用户登录功能"
+2. /tdd "创建登录组件测试"
+3. 实现代码
+4. /security-check
+5. git commit
+```
+
+### 工作流 2：代码重构
+
+```bash
+1. 选中代码
+2. /plan "重构这段代码"
+3. 审查建议
+4. 应用重构
+5. 运行测试
+```
+
+## 性能优化
+
+### 1. 减少 Token 使用
+
+```typescript
+// 使用 .claudeignore 排除不必要的文件
+node_modules/
+dist/
+.next/
+```
+
+### 2. 智能上下文选择
+
+只包含相关文件：
+```bash
+# 使用 @文件名 来指定上下文
+@src/components/Button.tsx 优化这个组件
+```
+
+## 团队协作
+
+### 1. 共享配置
+
+```bash
+# 提交 .claude/ 目录到 Git
+git add .claude/
+git commit -m "Add Claude Code configuration"
+```
+
+### 2. 统一代码风格
+
+```json
+{
+  "rules": [
+    "Use Prettier for formatting",
+    "Follow Airbnb style guide",
+    "Write JSDoc comments"
+  ]
+}
+```
+
+## 故障排查
+
+### 问题 1：响应速度慢
+
+**解决方案**：
+- 减少上下文大小
+- 使用 .claudeignore
+- 选择更快的模型（如 Sonnet）
+
+### 问题 2：Token 超限
+
+**解决方案**：
+- 使用 Strategic Compact
+- 分阶段完成任务
+- 手动清理上下文
+
+## 总结
+
+掌握这些配置和技巧，你将能充分发挥 Claude Code 的能力，成为 AI 辅助开发的高手。
+
+**推荐阅读**：
+- [教你反代使用最强模型 Opus 4.6](/guide/opus-proxy-guide)
+- [Antigravity 配置指南](/guide/antigravity-config)
+
+## 资源链接
+
+- [官方文档](https://docs.claude.com)
+- [GitHub 仓库](https://github.com/anthropics/claude-code)
+- [社区论坛](https://community.anthropic.com)

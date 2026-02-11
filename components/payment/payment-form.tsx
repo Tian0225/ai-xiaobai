@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -9,12 +9,30 @@ interface PaymentFormProps {
   userEmail: string
 }
 
+const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499)
+
 export default function PaymentForm({ userEmail }: PaymentFormProps) {
   const [orderId, setOrderId] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'wechat' | 'alipay'>('wechat')
   const [showQR, setShowQR] = useState(false)
   const [polling, setPolling] = useState(false)
   const [countdown, setCountdown] = useState(0)
+  const [creatingOrder, setCreatingOrder] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const pollingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const stopPolling = () => {
+    if (pollingTimerRef.current) {
+      clearInterval(pollingTimerRef.current)
+      pollingTimerRef.current = null
+    }
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current)
+      pollingTimeoutRef.current = null
+    }
+    setPolling(false)
+  }
 
   // 生成订单号
   const generateOrderId = () => {
@@ -26,46 +44,62 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
 
   // 创建订单
   const handleCreateOrder = async () => {
+    setErrorMessage('')
+    setCreatingOrder(true)
     const newOrderId = generateOrderId()
     setOrderId(newOrderId)
-    setShowQR(true)
-    setCountdown(600) // 10分钟倒计时
 
-    // 调用 API 创建订单
-    await fetch('/api/orders/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderId: newOrderId,
-        amount: 499,
-        userEmail,
-        paymentMethod,
-      }),
-    })
+    try {
+      // 调用 API 创建订单
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: newOrderId,
+          paymentMethod,
+        }),
+      })
 
-    // 开始轮询检查支付状态
-    startPolling(newOrderId)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || '创建订单失败，请稍后重试')
+      }
+
+      setShowQR(true)
+      setCountdown(600) // 10分钟倒计时
+
+      // 开始轮询检查支付状态
+      startPolling(newOrderId)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '创建订单失败，请稍后重试'
+      setErrorMessage(message)
+      setShowQR(false)
+      setCountdown(0)
+    } finally {
+      setCreatingOrder(false)
+    }
   }
 
   // 开始轮询
   const startPolling = (orderId: string) => {
     setPolling(true)
-    const interval = setInterval(async () => {
+    pollingTimerRef.current = setInterval(async () => {
       const res = await fetch(`/api/orders/check?orderId=${orderId}`)
       const data = await res.json()
 
       if (data.paid) {
-        clearInterval(interval)
-        setPolling(false)
+        stopPolling()
         // 支付成功，刷新页面
         window.location.reload()
+      }
+      if (data.expired) {
+        stopPolling()
       }
     }, 5000) // 每5秒检查一次
 
     // 10分钟后停止轮询
-    setTimeout(() => {
-      clearInterval(interval)
-      setPolling(false)
+    pollingTimeoutRef.current = setTimeout(() => {
+      stopPolling()
     }, 600000)
   }
 
@@ -76,6 +110,12 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
       return () => clearTimeout(timer)
     }
   }, [countdown])
+
+  useEffect(() => {
+    return () => {
+      stopPolling()
+    }
+  }, [])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -94,36 +134,39 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => setPaymentMethod('wechat')}
-              className={`p-4 border-2 rounded-lg transition ${
-                paymentMethod === 'wechat'
+              className={`p-4 border-2 rounded-lg transition ${paymentMethod === 'wechat'
                   ? 'border-green-500 bg-green-50'
                   : 'border-gray-200 hover:border-gray-300'
-              }`}
+                }`}
             >
               <div className="text-2xl mb-2">💚</div>
               <div className="font-semibold">微信支付</div>
             </button>
             <button
               onClick={() => setPaymentMethod('alipay')}
-              className={`p-4 border-2 rounded-lg transition ${
-                paymentMethod === 'alipay'
+              className={`p-4 border-2 rounded-lg transition ${paymentMethod === 'alipay'
                   ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-200 hover:border-gray-300'
-              }`}
+                }`}
             >
               <div className="text-2xl mb-2">💙</div>
               <div className="font-semibold">支付宝</div>
             </button>
           </div>
 
-          <Button onClick={handleCreateOrder} className="w-full" size="lg">
-            生成收款码（¥499）
+          <Button onClick={handleCreateOrder} className="w-full" size="lg" disabled={creatingOrder}>
+            {creatingOrder ? '生成中...' : `生成收款码（¥${MEMBERSHIP_PRICE}）`}
           </Button>
 
           <div className="text-xs text-gray-500 text-center space-y-1">
             <p>点击后将生成专属收款码</p>
             <p>支付时请务必填写订单备注</p>
+            <p>当前账户：{userEmail}</p>
           </div>
+
+          {errorMessage && (
+            <p className="text-sm text-red-600 text-center">{errorMessage}</p>
+          )}
         </CardContent>
       </Card>
     )
@@ -140,19 +183,21 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
       <CardContent className="space-y-4">
         {/* 收款码 */}
         <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="relative aspect-square w-full max-w-xs mx-auto bg-gray-100 rounded flex items-center justify-center">
+          <div className="relative aspect-square w-full max-w-xs mx-auto bg-white rounded overflow-hidden">
             {paymentMethod === 'wechat' ? (
-              <div className="text-center">
-                <div className="text-4xl mb-2">💚</div>
-                <div className="text-sm text-gray-500">微信收款码</div>
-                <div className="text-xs text-gray-400 mt-2">请在 public/payment/ 放置真实收款码</div>
-              </div>
+              <Image
+                src="/payment/wechat-qr.png"
+                alt="微信收款码"
+                fill
+                className="object-contain p-2"
+              />
             ) : (
-              <div className="text-center">
-                <div className="text-4xl mb-2">💙</div>
-                <div className="text-sm text-gray-500">支付宝收款码</div>
-                <div className="text-xs text-gray-400 mt-2">请在 public/payment/ 放置真实收款码</div>
-              </div>
+              <Image
+                src="/payment/alipay-qr.png"
+                alt="支付宝收款码"
+                fill
+                className="object-contain p-2"
+              />
             )}
           </div>
         </div>
@@ -161,7 +206,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="font-semibold text-sm mb-2">⚠️ 重要提示</div>
           <div className="text-sm space-y-1">
-            <p>支付金额：<span className="font-bold text-red-600">¥499</span></p>
+            <p>支付金额：<span className="font-bold text-red-600">¥{MEMBERSHIP_PRICE}</span></p>
             <p>订单编号：<span className="font-mono text-xs bg-white px-2 py-1 rounded">{orderId}</span></p>
             <p className="text-red-600 font-semibold">请务必在支付备注中填写订单编号！</p>
           </div>
@@ -190,8 +235,8 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
           variant="outline"
           onClick={() => {
             setShowQR(false)
-            setPolling(false)
             setCountdown(0)
+            stopPolling()
           }}
           className="w-full"
         >

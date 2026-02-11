@@ -1,0 +1,92 @@
+---
+title: "教你反代使用最强模型 Opus 4.6"
+description: "详细教你如何配置反向代理，稳定使用 Claude Opus 4.6 模型，避免封号风险。包含完整的配置步骤、常见问题排查和最佳实践。"
+difficulty: intermediate
+readTime: 15
+tags: ["Claude", "Opus", "反代", "配置"]
+category: "Claude Code"
+featured: true
+publishedAt: "2026-02-11"
+updatedAt: "2026-02-11"
+---
+
+# 教你反代使用最强模型 Opus 4.6
+
+> **难度**：中级 | **阅读时间**：15 分钟
+
+## 前言
+
+Claude Opus 4.6 是目前最强大的 AI 模型之一，但官方订阅价格昂贵（$249.99/月）。本教程将教你如何通过反向代理的方式，以更低的成本稳定使用 Opus 4.6。
+
+## 什么是反向代理？
+
+反向代理（Reverse Proxy）是一种服务器配置模式，它接收客户端请求后，将请求转发到后端服务器，然后将结果返回给客户端。
+
+**优势**：
+- ✅ 成本更低（约 500 元/年）
+- ✅ 稳定不封号
+- ✅ 速度更快
+- ✅ 支持多种模型
+
+## 配置步骤
+
+### 1. 选择反代服务商
+
+推荐的服务商：
+- **选项 A**：自建反代（需要技术基础）
+- **选项 B**：使用第三方反代服务（简单快捷）
+
+### 2. 配置 API Key
+
+```bash
+# 在 .env 文件中配置
+ANTHROPIC_API_KEY=your-api-key-here
+ANTHROPIC_BASE_URL=https://your-proxy-url.com/v1
+```
+
+### 3. 测试连接
+
+```typescript
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  baseURL: process.env.ANTHROPIC_BASE_URL,
+})
+
+const message = await client.messages.create({
+  model: 'claude-opus-4-20250514',
+  max_tokens: 1024,
+  messages: [{ role: 'user', content: 'Hello, Claude!' }],
+})
+
+console.log(message.content)
+```
+
+## 常见问题
+
+### Q1: 会被封号吗？
+
+**A**: 使用正规的反代服务不会被封号。关键是选择可靠的服务商。
+
+### Q2: 速度会变慢吗？
+
+**A**: 选择国内的反代服务，速度通常比官方直连更快。
+
+### Q3: 成本是多少？
+
+**A**: 约 500 元/年，相比官方的 $249.99/月 便宜很多。
+
+## 最佳实践
+
+1. **定期备份配置**：保存好 API Key 和配置文件
+2. **监控使用量**：避免超额使用
+3. **选择稳定服务商**：不要频繁更换
+
+## 总结
+
+通过反向代理使用 Opus 4.6 是一个性价比极高的方案。只需简单配置，就能享受最强 AI 模型的能力。
+
+**下一步**：
+- [Antigravity 配置指南](/guide/antigravity-config)
+- [Everything Claude Code 配置](/guide/everything-claude-code)

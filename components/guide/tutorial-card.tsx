@@ -1,11 +1,11 @@
 import Link from 'next/link'
-import { Tutorial } from '@/lib/types'
+import type { TutorialMeta } from '@/lib/mdx'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock, Star } from 'lucide-react'
 
 interface TutorialCardProps {
-  tutorial: Tutorial
+  tutorial: TutorialMeta
 }
 
 const difficultyConfig = {

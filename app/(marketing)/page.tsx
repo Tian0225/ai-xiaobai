@@ -1,5 +1,6 @@
 import Navbar from "@/components/marketing/navbar";
 import HeroSection from "@/components/marketing/hero-section";
+import HomeContent from "@/components/marketing/home-content";
 import Footer from "@/components/marketing/footer";
 
 export default function HomePage() {
@@ -8,7 +9,7 @@ export default function HomePage() {
       <Navbar />
       <main className="min-h-screen">
         <HeroSection />
-        {/* 后续 Milestone 2-3 会添加更多 sections */}
+        <HomeContent />
       </main>
       <Footer />
     </>
