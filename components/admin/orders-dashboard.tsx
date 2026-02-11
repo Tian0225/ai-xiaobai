@@ -10,6 +10,7 @@ type OrderStatus = "pending" | "paid" | "expired" | "cancelled";
 
 interface OrderRecord {
   order_id: string;
+  user_id: string;
   user_email: string;
   amount: number;
   payment_method: PaymentMethod;
@@ -18,6 +19,8 @@ interface OrderRecord {
   created_at: string;
   paid_at: string | null;
   expires_at: string;
+  is_member: boolean;
+  membership_expires_at: string | null;
 }
 
 interface OrdersResponse {
@@ -62,6 +65,7 @@ export default function OrdersDashboard({ adminEmail }: OrdersDashboardProps) {
   const [successMessage, setSuccessMessage] = useState("");
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState<Record<string, boolean>>({});
+  const [memberSubmitting, setMemberSubmitting] = useState<Record<string, boolean>>({});
   const [transactionInputs, setTransactionInputs] = useState<Record<string, string>>({});
 
   const loadOrders = useCallback(async (showLoading = false) => {
@@ -152,6 +156,44 @@ export default function OrdersDashboard({ adminEmail }: OrdersDashboardProps) {
     }
   };
 
+  const handleMemberAction = async (order: OrderRecord, action: "revoke" | "grant") => {
+    const actionKey = `${action}:${order.user_id}`;
+    setMemberSubmitting((prev) => ({ ...prev, [actionKey]: true }));
+    setActionErrors((prev) => ({ ...prev, [order.order_id]: "" }));
+    setSuccessMessage("");
+
+    try {
+      const response = await fetch("/api/admin/members", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: order.user_id,
+          userEmail: order.user_email,
+          action,
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.error || "会员状态更新失败");
+      }
+
+      setSuccessMessage(
+        action === "revoke"
+          ? `已撤销 ${order.user_email} 的会员权限`
+          : `已恢复 ${order.user_email} 的会员权限（延长 1 年）`
+      );
+      await loadOrders(true);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "会员状态更新失败";
+      setActionErrors((prev) => ({ ...prev, [order.order_id]: message }));
+    } finally {
+      setMemberSubmitting((prev) => ({ ...prev, [actionKey]: false }));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <section className="surface-card rounded-3xl border border-[#d8e6df] p-6">
@@ -239,6 +281,9 @@ export default function OrdersDashboard({ adminEmail }: OrdersDashboardProps) {
                     <p className="text-sm font-semibold text-slate-900">
                       ¥{order.amount} · {paymentMethodLabel[order.payment_method]}
                     </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      会员：{order.is_member ? `已开通（到期 ${formatDate(order.membership_expires_at)}）` : "未开通"}
+                    </p>
                     <p className="mt-1 text-xs text-slate-500">创建：{formatDate(order.created_at)}</p>
                   </div>
                   <div>
@@ -291,14 +336,16 @@ export default function OrdersDashboard({ adminEmail }: OrdersDashboardProps) {
                 <th className="px-4 py-3 font-semibold">金额</th>
                 <th className="px-4 py-3 font-semibold">支付方式</th>
                 <th className="px-4 py-3 font-semibold">交易号</th>
+                <th className="px-4 py-3 font-semibold">会员状态</th>
                 <th className="px-4 py-3 font-semibold">创建时间</th>
                 <th className="px-4 py-3 font-semibold">支付时间</th>
+                <th className="px-4 py-3 font-semibold">操作</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-6 text-center text-slate-500">
+                  <td colSpan={10} className="px-4 py-6 text-center text-slate-500">
                     暂无订单数据
                   </td>
                 </tr>
@@ -323,8 +370,46 @@ export default function OrdersDashboard({ adminEmail }: OrdersDashboardProps) {
                     <td className="px-4 py-3">¥{order.amount}</td>
                     <td className="px-4 py-3">{paymentMethodLabel[order.payment_method]}</td>
                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{order.transaction_id ?? "-"}</td>
+                    <td className="px-4 py-3">
+                      {order.is_member ? (
+                        <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                          已开通
+                        </span>
+                      ) : (
+                        <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                          未开通
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-slate-600">{formatDate(order.created_at)}</td>
                     <td className="px-4 py-3 text-slate-600">{formatDate(order.paid_at)}</td>
+                    <td className="px-4 py-3">
+                      {order.status === "paid" ? (
+                        order.is_member ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                            disabled={memberSubmitting[`revoke:${order.user_id}`]}
+                            onClick={() => handleMemberAction(order, "revoke")}
+                          >
+                            {memberSubmitting[`revoke:${order.user_id}`] ? "撤销中..." : "撤销会员"}
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+                            disabled={memberSubmitting[`grant:${order.user_id}`]}
+                            onClick={() => handleMemberAction(order, "grant")}
+                          >
+                            {memberSubmitting[`grant:${order.user_id}`] ? "恢复中..." : "恢复会员"}
+                          </Button>
+                        )
+                      ) : (
+                        <span className="text-xs text-slate-400">-</span>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}

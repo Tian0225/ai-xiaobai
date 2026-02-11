@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -21,6 +22,8 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
   const [showQR, setShowQR] = useState(false)
   const [polling, setPolling] = useState(false)
   const [countdown, setCountdown] = useState(0)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [redirectCountdown, setRedirectCountdown] = useState(3)
   const [creatingOrder, setCreatingOrder] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const pollingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -38,6 +41,12 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
     setPolling(false)
   }
 
+  const markAsPaid = () => {
+    stopPolling()
+    setPaymentSuccess(true)
+    setRedirectCountdown(3)
+  }
+
   // 生成订单号
   const generateOrderId = () => {
     const date = new Date()
@@ -49,6 +58,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
   // 创建订单
   const handleCreateOrder = async () => {
     setErrorMessage('')
+    setPaymentSuccess(false)
     setCreatingOrder(true)
     const newOrderId = generateOrderId()
     setOrderId(newOrderId)
@@ -88,13 +98,11 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
   const startPolling = (orderId: string) => {
     setPolling(true)
     pollingTimerRef.current = setInterval(async () => {
-      const res = await fetch(`/api/orders/check?orderId=${orderId}`)
+      const res = await fetch(`/api/orders/check?orderId=${orderId}`, { cache: 'no-store' })
       const data = await res.json()
 
-      if (data.paid) {
-        stopPolling()
-        // 支付成功，刷新页面
-        window.location.reload()
+      if (data.paid || data.isMember) {
+        markAsPaid()
       }
       if (data.expired) {
         stopPolling()
@@ -114,6 +122,18 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
       return () => clearTimeout(timer)
     }
   }, [countdown])
+
+  useEffect(() => {
+    if (!paymentSuccess) return
+
+    if (redirectCountdown <= 0) {
+      window.location.href = '/membership?payment=success'
+      return
+    }
+
+    const timer = setTimeout(() => setRedirectCountdown((prev) => prev - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [paymentSuccess, redirectCountdown])
 
   useEffect(() => {
     return () => {
@@ -143,7 +163,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
                   : 'border-[#d8e6df] bg-white hover:border-[#9bc6b7]'
                 }`}
             >
-              <div className="mb-2 text-2xl">💚</div>
+              <Image src="/icons/wechat.svg" alt="微信图标" width={30} height={30} className="mb-2" />
               <div className="font-semibold text-slate-900">微信支付</div>
               <div className="mt-1 text-xs text-slate-500">扫码后在备注里填写订单号</div>
             </button>
@@ -154,7 +174,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
                   : 'border-[#d8e6df] bg-white hover:border-[#9bc6b7]'
                 }`}
             >
-              <div className="mb-2 text-2xl">💙</div>
+              <Image src="/icons/alipay.svg" alt="支付宝图标" width={30} height={30} className="mb-2" />
               <div className="font-semibold text-slate-900">支付宝</div>
               <div className="mt-1 text-xs text-slate-500">扫码后在备注里填写订单号</div>
             </button>
@@ -175,12 +195,12 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
             size="lg"
             disabled={creatingOrder}
           >
-            {creatingOrder ? '生成中...' : `生成收款码（¥${MEMBERSHIP_PRICE}）`}
+            {creatingOrder ? '创建订单中...' : `创建订单并展示收款码（¥${MEMBERSHIP_PRICE}）`}
           </Button>
 
           <div className="space-y-1 text-center text-xs text-slate-500">
             <p>生成后有效期 10 分钟</p>
-            <p>支付时请务必备注订单号，便于人工核销</p>
+            <p>支付后系统自动检测，若人工核销成功会自动提示支付成功</p>
           </div>
 
           {errorMessage && (
@@ -217,6 +237,17 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
           </section>
 
           <section className="space-y-4">
+            {paymentSuccess && (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <p className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                  <CheckCircle2 className="h-4 w-4" />
+                  支付成功，会员已开通
+                </p>
+                <p className="mt-2 text-sm text-emerald-700">
+                  {redirectCountdown} 秒后自动跳转到会员状态页...
+                </p>
+              </div>
+            )}
             <div className="grid gap-3 sm:grid-cols-2">
               <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
                 <p className="text-xs uppercase tracking-[0.15em] text-slate-500">金额</p>
@@ -225,7 +256,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
               <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
                 <p className="text-xs uppercase tracking-[0.15em] text-slate-500">剩余时间</p>
                 <p className="mt-1 text-3xl font-display text-[var(--brand-ink)]">
-                  {countdown > 0 ? formatTime(countdown) : "已过期"}
+                  {paymentSuccess ? "已支付" : countdown > 0 ? formatTime(countdown) : "已过期"}
                 </p>
               </article>
             </div>
@@ -242,35 +273,50 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
                 <div className="h-4 w-4 rounded-full border-2 border-[var(--brand-fresh)] border-t-transparent animate-spin" />
                 正在检测支付状态...
               </div>
+            ) : paymentSuccess ? (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                检测到支付成功，正在跳转...
+              </div>
             ) : (
               <div className="rounded-xl border border-[#d8e6df] bg-white px-3 py-2 text-sm text-slate-600">
-                请完成支付后等待系统刷新
+                系统每 5 秒自动检测一次支付状态
               </div>
             )}
 
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowQR(false)
-                  setCountdown(0)
-                  stopPolling()
-                }}
-                className="flex-1"
-              >
-                取消订单
-              </Button>
+            {paymentSuccess ? (
               <Button
                 onClick={() => {
-                  setShowQR(false)
-                  setCountdown(0)
-                  stopPolling()
+                  window.location.href = '/membership?payment=success'
                 }}
-                className="flex-1 rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
               >
-                重新生成
+                立即查看会员状态
               </Button>
-            </div>
+            ) : (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowQR(false)
+                    setCountdown(0)
+                    stopPolling()
+                  }}
+                  className="flex-1"
+                >
+                  取消订单
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowQR(false)
+                    setCountdown(0)
+                    stopPolling()
+                  }}
+                  className="flex-1 rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                >
+                  重新生成
+                </Button>
+              </div>
+            )}
           </section>
         </div>
 
