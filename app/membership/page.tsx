@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, Crown, MessageCircle, Sparkles, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, CheckCircle2, Crown, MessageCircle, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PaymentForm from "@/components/payment/payment-form";
 import { createClient } from "@/lib/supabase/client";
+import Navbar from "@/components/marketing/navbar";
 
 const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499);
 
@@ -33,10 +35,27 @@ const comparison = [
   { feature: "社群答疑", free: "无", member: "优先支持" },
 ];
 
+interface MemberProfile {
+  is_member: boolean;
+  membership_expires_at: string | null;
+}
+
+function formatDate(dateString: string | null) {
+  if (!dateString) return "未设置";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "未设置";
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
 export default function MembershipPage() {
   const [showPayment, setShowPayment] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [memberProfile, setMemberProfile] = useState<MemberProfile | null>(null);
   const monthlyPrice = Number.isFinite(MEMBERSHIP_PRICE)
     ? (MEMBERSHIP_PRICE / 12).toFixed(1)
     : "41.6";
@@ -45,9 +64,25 @@ export default function MembershipPage() {
     const supabase = createClient();
     let active = true;
 
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!active) return;
-      setUserEmail(data.user?.email ?? null);
+      const user = data.user;
+      setUserEmail(user?.email ?? null);
+
+      if (!user) {
+        setMemberProfile(null);
+        setLoadingUser(false);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_member, membership_expires_at")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!active) return;
+      setMemberProfile((profile as MemberProfile | null) ?? null);
       setLoadingUser(false);
     });
 
@@ -57,7 +92,9 @@ export default function MembershipPage() {
   }, []);
 
   return (
-    <div className="min-h-screen pb-20 pt-28 sm:pt-32">
+    <>
+      <Navbar />
+      <div className="min-h-screen pb-20 pt-28 sm:pt-32">
       <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
@@ -97,27 +134,52 @@ export default function MembershipPage() {
           </div>
           <p className="mt-2 text-sm text-slate-600">平均每月 ¥{monthlyPrice}，持续获得增量内容。</p>
 
-          <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
-            {!showPayment ? (
-              <Button
-                size="lg"
-                className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                disabled={loadingUser || !userEmail}
-                onClick={() => setShowPayment(true)}
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                {loadingUser ? "加载账户中..." : userEmail ? "立即开通会员" : "请先登录"}
-              </Button>
-            ) : !userEmail ? (
-              <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
-            ) : (
-              <PaymentForm userEmail={userEmail} />
-            )}
-          </div>
+          {memberProfile?.is_member ? (
+            <div className="mt-6 rounded-2xl border border-[#b7e0d0] bg-[#eef9f4] p-5">
+              <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#1f7a56]">
+                <CheckCircle2 className="h-4 w-4" />
+                会员已开通
+              </p>
+              <p className="mt-3 text-sm text-slate-700">
+                当前账号：<span className="font-medium">{userEmail}</span>
+              </p>
+              <p className="mt-1 text-sm text-slate-700">
+                到期时间：<span className="font-medium">{formatDate(memberProfile.membership_expires_at)}</span>
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
+                  <Link href="/guide">查看会员内容</Link>
+                </Button>
+                <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                  <Link href="/admin/orders">去后台看订单</Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
+                {!showPayment ? (
+                  <Button
+                    size="lg"
+                    className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                    disabled={loadingUser || !userEmail}
+                    onClick={() => setShowPayment(true)}
+                  >
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    {loadingUser ? "加载账户中..." : userEmail ? "立即开通会员" : "请先登录"}
+                  </Button>
+                ) : !userEmail ? (
+                  <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
+                ) : (
+                  <PaymentForm userEmail={userEmail} />
+                )}
+              </div>
 
-          <p className="mt-4 text-xs text-slate-500">
-            支付完成后系统会检测到账；如未自动开通，可在后台人工核销。
-          </p>
+              <p className="mt-4 text-xs text-slate-500">
+                支付完成后系统会检测到账；如未自动开通，可在后台人工核销。
+              </p>
+            </>
+          )}
         </div>
       </section>
 
@@ -143,6 +205,7 @@ export default function MembershipPage() {
           ))}
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

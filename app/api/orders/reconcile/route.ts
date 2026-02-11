@@ -9,7 +9,7 @@ const RECONCILE_BATCH_SIZE = 50
 
 type PendingOrder = Pick<
   Database['public']['Tables']['orders']['Row'],
-  'order_id' | 'user_id' | 'amount' | 'payment_method' | 'status' | 'expires_at'
+  'order_id' | 'user_id' | 'user_email' | 'amount' | 'payment_method' | 'status' | 'expires_at'
 >
 
 function isAuthorized(request: NextRequest) {
@@ -44,7 +44,7 @@ async function reconcileOrders(request: NextRequest) {
 
     const { data: orders, error: queryError } = await supabase
       .from('orders')
-      .select('order_id, user_id, amount, payment_method, status, expires_at')
+      .select('order_id, user_id, user_email, amount, payment_method, status, expires_at')
       .eq('status', 'pending')
       .order('created_at', { ascending: true })
       .limit(RECONCILE_BATCH_SIZE)
@@ -111,12 +111,15 @@ async function reconcileOrders(request: NextRequest) {
 
         const { error: profileUpdateError } = await supabase
           .from('profiles')
-          .update({
+          .upsert({
+            id: order.user_id,
+            email: order.user_email,
             is_member: true,
             membership_expires_at: membershipExpiresAt.toISOString(),
             updated_at: paidAt,
           })
-          .eq('id', order.user_id)
+          .select('id')
+          .single()
 
         if (profileUpdateError) {
           failedOrders.push(order.order_id)

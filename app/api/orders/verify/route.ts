@@ -95,14 +95,19 @@ export async function POST(request: NextRequest) {
     const membershipExpiresAt = new Date()
     membershipExpiresAt.setFullYear(membershipExpiresAt.getFullYear() + 1) // 1年后过期
 
+    const nowIso = new Date().toISOString()
+
     const { error: profileError } = await supabase
       .from('profiles')
-      .update({
+      .upsert({
+        id: order.user_id,
+        email: order.user_email,
         is_member: true,
         membership_expires_at: membershipExpiresAt.toISOString(),
-        updated_at: new Date().toISOString(),
+        updated_at: nowIso,
       })
-      .eq('id', order.user_id)
+      .select('id')
+      .single()
 
     if (profileError) {
       console.error('开通会员失败:', profileError)

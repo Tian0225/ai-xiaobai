@@ -3,6 +3,7 @@ import PricingPlans from "@/components/enterprise/pricing-plans";
 import CaseStudies from "@/components/enterprise/case-studies";
 import ConsultationForm from "@/components/enterprise/consultation-form";
 import EnterpriseFeatures from "@/components/enterprise/features";
+import Navbar from "@/components/marketing/navbar";
 
 export const metadata = {
   title: "企业 AI 服务 - AI-xiaobai",
@@ -12,12 +13,15 @@ export const metadata = {
 
 export default function EnterprisePage() {
   return (
-    <div className="min-h-screen">
-      <EnterpriseHero />
-      <EnterpriseFeatures />
-      <PricingPlans />
-      <CaseStudies />
-      <ConsultationForm />
-    </div>
+    <>
+      <Navbar />
+      <div className="min-h-screen pt-24">
+        <EnterpriseHero />
+        <EnterpriseFeatures />
+        <PricingPlans />
+        <CaseStudies />
+        <ConsultationForm />
+      </div>
+    </>
   );
 }

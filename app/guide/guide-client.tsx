@@ -31,7 +31,7 @@ export default function GuideClientPage({ tutorials }: GuideClientPageProps) {
         : tutorials.filter(t => t.difficulty === selectedDifficulty)
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-24">
             {/* 顶部区域 */}
             <div className="bg-white border-b">
                 <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">

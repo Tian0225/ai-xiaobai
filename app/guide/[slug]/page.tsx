@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Clock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { isValidElement, type ReactNode } from 'react'
+import Navbar from '@/components/marketing/navbar'
 
 /**
  * 教程详情页
@@ -124,9 +125,11 @@ export default async function TutorialPage({ params }: TutorialPageProps) {
   const toc = extractToc(tutorial.content)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-24">
       {/* 顶部导航 */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-white border-b sticky top-20 z-10">
         <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href="/guide"
@@ -255,7 +258,8 @@ export default async function TutorialPage({ params }: TutorialPageProps) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

@@ -3,6 +3,7 @@
 import { ExternalLink, Shield, Zap, Users, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Navbar from "@/components/marketing/navbar";
 
 const products = [
   {
@@ -68,7 +69,9 @@ const benefits = [
 
 export default function ShopPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-24">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-green-50 via-white to-blue-50 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -263,6 +266,7 @@ export default function ShopPage() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }
