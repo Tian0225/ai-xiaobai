@@ -21,8 +21,8 @@ async function fetchOrder(
   supabase: SupabaseClient<Database>,
   orderId: string
 ) {
-  const { data, error } = await (supabase
-    .from('orders' as never) as any)
+  const { data, error } = await supabase
+    .from('orders')
     .select('order_id, user_id, user_email, status, transaction_id, paid_at')
     .eq('order_id', orderId)
     .maybeSingle()
@@ -59,8 +59,8 @@ export async function fulfillPaidOrder(
 
   const paidAtIso = input.paidAtIso ?? new Date().toISOString()
 
-  const { data: updatedOrder, error: updateError } = await (supabase
-    .from('orders' as never) as any)
+  const { data: updatedOrder, error: updateError } = await supabase
+    .from('orders')
     .update({
       status: 'paid',
       transaction_id: input.transactionId,
@@ -89,8 +89,8 @@ export async function fulfillPaidOrder(
     }
   }
 
-  const { data: profile, error: profileQueryError } = await (supabase
-    .from('profiles' as never) as any)
+  const { data: profile, error: profileQueryError } = await supabase
+    .from('profiles')
     .select('membership_expires_at')
     .eq('id', updatedOrder.user_id)
     .maybeSingle()
@@ -101,8 +101,8 @@ export async function fulfillPaidOrder(
 
   const membershipExpiresAt = calculateMembershipExpiresAt(profile?.membership_expires_at, paidAtIso)
 
-  const { error: profileUpsertError } = await (supabase
-    .from('profiles' as never) as any)
+  const { error: profileUpsertError } = await supabase
+    .from('profiles')
     .upsert({
       id: updatedOrder.user_id,
       email: updatedOrder.user_email,
@@ -112,8 +112,8 @@ export async function fulfillPaidOrder(
     })
 
   if (profileUpsertError) {
-    const { error: rollbackError } = await (supabase
-      .from('orders' as never) as any)
+    const { error: rollbackError } = await supabase
+      .from('orders')
       .update({
         status: 'pending',
         transaction_id: null,
