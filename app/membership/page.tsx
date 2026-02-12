@@ -150,7 +150,7 @@ export default function MembershipPage() {
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
-                  <Link href="/guide">查看会员内容</Link>
+                  <Link href="/guide/member">查看会员内容</Link>
                 </Button>
                 <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
                   <Link href="/guide">继续学习</Link>

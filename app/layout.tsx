@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { getAllTutorials } from "@/lib/mdx";
 import SearchDialog from "@/components/search/search-dialog";
+import { siteProfile } from "@/lib/site-profile";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -16,18 +17,18 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "AI-xiaobai - 小白学AI不焦虑",
-  description: "从零开始掌握 Claude Code，真实经验·避坑指南·实战项目。500元/年用真 Claude，御三家模型协同使用。",
-  keywords: ["Claude Code", "AI教程", "小白学AI", "省钱方案", "实战项目"],
+  title: `${siteProfile.siteName} - 小白学AI不焦虑`,
+  description: "从零开始掌握 AI 工作流，真实经验·避坑指南·实战项目。教程、会员、企业服务一体化学习平台。",
+  keywords: ["AI教程", "小白学AI", "实战项目", "AI工作流", "会员课程"],
   authors: [{ name: "金田" }],
   creator: "金田",
   openGraph: {
     type: "website",
     locale: "zh_CN",
-    url: "https://ai-xiaobai.com",
-    title: "AI-xiaobai - 小白学AI不焦虑",
-    description: "从零开始掌握 Claude Code，真实经验·避坑指南·实战项目",
-    siteName: "AI-xiaobai",
+    url: siteProfile.siteUrl,
+    title: `${siteProfile.siteName} - 小白学AI不焦虑`,
+    description: "从零开始掌握 AI 工作流，真实经验·避坑指南·实战项目",
+    siteName: siteProfile.siteName,
   },
 };
 

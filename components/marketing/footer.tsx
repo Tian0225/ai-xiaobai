@@ -9,8 +9,13 @@ const footerLinks = {
     { name: "企业服务", href: "/enterprise" },
   ],
   resources: [
-    { name: "省钱方案", href: "/guide/opus-proxy-guide" },
+    { name: "学习路径", href: "/guide" },
     { name: "服务商城", href: "/shop" },
+  ],
+  support: [
+    { name: "服务条款", href: "/legal/terms" },
+    { name: "退款说明", href: "/legal/refund" },
+    { name: "联系我们", href: "/contact" },
   ],
   community: [
     { name: "GitHub", href: "https://github.com/Tian0225/ai-xiaobai" },
@@ -22,7 +27,7 @@ export default function Footer() {
     <footer className="pt-20">
       <div className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
         <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 sm:p-10">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="inline-flex items-center gap-2">
                 <span className="font-display text-2xl text-[var(--brand-ink)]">AI-xiaobai</span>
@@ -54,6 +59,22 @@ export default function Footer() {
               <h3 className="text-sm font-semibold text-slate-900">资源</h3>
               <ul className="mt-4 space-y-3">
                 {footerLinks.resources.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-slate-600 transition-colors hover:text-[var(--brand-fresh)]"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">支持</h3>
+              <ul className="mt-4 space-y-3">
+                {footerLinks.support.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}

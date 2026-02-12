@@ -1,6 +1,5 @@
 import type { NextRequest } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/lib/database.types'
 
 export type AdminOperationAction =
   | 'member_activate'
@@ -28,7 +27,7 @@ export function getRequestMeta(request: NextRequest) {
 }
 
 export async function writeAdminOperationLog(
-  adminClient: SupabaseClient<Database>,
+  adminClient: SupabaseClient,
   request: NextRequest,
   actorEmail: string,
   action: AdminOperationAction,
@@ -36,7 +35,7 @@ export async function writeAdminOperationLog(
 ) {
   const { operatorIp, operatorUserAgent } = getRequestMeta(request)
 
-  const { error } = await (adminClient.from('admin_operation_logs' as never) as any).insert({
+  const { error } = await adminClient.from('admin_operation_logs').insert({
     actor_email: actorEmail,
     action,
     target_user_id: context.targetUserId ?? null,

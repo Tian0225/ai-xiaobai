@@ -74,6 +74,13 @@
 
 - 导航与账户：`/Users/jitian/Documents/ai-xiaobai/components/marketing/navbar.tsx`
 - 支付核心：`/Users/jitian/Documents/ai-xiaobai/components/payment/payment-form.tsx`
+- 商城页模板：`/Users/jitian/Documents/ai-xiaobai/app/shop/page.tsx`
 - 通用按钮：`/Users/jitian/Documents/ai-xiaobai/components/ui/button.tsx`
 - 通用卡片：`/Users/jitian/Documents/ai-xiaobai/components/ui/card.tsx`
 - 全局 token/工具类：`/Users/jitian/Documents/ai-xiaobai/app/globals.css`
+
+## 6) 本轮落地范围（P1）
+
+- 导航账号入口常驻与移动端可直达：已完成
+- 支付流程三态（加载/成功/异常）与文案统一：已完成
+- 商城页视觉重绘（信息层级、卡片系统、CTA 一致性）：已完成

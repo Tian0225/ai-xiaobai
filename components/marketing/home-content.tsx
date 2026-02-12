@@ -4,12 +4,13 @@ import { TutorialCard } from "@/components/guide/tutorial-card";
 import { ArrowRight, Crown, Sparkles, Users, Building2, ShieldCheck, Zap, BookOpen, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { siteProfile } from "@/lib/site-profile";
 
 const advantages = [
   {
     icon: ShieldCheck,
-    title: "500 元/年用真 Claude",
-    description: "稳定不封号，比官方节省 95%",
+    title: "会员体系透明",
+    description: "按年订阅、权益明确、可持续更新",
   },
   {
     icon: Zap,
@@ -19,7 +20,7 @@ const advantages = [
   {
     icon: Users,
     title: "御三家模型协同",
-    description: "Claude + GPT + Gemini 最佳搭配指南",
+    description: "Claude + GPT + Gemini 多模型协同指南",
   },
   {
     icon: BookOpen,
@@ -46,6 +47,12 @@ export default function HomeContent() {
   const featuredTutorials = getAllTutorials()
     .filter((t) => t.featured)
     .slice(0, 3);
+  const serviceProfile = [
+    { label: "服务主体", value: siteProfile.legalEntityName },
+    { label: "客服邮箱", value: siteProfile.supportEmail },
+    { label: "客服时段", value: siteProfile.serviceHours },
+    { label: "服务说明", value: siteProfile.serviceScope },
+  ];
 
   return (
     <>
@@ -135,9 +142,9 @@ export default function HomeContent() {
               </div>
               <p className="mt-2 text-slate-600">平均每月仅 ¥41.6</p>
               <div className="mt-6 space-y-3 text-sm text-slate-700">
-                <p>比 Claude Pro 便宜 <strong>97%</strong></p>
-                <p>比 ChatGPT Plus 便宜 <strong>71%</strong></p>
-                <p>买任意课程即享 <strong>终身会员</strong></p>
+                <p>全年会员持续迭代 <strong>教程 + 模板</strong></p>
+                <p>按月均摊成本约 <strong>¥41.6</strong></p>
+                <p>聚焦可落地的 <strong>学习与交付</strong></p>
               </div>
               <div className="mt-6 rounded-xl border border-[#c7ded6] bg-white/80 p-4 text-sm text-slate-600">
                 <p className="font-semibold text-slate-800">适合人群</p>
@@ -188,6 +195,22 @@ export default function HomeContent() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className="pb-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-[#d8e6df] bg-[#f7fbf9] p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Service Info</p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {serviceProfile.map((item) => (
+                <div key={item.label} className="rounded-2xl border border-[#d8e6df] bg-white px-4 py-3">
+                  <p className="text-xs text-slate-500">{item.label}</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">{item.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

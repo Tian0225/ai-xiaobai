@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Shield, Zap, Users, Check } from "lucide-react";
+import { ExternalLink, ShieldCheck, Sparkles, Truck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/marketing/navbar";
@@ -10,28 +10,25 @@ const products = [
     name: "ChatGPT Plus 月卡",
     price: "¥150",
     originalPrice: "$19.99/月",
-    features: ["自充模式，安全稳定", "支持 GPT-4 Turbo", "24/7 售后服务", "即买即用"],
+    features: ["自充模式，账号独享", "支持 GPT-4 级别模型", "自动发货，到账快", "售后问题可追踪处理"],
     link: "https://zichong.online/chatgpt-plus-monthly",
-    badge: "热销",
-    icon: "🤖",
+    badge: "热门",
   },
   {
     name: "ChatGPT Plus 年卡",
     price: "¥988",
     originalPrice: "$239.88/年",
-    features: ["平均每月 ¥82.3", "比月卡节省 45%", "赠送 1 个月", "优先技术支持"],
+    features: ["折算每月约 ¥82.3", "比月卡更省", "优先售后支持", "适合长期高频使用"],
     link: "https://zichong.online/chatgpt-plus-yearly",
-    badge: "最划算",
-    icon: "💎",
+    badge: "性价比",
   },
   {
     name: "代理会员",
     price: "¥299",
     originalPrice: "批发价",
-    features: ["月卡 ¥120/10个起", "年卡 ¥800/5个起", "专属代理后台", "丰厚利润空间"],
+    features: ["月卡/年卡阶梯采购", "专属代理后台", "面向团队合作", "适合稳定复购场景"],
     link: "https://zichong.online/reseller",
-    badge: "赚钱",
-    icon: "💰",
+    badge: "渠道",
   },
 ];
 
@@ -39,31 +36,40 @@ const vpnService = {
   name: "机场 VPN 服务",
   price: "¥300",
   duration: "/年",
-  features: [
-    "全球节点覆盖",
-    "高速稳定连接",
-    "支持多设备同时在线",
-    "不限流量",
-    "7x24 技术支持",
-  ],
-  icon: "🚀",
+  features: ["多节点覆盖", "高速稳定连接", "支持多设备", "不限流量", "7x24 技术支持"],
+  link: "https://zichong.online/vpn",
 };
 
-const benefits = [
+const assurances = [
   {
-    icon: Shield,
-    title: "安全可靠",
-    description: "自充模式，不是共享账号，100% 安全",
+    icon: ShieldCheck,
+    title: "安全交付",
+    description: "采用自充模式，账号权限归你本人管理。",
   },
   {
-    icon: Zap,
-    title: "即买即用",
-    description: "自动发货，1分钟内到账，立即使用",
+    icon: Truck,
+    title: "快速到账",
+    description: "下单后自动处理，大多数场景 1-5 分钟完成。",
   },
   {
-    icon: Users,
-    title: "专业售后",
-    description: "7x24 客服支持，遇到问题快速解决",
+    icon: Sparkles,
+    title: "售后可追踪",
+    description: "异常有工单通道，问题处理链路清晰可查。",
+  },
+];
+
+const faqs = [
+  {
+    q: "自充模式和共享账号有什么区别？",
+    a: "自充是直接充值到你的个人账号，不是多人共享，稳定性和可控性更高。",
+  },
+  {
+    q: "如果超过 10 分钟还没到账怎么办？",
+    a: "请联系售后并提供订单信息，我们会优先排查并人工补偿处理。",
+  },
+  {
+    q: "支持退款吗？",
+    a: "虚拟服务通常在完成交付后不支持退款；具体以订单页面说明为准。",
   },
 ];
 
@@ -71,202 +77,136 @@ export default function ShopPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-24">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-50 via-white to-blue-50 py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+      <main className="min-h-screen pb-16 pt-28 sm:pt-32">
+        <section className="layout-grid">
+          <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 sm:p-10">
+            <p className="inline-flex items-center rounded-full bg-[#e6f2ec] px-3 py-1 text-xs font-semibold text-[var(--brand-fresh)]">
+              Service Marketplace
+            </p>
+            <h1 className="mt-4 font-display text-4xl leading-tight text-[var(--brand-ink)] sm:text-5xl">
               AI 服务商城
               <br />
-              <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                省钱好用的 AI 工具
-              </span>
+              <span className="text-gradient">按可交付标准选购</span>
             </h1>
-
-            <p className="text-xl text-gray-600 mb-8">
-              ChatGPT Plus、VPN 等服务，价格实惠，质量保证
+            <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">
+              面向稳定使用场景，提供可追踪、可售后的 AI 服务商品。先看适配，再下单。
             </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ChatGPT Products */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
-              ChatGPT Plus 服务
-            </h2>
-            <p className="text-lg text-gray-600">
-              比官方便宜 30%+，自充模式更安全
-            </p>
+        <section className="layout-grid space-section">
+          <div className="mb-8">
+            <h2 className="font-display text-3xl text-[var(--brand-ink)]">ChatGPT Plus 服务</h2>
+            <p className="mt-2 text-slate-600">统一交付标准，按使用周期选择更合适的方案。</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {products.map((product, index) => (
-              <Card key={index} className="border-2 hover:border-green-300 hover:shadow-xl transition-all relative">
-                {product.badge && (
-                  <div className="absolute -top-3 -right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                    {product.badge}
-                  </div>
-                )}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {products.map((product) => (
+              <Card key={product.name} className="surface-card relative rounded-2xl border-[#d8e6df]">
+                <span className="absolute right-4 top-4 rounded-full border border-[#c7ddd5] bg-white px-2.5 py-1 text-xs font-semibold text-[var(--brand-fresh)]">
+                  {product.badge}
+                </span>
                 <CardHeader>
-                  <div className="text-4xl mb-4">{product.icon}</div>
-                  <CardTitle className="text-2xl">{product.name}</CardTitle>
-                  <CardDescription className="text-lg">
-                    <div className="flex items-baseline gap-2 mt-2">
-                      <span className="text-3xl font-bold text-gray-900">{product.price}</span>
-                      <span className="text-sm text-gray-500 line-through">{product.originalPrice}</span>
+                  <CardTitle className="text-2xl text-[var(--brand-ink)]">{product.name}</CardTitle>
+                  <CardDescription>
+                    <div className="mt-1 flex items-end gap-2">
+                      <span className="font-display text-4xl text-slate-900">{product.price}</span>
+                      <span className="pb-1 text-xs text-slate-500 line-through">{product.originalPrice}</span>
                     </div>
                   </CardDescription>
                 </CardHeader>
+
                 <CardContent>
-                  <ul className="space-y-3 mb-6">
-                    {product.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700">{feature}</span>
+                  <ul className="mb-6 space-y-3">
+                    {product.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
+                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--brand-fresh)]" />
+                        {feature}
                       </li>
                     ))}
                   </ul>
                   <Button
-                    className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-                    onClick={() => window.open(product.link, '_blank')}
+                    className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                    onClick={() => window.open(product.link, "_blank")}
                   >
                     立即购买
-                    <ExternalLink className="ml-2 h-4 w-4" />
+                    <ExternalLink className="h-4 w-4" />
                   </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* VPN Service */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
-              VPN 机场服务
-            </h2>
-            <p className="text-lg text-gray-600">
-              稳定快速的网络加速服务
-            </p>
+        <section className="layout-grid pb-16">
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <Card className="surface-card rounded-2xl border-[#d8e6df]">
+              <CardHeader>
+                <CardTitle className="text-2xl text-[var(--brand-ink)]">VPN 机场服务</CardTitle>
+                <CardDescription>此服务通过外部专属页面购买，不在本站直接完成支付。</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 flex items-baseline gap-2">
+                  <span className="font-display text-4xl text-slate-900">{vpnService.price}</span>
+                  <span className="text-sm text-slate-500">{vpnService.duration}</span>
+                </div>
+                <ul className="mb-6 space-y-2">
+                  {vpnService.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm text-slate-700">
+                      <Check className="h-4 w-4 text-[var(--brand-fresh)]" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                  onClick={() => window.open(vpnService.link, "_blank")}
+                >
+                  前往购买
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="surface-card rounded-2xl border-[#d8e6df]">
+              <CardHeader>
+                <CardTitle className="text-2xl text-[var(--brand-ink)]">服务保障</CardTitle>
+                <CardDescription>确保下单、交付、售后链路清晰可执行。</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {assurances.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <article key={item.title} className="rounded-xl border border-[#d8e6df] bg-white p-4">
+                      <p className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                        <Icon className="h-4 w-4 text-[var(--brand-fresh)]" />
+                        {item.title}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+                    </article>
+                  );
+                })}
+              </CardContent>
+            </Card>
           </div>
+        </section>
 
-          <Card className="max-w-2xl mx-auto border-2 border-blue-200 shadow-xl">
-            <CardHeader className="text-center">
-              <div className="text-5xl mb-4">{vpnService.icon}</div>
-              <CardTitle className="text-3xl">{vpnService.name}</CardTitle>
-              <div className="flex items-baseline justify-center gap-2 mt-4">
-                <span className="text-4xl font-bold text-gray-900">{vpnService.price}</span>
-                <span className="text-gray-500">{vpnService.duration}</span>
-              </div>
+        <section className="layout-grid pb-12">
+          <Card className="surface-card rounded-2xl border-[#d8e6df]">
+            <CardHeader>
+              <CardTitle className="text-2xl text-[var(--brand-ink)]">常见问题</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-4 mb-8">
-                {vpnService.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-3">
-                    <Check className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                    <span className="text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-yellow-800">
-                  ⚠️ 由于政策原因，VPN 服务不在本站直接销售。
-                  <br />
-                  点击下方按钮跳转到专属购买页面。
-                </p>
-              </div>
-
-              <Button
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                size="lg"
-                onClick={() => window.open('https://zichong.online/vpn', '_blank')}
-              >
-                前往购买
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
+            <CardContent className="space-y-4">
+              {faqs.map((item) => (
+                <details key={item.q} className="rounded-xl border border-[#d8e6df] bg-white p-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-900">{item.q}</summary>
+                  <p className="mt-3 text-sm text-slate-600">{item.a}</p>
+                </details>
+              ))}
             </CardContent>
           </Card>
-        </div>
-      </section>
-
-      {/* Benefits */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
-              为什么选择我们？
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon;
-              return (
-                <div key={index} className="text-center">
-                  <div className="mb-4 inline-flex rounded-full bg-blue-50 p-4 text-blue-600">
-                    <Icon className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-gray-600">{benefit.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
-              常见问题
-            </h2>
-          </div>
-
-          <div className="space-y-6">
-            <details className="group border rounded-lg p-6 bg-white hover:border-green-300 transition-colors">
-              <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                <span>自充模式是什么？</span>
-                <span className="group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="mt-4 text-gray-600">
-                自充模式是指我们帮您充值到您自己的 OpenAI 账号，不是共享账号。这样更安全，不会被封号，也不会被其他人影响使用体验。
-              </p>
-            </details>
-
-            <details className="group border rounded-lg p-6 bg-white hover:border-green-300 transition-colors">
-              <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                <span>多久能到账？</span>
-                <span className="group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="mt-4 text-gray-600">
-                支付成功后，系统会在 1-5 分钟内自动发货。如超过 10 分钟未到账，请联系客服处理。
-              </p>
-            </details>
-
-            <details className="group border rounded-lg p-6 bg-white hover:border-green-300 transition-colors">
-              <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                <span>支持退款吗？</span>
-                <span className="group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="mt-4 text-gray-600">
-                由于是虚拟商品，一旦充值成功无法退款。建议先购买月卡试用，满意后再购买年卡。
-              </p>
-            </details>
-          </div>
-        </div>
-      </section>
-      </div>
+        </section>
+      </main>
     </>
   );
 }

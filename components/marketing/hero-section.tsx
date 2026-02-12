@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const features = [
-  "500元/年用真 Claude（稳定不封号）",
-  "御三家模型（Claude/GPT/Gemini）协同使用",
+  "年度会员持续更新，按月迭代可执行模板",
+  "多模型协同工作流（Claude/GPT/Gemini）",
   "会员每月更新 + 社群答疑",
 ];
 
@@ -29,7 +29,7 @@ export default function HeroSection() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-            把复杂的 Claude Code、模型协同与商业化路径，拆成可以立即执行的模块。先学会，再跑通，再放大。
+            把复杂的 AI 工作流、模型协同与项目落地路径，拆成可以立即执行的模块。先学会，再跑通，再放大。
           </p>
 
           <div className="mt-10 flex flex-wrap gap-3">
@@ -40,7 +40,7 @@ export default function HeroSection() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80 px-8" asChild>
-              <Link href="/guide/opus-proxy-guide">查看省钱方案</Link>
+              <Link href="/membership">查看会员权益</Link>
             </Button>
           </div>
 
@@ -68,7 +68,7 @@ export default function HeroSection() {
             <div className="rounded-2xl bg-white p-5">
               <p className="text-xs uppercase tracking-wider text-slate-500">最新路线</p>
               <p className="mt-2 text-2xl font-display text-[var(--brand-ink)]">Opus 4.6</p>
-              <p className="mt-1 text-sm text-slate-600">反代稳定方案 + 低成本落地</p>
+              <p className="mt-1 text-sm text-slate-600">高质量工作流 + 低成本落地</p>
             </div>
             <div className="rounded-2xl bg-white p-5">
               <p className="text-xs uppercase tracking-wider text-slate-500">本月内容</p>

@@ -125,9 +125,9 @@ export default function GuideClientPage({ tutorials }: GuideClientPageProps) {
         )}
 
         <div className="mt-16 text-center">
-          <p className="text-gray-600">✓ 500元/年用真 Claude（稳定不封号）</p>
-          <p className="text-gray-600">✓ 御三家模型（Claude/GPT/Gemini）协同使用</p>
-          <p className="text-gray-600">✓ 会员每月最新教程 + 专属群</p>
+          <p className="text-gray-600">✓ 年度会员：持续更新的教程与模板</p>
+          <p className="text-gray-600">✓ 多模型协同：Claude/GPT/Gemini 实战路径</p>
+          <p className="text-gray-600">✓ 会员权益：每月更新 + 答疑支持</p>
         </div>
       </div>
     </div>
