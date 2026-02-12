@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkPaymentStatus } from '@/lib/payment/polling'
 import type { Database } from '@/lib/database.types'
+import { fulfillPaidOrder } from '@/lib/order-fulfillment'
+import { hasOrderExpired } from '@/lib/order-state'
 
 const ORDER_RECONCILE_TOKEN = process.env.ORDER_RECONCILE_TOKEN
 const CRON_SECRET = process.env.CRON_SECRET
@@ -58,17 +60,18 @@ async function reconcileOrders(request: NextRequest) {
     let paidCount = 0
     let expiredCount = 0
     let scannedCount = 0
+    let idempotentCount = 0
     const failedOrders: string[] = []
 
     for (const order of pendingOrders) {
       scannedCount += 1
-      const expiresAt = new Date(order.expires_at)
 
-      if (expiresAt <= now) {
+      if (hasOrderExpired(order.expires_at, now)) {
         const { error } = await supabase
           .from('orders')
           .update({ status: 'expired' })
           .eq('order_id', order.order_id)
+          .eq('status', 'pending')
 
         if (error) {
           failedOrders.push(order.order_id)
@@ -88,46 +91,24 @@ async function reconcileOrders(request: NextRequest) {
 
         if (!isPaid) continue
 
-        const paidAt = new Date().toISOString()
         const transactionId = `AUTO_${Date.now()}_${order.order_id}`
-        const membershipExpiresAt = new Date()
-        membershipExpiresAt.setFullYear(membershipExpiresAt.getFullYear() + 1)
+        const result = await fulfillPaidOrder(supabase, {
+          orderId: order.order_id,
+          transactionId,
+          paidAtIso: new Date().toISOString(),
+        })
 
-        const { error: orderUpdateError } = await supabase
-          .from('orders')
-          .update({
-            status: 'paid',
-            transaction_id: transactionId,
-            paid_at: paidAt,
-          })
-          .eq('order_id', order.order_id)
-          .eq('status', 'pending')
-
-        if (orderUpdateError) {
+        if (!result.success) {
           failedOrders.push(order.order_id)
-          console.error('订单支付状态更新失败:', order.order_id, orderUpdateError)
+          console.error('自动发货失败:', order.order_id, result.error)
           continue
         }
 
-        const { error: profileUpdateError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: order.user_id,
-            email: order.user_email,
-            is_member: true,
-            membership_expires_at: membershipExpiresAt.toISOString(),
-            updated_at: paidAt,
-          })
-          .select('id')
-          .single()
-
-        if (profileUpdateError) {
-          failedOrders.push(order.order_id)
-          console.error('会员开通失败:', order.order_id, profileUpdateError)
-          continue
+        if (result.idempotent) {
+          idempotentCount += 1
+        } else {
+          paidCount += 1
         }
-
-        paidCount += 1
       } catch (error) {
         failedOrders.push(order.order_id)
         console.error('订单对账异常:', order.order_id, error)
@@ -139,6 +120,7 @@ async function reconcileOrders(request: NextRequest) {
       scannedCount,
       paidCount,
       expiredCount,
+      idempotentCount,
       failedCount: failedOrders.length,
       failedOrders,
       executedAt: now.toISOString(),

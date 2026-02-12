@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { hasActiveMembership } from '@/lib/membership'
+import { hasOrderExpired } from '@/lib/order-state'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +19,10 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     if (!user) {
       return NextResponse.json({ error: '未登录' }, { status: 401, headers: noStoreHeaders() })
     }
@@ -28,9 +33,8 @@ export async function GET(request: NextRequest) {
       .eq('id', user.id)
       .maybeSingle()
 
-    const isMember = Boolean(profile?.is_member)
+    const isMember = hasActiveMembership(profile)
 
-    // 查询订单状态
     const { data: order, error } = await supabase
       .from('orders')
       .select('*')
@@ -39,36 +43,52 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (error || !order) {
-      return NextResponse.json({ paid: false, isMember }, { headers: noStoreHeaders() })
+      return NextResponse.json({ paid: false, isMember, status: 'not_found' }, { headers: noStoreHeaders() })
     }
 
-    // 检查订单是否已支付
     if (order.status === 'paid') {
-      return NextResponse.json({ paid: true, isMember: true, order }, { headers: noStoreHeaders() })
+      return NextResponse.json(
+        {
+          paid: true,
+          isMember,
+          orderId: order.order_id,
+          status: order.status,
+          paidAt: order.paid_at,
+        },
+        { headers: noStoreHeaders() }
+      )
     }
 
-    // 检查订单是否过期
-    if (new Date(order.expires_at) < new Date()) {
-      // 更新订单状态为已过期
+    if (order.status === 'pending' && hasOrderExpired(order.expires_at)) {
       await supabase
         .from('orders')
         .update({ status: 'expired' })
         .eq('order_id', orderId)
+        .eq('status', 'pending')
 
-      return NextResponse.json({ paid: false, expired: true, isMember }, { headers: noStoreHeaders() })
+      return NextResponse.json(
+        {
+          paid: false,
+          expired: true,
+          isMember,
+          orderId: order.order_id,
+          status: 'expired',
+          expiresAt: order.expires_at,
+        },
+        { headers: noStoreHeaders() }
+      )
     }
 
-    // 这里应该调用微信/支付宝的账单API检查支付状态
-    // 由于是模拟，我们先返回未支付状态
-    // 实际生产环境需要集成真实的支付API
-
-    return NextResponse.json({
-      paid: false,
-      isMember,
-      orderId: order.order_id,
-      status: order.status,
-      expiresAt: order.expires_at,
-    }, { headers: noStoreHeaders() })
+    return NextResponse.json(
+      {
+        paid: false,
+        isMember,
+        orderId: order.order_id,
+        status: order.status,
+        expiresAt: order.expires_at,
+      },
+      { headers: noStoreHeaders() }
+    )
   } catch (error) {
     console.error('检查订单错误:', error)
     return NextResponse.json({ error: '服务器错误' }, { status: 500, headers: noStoreHeaders() })

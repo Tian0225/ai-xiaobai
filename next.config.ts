@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.anthropic.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.qrserver.com',
+      },
     ],
   },
 };

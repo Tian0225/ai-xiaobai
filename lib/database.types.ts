@@ -95,6 +95,47 @@ export interface Database {
           expires_at?: string
         }
       }
+      admin_operation_logs: {
+        Row: {
+          id: string
+          actor_email: string
+          action: 'member_activate' | 'member_revoke' | 'member_restore' | 'order_verify'
+          target_user_id: string | null
+          target_user_email: string | null
+          target_order_id: string | null
+          result: 'success' | 'failed'
+          detail: Record<string, unknown>
+          operator_ip: string | null
+          operator_user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          actor_email: string
+          action: 'member_activate' | 'member_revoke' | 'member_restore' | 'order_verify'
+          target_user_id?: string | null
+          target_user_email?: string | null
+          target_order_id?: string | null
+          result: 'success' | 'failed'
+          detail?: Record<string, unknown>
+          operator_ip?: string | null
+          operator_user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          actor_email?: string
+          action?: 'member_activate' | 'member_revoke' | 'member_restore' | 'order_verify'
+          target_user_id?: string | null
+          target_user_email?: string | null
+          target_order_id?: string | null
+          result?: 'success' | 'failed'
+          detail?: Record<string, unknown>
+          operator_ip?: string | null
+          operator_user_agent?: string | null
+          created_at?: string
+        }
+      }
     }
   }
 }

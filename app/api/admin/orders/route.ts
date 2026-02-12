@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { isAdminEmail } from '@/lib/auth/admin'
+import { requireAdmin } from '@/lib/auth/require-admin'
 
 const ORDER_FETCH_LIMIT = 120
 
@@ -11,17 +10,9 @@ function noStoreHeaders() {
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: '未登录' }, { status: 401, headers: noStoreHeaders() })
-    }
-
-    if (!isAdminEmail(user.email)) {
-      return NextResponse.json({ error: '无权限访问后台订单' }, { status: 403, headers: noStoreHeaders() })
+    const permission = await requireAdmin()
+    if (!permission.ok) {
+      return NextResponse.json({ error: permission.error }, { status: permission.status, headers: noStoreHeaders() })
     }
 
     const adminClient = createAdminClient()

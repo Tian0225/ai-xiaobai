@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import PaymentForm from "@/components/payment/payment-form";
 import { createClient } from "@/lib/supabase/client";
 import Navbar from "@/components/marketing/navbar";
+import { hasActiveMembership } from "@/lib/membership";
 
 const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499);
 
@@ -59,6 +60,7 @@ export default function MembershipPage() {
   const monthlyPrice = Number.isFinite(MEMBERSHIP_PRICE)
     ? (MEMBERSHIP_PRICE / 12).toFixed(1)
     : "41.6";
+  const isMemberActive = hasActiveMembership(memberProfile);
 
   useEffect(() => {
     const supabase = createClient();
@@ -134,7 +136,7 @@ export default function MembershipPage() {
           </div>
           <p className="mt-2 text-sm text-slate-600">平均每月 ¥{monthlyPrice}，持续获得增量内容。</p>
 
-          {memberProfile?.is_member ? (
+          {isMemberActive ? (
             <div className="mt-6 rounded-2xl border border-[#b7e0d0] bg-[#eef9f4] p-5">
               <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#1f7a56]">
                 <CheckCircle2 className="h-4 w-4" />
@@ -144,14 +146,14 @@ export default function MembershipPage() {
                 当前账号：<span className="font-medium">{userEmail}</span>
               </p>
               <p className="mt-1 text-sm text-slate-700">
-                到期时间：<span className="font-medium">{formatDate(memberProfile.membership_expires_at)}</span>
+                到期时间：<span className="font-medium">{formatDate(memberProfile?.membership_expires_at ?? null)}</span>
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
                   <Link href="/guide">查看会员内容</Link>
                 </Button>
                 <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
-                  <Link href="/admin/orders">去后台看订单</Link>
+                  <Link href="/guide">继续学习</Link>
                 </Button>
               </div>
             </div>
@@ -176,7 +178,7 @@ export default function MembershipPage() {
               </div>
 
               <p className="mt-4 text-xs text-slate-500">
-                支付完成后系统会检测到账；如未自动开通，可在后台人工核销。
+                支付完成后系统会检测到账；如未自动开通，请联系客服处理。
               </p>
             </>
           )}

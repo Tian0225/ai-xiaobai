@@ -42,28 +42,22 @@ export default async function AdminOrdersPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-4 rounded-2xl border border-[#c2d7d0] bg-[linear-gradient(100deg,#0d3b3a,#225f56)] px-5 py-4 text-white shadow-[0_18px_46px_-28px_rgba(9,36,34,0.9)]">
-        <p className="text-xs uppercase tracking-[0.24em] text-emerald-100">ADMIN BACKSTAGE</p>
-        <p className="mt-1 text-lg font-semibold">管理后台 · 订单核销与会员权限</p>
+    <main>
+      <div className="mb-5 rounded-2xl border border-slate-700 bg-slate-900/70 px-5 py-4 text-slate-100 shadow-[0_22px_52px_-34px_rgba(0,0,0,0.85)]">
+        <p className="text-xs uppercase tracking-[0.24em] text-amber-300">ADMIN BACKSTAGE</p>
+        <p className="mt-1 text-lg font-semibold">管理后台 · 订单核销与会员权限（P1）</p>
       </div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 rounded-full border border-[#c8ddd6] bg-white/85 px-4 py-2 text-sm text-slate-700 transition hover:border-[var(--brand-fresh)] hover:text-[var(--brand-fresh)]"
-        >
-          ← 返回主站
-        </Link>
+      <div className="mb-6 flex flex-wrap items-center justify-end gap-3">
         <div className="flex items-center gap-2">
           <Link
             href="/membership"
-            className="inline-flex items-center rounded-full border border-[#c8ddd6] bg-white/85 px-4 py-2 text-sm text-slate-700 transition hover:border-[var(--brand-fresh)] hover:text-[var(--brand-fresh)]"
+            className="inline-flex items-center rounded-full border border-slate-600 bg-slate-900/60 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-300 hover:text-amber-200"
           >
             会员页
           </Link>
           <Link
             href="/guide"
-            className="inline-flex items-center rounded-full border border-[#c8ddd6] bg-white/85 px-4 py-2 text-sm text-slate-700 transition hover:border-[var(--brand-fresh)] hover:text-[var(--brand-fresh)]"
+            className="inline-flex items-center rounded-full border border-slate-600 bg-slate-900/60 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-300 hover:text-amber-200"
           >
             教程页
           </Link>

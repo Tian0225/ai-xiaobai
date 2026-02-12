@@ -173,17 +173,30 @@ npm run dev
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_EMAILS`
 
-## 7. 支付集成（待完成）
+## 7. 支付集成
 
-支付轮询 API 需要：
-1. 申请微信/支付宝商户账号
-2. 获取账单查询 API 权限
-3. 配置 API 密钥到环境变量
-4. 实现 `lib/payment/polling.ts` 中的实际 API 调用
+### 7.1 微信支付官方闭环（已接入）
 
-参考文档：
-- 微信支付: https://pay.weixin.qq.com/wiki/doc/api/native.php
-- 支付宝: https://opendocs.alipay.com/
+已实现：
+1. `POST /api/orders/create` 在 `paymentMethod=wechat` 时调用微信官方 Native 下单，返回 `code_url`
+2. `POST /api/payments/wechat/notify` 处理微信回调（签名验签 + 资源解密 + 幂等落库 + 会员开通）
+3. 前端优先展示微信官方 `code_url` 二维码
+
+需要配置环境变量：
+- `WECHAT_PAY_MCH_ID`
+- `WECHAT_PAY_APP_ID`
+- `WECHAT_PAY_MCH_SERIAL_NO`
+- `WECHAT_PAY_MCH_PRIVATE_KEY`
+- `WECHAT_PAY_API_V3_KEY`
+- `WECHAT_PAY_NOTIFY_URL`（建议显式配置为生产域名）
+- `WECHAT_PAY_API_BASE`（默认 `https://api.mch.weixin.qq.com`）
+- `WECHAT_PAY_ORDER_DESC`（可选）
+
+### 7.2 支付宝官方接口（预留）
+
+已预留接口：
+- `POST /api/payments/alipay/notify`（当前返回 501）
+- `lib/payment/alipay-official.ts`（当前仅定义接口，尚未实现）
 
 ## 8. 对账定时任务（Vercel Cron）
 

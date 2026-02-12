@@ -1,7 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminEmail } from '@/lib/auth/admin'
 import { createClient } from '@/lib/supabase/server'
+import { fulfillPaidOrder } from '@/lib/order-fulfillment'
 import { NextRequest, NextResponse } from 'next/server'
+import { writeAdminOperationLog } from '@/lib/admin-operation-log'
 
 const PAYMENT_VERIFY_TOKEN = process.env.PAYMENT_VERIFY_TOKEN
 
@@ -9,7 +11,7 @@ async function verifyCallerPermission(request: NextRequest) {
   const authHeader = request.headers.get('x-payment-verify-token')
 
   if (PAYMENT_VERIFY_TOKEN && authHeader === PAYMENT_VERIFY_TOKEN) {
-    return { ok: true as const }
+    return { ok: true as const, actorEmail: 'system:payment-verify-token' }
   }
 
   const supabase = await createClient()
@@ -33,7 +35,7 @@ async function verifyCallerPermission(request: NextRequest) {
     }
   }
 
-  return { ok: true as const }
+  return { ok: true as const, actorEmail: user.email }
 }
 
 // 支持两种调用方式：
@@ -45,86 +47,80 @@ export async function POST(request: NextRequest) {
     if (!permission.ok) {
       return NextResponse.json({ error: permission.error }, { status: permission.status })
     }
+    const actorEmail = permission.actorEmail ?? 'system:unknown'
 
     const body = await request.json()
     const orderId = typeof body.orderId === 'string' ? body.orderId.trim() : ''
-    const transactionId =
-      typeof body.transactionId === 'string' ? body.transactionId.trim() : ''
+    const transactionId = typeof body.transactionId === 'string' ? body.transactionId.trim() : ''
 
     if (!orderId) {
       return NextResponse.json({ error: '缺少订单号' }, { status: 400 })
     }
 
+    const paidAtIso = new Date().toISOString()
+    const safeTransactionId = transactionId || `MANUAL_${Date.now()}_${orderId}`
+
     const supabase = createAdminClient()
+    const result = await fulfillPaidOrder(supabase, {
+      orderId,
+      transactionId: safeTransactionId,
+      paidAtIso,
+    })
 
-    // 查询订单
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('order_id', orderId)
-      .single()
-
-    if (orderError || !order) {
-      return NextResponse.json({ error: '订单不存在' }, { status: 404 })
-    }
-
-    // 检查订单是否已经处理过
-    if (order.status === 'paid') {
-      return NextResponse.json({ success: true, message: '订单已支付' })
-    }
-    if (order.status !== 'pending') {
-      return NextResponse.json({ error: `订单状态不可验证: ${order.status}` }, { status: 400 })
-    }
-
-    // 更新订单状态
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({
-        status: 'paid',
-        transaction_id: transactionId || `MANUAL_${Date.now()}_${orderId}`,
-        paid_at: new Date().toISOString(),
+    if (!result.success) {
+      await writeAdminOperationLog(supabase, request, actorEmail, 'order_verify', {
+        targetOrderId: orderId,
+        result: 'failed',
+        detail: {
+          reason: result.error ?? '确认支付失败',
+          status: result.status,
+          rollbackSucceeded: result.rollbackSucceeded ?? null,
+        },
       })
-      .eq('order_id', orderId)
 
-    if (updateError) {
-      console.error('更新订单状态失败:', updateError)
-      return NextResponse.json({ error: '更新订单失败' }, { status: 500 })
+      const statusCode = result.status === 'not_found' ? 404 : result.status === 'rollback' ? 500 : 409
+      return NextResponse.json(
+        {
+          error: result.error || '确认支付失败',
+          orderId,
+          rollbackSucceeded: result.rollbackSucceeded,
+        },
+        { status: statusCode }
+      )
     }
 
-    // 开通会员权限
-    const membershipExpiresAt = new Date()
-    membershipExpiresAt.setFullYear(membershipExpiresAt.getFullYear() + 1) // 1年后过期
-
-    const nowIso = new Date().toISOString()
-
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: order.user_id,
-        email: order.user_email,
-        is_member: true,
-        membership_expires_at: membershipExpiresAt.toISOString(),
-        updated_at: nowIso,
+    if (result.idempotent) {
+      await writeAdminOperationLog(supabase, request, actorEmail, 'order_verify', {
+        targetOrderId: orderId,
+        result: 'success',
+        detail: {
+          idempotent: true,
+          transactionId: safeTransactionId,
+        },
       })
-      .select('id')
-      .single()
 
-    if (profileError) {
-      console.error('开通会员失败:', profileError)
-      // 即使开通会员失败，订单也已标记为已支付，需要人工处理
       return NextResponse.json({
-        error: '开通会员失败，请联系客服',
-        orderId
-      }, { status: 500 })
+        success: true,
+        idempotent: true,
+        message: '订单已支付（幂等命中）',
+      })
     }
 
-    // TODO: 发送确认邮件
-    // await sendConfirmationEmail(order.user_email, orderId)
+    await writeAdminOperationLog(supabase, request, actorEmail, 'order_verify', {
+      targetOrderId: orderId,
+      result: 'success',
+      detail: {
+        idempotent: false,
+        transactionId: safeTransactionId,
+        membershipExpiresAt: result.membershipExpiresAt ?? null,
+      },
+    })
 
     return NextResponse.json({
       success: true,
+      idempotent: false,
       message: '支付成功，会员已开通',
-      membershipExpiresAt: membershipExpiresAt.toISOString()
+      membershipExpiresAt: result.membershipExpiresAt,
     })
   } catch (error) {
     console.error('验证支付错误:', error)

@@ -50,6 +50,14 @@
 
 :root {
   --radius: 0.625rem;
+  --content-max: 72rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
   --background: oklch(0.985 0.007 95.1);
   --foreground: oklch(0.23 0.045 215.1);
   --card: oklch(1 0 0);
@@ -87,6 +95,12 @@
   --brand-sand: #f7f2e7;
   --brand-signal: #f4a259;
   --brand-ink: #1f2d3a;
+  --state-success: #1f7a56;
+  --state-success-bg: #eef9f4;
+  --state-warning: #a16207;
+  --state-warning-bg: #fff8e6;
+  --state-error: #be123c;
+  --state-error-bg: #fff1f2;
 }
 
 .dark {
@@ -139,6 +153,16 @@
 }
 
 @layer utilities {
+  .layout-grid {
+    width: min(100%, var(--content-max));
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+  }
+
+  .space-section {
+    padding-block: var(--space-16);
+  }
+
   .text-gradient {
     background: linear-gradient(120deg, var(--brand-fresh), var(--brand-signal));
     -webkit-background-clip: text;
@@ -183,6 +207,21 @@
 
   .float-soft {
     animation: float-soft 7s ease-in-out infinite;
+  }
+
+  .feedback-success {
+    color: var(--state-success);
+    background: var(--state-success-bg);
+  }
+
+  .feedback-warning {
+    color: var(--state-warning);
+    background: var(--state-warning-bg);
+  }
+
+  .feedback-error {
+    color: var(--state-error);
+    background: var(--state-error-bg);
   }
 }
 

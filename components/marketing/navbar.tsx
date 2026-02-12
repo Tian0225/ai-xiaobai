@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Menu, X, Search, ArrowRight, ChevronDown, LayoutDashboard, LogOut, UserCircle2 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -21,6 +22,7 @@ interface CurrentUser {
 }
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const [loadingUser, setLoadingUser] = React.useState(true);
@@ -124,7 +126,12 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-slate-700 transition-colors hover:text-[var(--brand-fresh)]"
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "text-[var(--brand-fresh)]"
+                    : "text-slate-700 hover:text-[var(--brand-fresh)]"
+                )}
               >
                 {item.name}
               </Link>
@@ -216,14 +223,32 @@ export default function Navbar() {
             )}
           </div>
 
-          <button
-            type="button"
-            className="rounded-md p-2 text-slate-700 hover:bg-white/70 md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <span className="sr-only">打开菜单</span>
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            {loadingUser ? (
+              <div className="h-8 w-8 animate-pulse rounded-full bg-[#d7e5df]" />
+            ) : currentUser ? (
+              <button
+                type="button"
+                className="grid h-8 w-8 place-items-center rounded-full border border-[#c7ddd5] bg-white/80 text-xs font-semibold text-[var(--brand-fresh)]"
+                onClick={() => setIsOpen(true)}
+                aria-label="打开账号菜单"
+              >
+                {avatarLabel}
+              </button>
+            ) : (
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/auth">登录</Link>
+              </Button>
+            )}
+            <button
+              type="button"
+              className="rounded-md p-2 text-slate-700 hover:bg-white/70"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <span className="sr-only">打开菜单</span>
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
         {isOpen && (
@@ -233,7 +258,10 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block rounded-xl px-3 py-2 text-base font-medium text-slate-700 hover:bg-white/80"
+                  className={cn(
+                    "block rounded-xl px-3 py-2 text-base font-medium hover:bg-white/80",
+                    pathname === item.href ? "bg-white text-[var(--brand-fresh)]" : "text-slate-700"
+                  )}
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
