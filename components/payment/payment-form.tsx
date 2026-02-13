@@ -1,13 +1,19 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { AlertTriangle, CheckCircle2, LoaderCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Copy, LoaderCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
+import { getClientPaymentMode, type PaymentMode } from '@/lib/payment/mode'
+import type { OrderBizType } from '@/lib/order-biz'
 
 interface PaymentFormProps {
   userEmail: string
+  bizType?: OrderBizType
+  amountYuan?: number
+  productLabel?: string
+  successRedirect?: string
 }
 
 interface CheckOrderResponse {
@@ -17,11 +23,32 @@ interface CheckOrderResponse {
   isMember?: boolean
 }
 
-const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499)
+interface CreateOrderResponse {
+  order?: {
+    order_id?: string
+    payment_method?: 'wechat' | 'alipay'
+    expires_at?: string
+  }
+  payment?: {
+    method?: 'wechat' | 'alipay'
+    mode?: PaymentMode
+    codeUrl?: string | null
+    prepayId?: string | null
+  }
+  manualReviewRequired?: boolean
+  error?: string
+}
+
 const PAYMENT_METHOD_TEXT = {
   wechat: '微信支付',
   alipay: '支付宝支付',
 } as const
+
+const DEFAULT_CLIENT_MODE = getClientPaymentMode()
+const OFFICIAL_POLL_INTERVAL_MS = 5000
+const MANUAL_POLL_INTERVAL_MS = 15000
+const OFFICIAL_POLL_TIMEOUT_MS = 10 * 60 * 1000
+const MANUAL_POLL_TIMEOUT_MS = 30 * 60 * 1000
 
 function secondsUntil(expiresAt: string | undefined): number {
   if (!expiresAt) return 600
@@ -33,18 +60,22 @@ function secondsUntil(expiresAt: string | undefined): number {
 function StatusBanner({
   state,
   redirectCountdown,
+  paymentMode,
 }: {
   state: 'loading' | 'success' | 'warning' | 'error' | 'idle'
   redirectCountdown: number
+  paymentMode: PaymentMode
 }) {
+  const pollIntervalSeconds = paymentMode === 'official' ? 5 : 15
+
   if (state === 'success') {
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
         <p className="inline-flex items-center gap-2 font-semibold text-emerald-700">
           <CheckCircle2 className="h-4 w-4" />
-          支付成功，会员权限已开通
+          支付已确认，权益已开通
         </p>
-        <p className="mt-2 text-emerald-700">{redirectCountdown} 秒后自动跳转到会员状态页。</p>
+        <p className="mt-2 text-emerald-700">{redirectCountdown} 秒后自动跳转。</p>
       </div>
     )
   }
@@ -56,7 +87,11 @@ function StatusBanner({
           <AlertTriangle className="h-4 w-4" />
           订单已过期
         </p>
-        <p className="mt-2">请重新生成新订单并在 10 分钟内完成支付。</p>
+        <p className="mt-2">
+          {paymentMode === 'official'
+            ? '请重新生成新订单并在 10 分钟内完成支付。'
+            : '请重新生成新订单，并在支付后联系管理员核销。'}
+        </p>
       </div>
     )
   }
@@ -77,21 +112,39 @@ function StatusBanner({
     return (
       <div className="flex items-center gap-2 rounded-2xl border border-[#bfe2d2] bg-[#eef8f3] p-4 text-sm text-[var(--brand-fresh)]">
         <LoaderCircle className="h-4 w-4 animate-spin" />
-        正在检测支付状态，每 5 秒自动刷新一次
+        {paymentMode === 'official'
+          ? `正在检测支付状态，每 ${pollIntervalSeconds} 秒自动刷新一次`
+          : `正在等待人工核销，每 ${pollIntervalSeconds} 秒自动刷新一次`}
       </div>
     )
   }
 
   return (
     <div className="rounded-2xl border border-[#d8e6df] bg-white px-4 py-3 text-sm text-slate-600">
-      扫码后请勿关闭页面，系统会自动完成到账检测。
+      {paymentMode === 'official'
+        ? '扫码后请勿关闭页面，系统会自动完成到账检测。'
+        : '扫码后请勿关闭页面，后台确认到账后会自动开通。'}
     </div>
   )
 }
 
-export default function PaymentForm({ userEmail }: PaymentFormProps) {
+function resolvePollingConfig(mode: PaymentMode) {
+  return mode === 'official'
+    ? { intervalMs: OFFICIAL_POLL_INTERVAL_MS, timeoutMs: OFFICIAL_POLL_TIMEOUT_MS }
+    : { intervalMs: MANUAL_POLL_INTERVAL_MS, timeoutMs: MANUAL_POLL_TIMEOUT_MS }
+}
+
+export default function PaymentForm({
+  userEmail,
+  bizType = 'membership',
+  amountYuan = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499),
+  productLabel = '会员权益',
+  successRedirect = '/membership?payment=success',
+}: PaymentFormProps) {
   const [orderId, setOrderId] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'wechat' | 'alipay'>('wechat')
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>(DEFAULT_CLIENT_MODE)
+  const [manualReviewRequired, setManualReviewRequired] = useState(DEFAULT_CLIENT_MODE === 'manual')
   const [showQR, setShowQR] = useState(false)
   const [polling, setPolling] = useState(false)
   const [countdown, setCountdown] = useState(0)
@@ -102,6 +155,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
   const [creatingOrder, setCreatingOrder] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [wechatCodeUrl, setWechatCodeUrl] = useState('')
+  const [copiedOrderId, setCopiedOrderId] = useState(false)
   const pollingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -134,13 +188,21 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
     setPaymentSuccess(false)
     setPaymentExpired(false)
     setErrorMessage('')
+    setCopiedOrderId(false)
+    setPaymentMode(DEFAULT_CLIENT_MODE)
+    setManualReviewRequired(DEFAULT_CLIENT_MODE === 'manual')
   }
 
   const generateOrderId = () => {
     const date = new Date()
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '')
     const timeStr = `${date.getTime().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`
-    return `ORDER_${dateStr}_${timeStr}`
+    const prefixMap: Record<OrderBizType, string> = {
+      membership: 'ORDER',
+      token_basic: 'TOK100',
+      token_pro: 'TOK300',
+    }
+    return `${prefixMap[bizType]}_${dateStr}_${timeStr}`
   }
 
   const pollOrder = async (targetOrderId: string): Promise<'paid' | 'expired' | 'pending'> => {
@@ -170,16 +232,17 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
     return 'pending'
   }
 
-  const startPolling = (targetOrderId: string) => {
+  const startPolling = (targetOrderId: string, mode: PaymentMode) => {
     stopPolling()
+    const config = resolvePollingConfig(mode)
     setPolling(true)
     pollingTimerRef.current = setInterval(() => {
       void pollOrder(targetOrderId)
-    }, 5000)
+    }, config.intervalMs)
 
     pollingTimeoutRef.current = setTimeout(() => {
       stopPolling()
-    }, 600000)
+    }, config.timeoutMs)
   }
 
   const handleCreateOrder = async () => {
@@ -190,6 +253,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
     setPaymentExpired(false)
     setCreatingOrder(true)
     setWechatCodeUrl('')
+    setCopiedOrderId(false)
 
     const newOrderId = generateOrderId()
 
@@ -200,10 +264,11 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
         body: JSON.stringify({
           orderId: newOrderId,
           paymentMethod,
+          bizType,
         }),
       })
 
-      const payload = await response.json().catch(() => ({}))
+      const payload = (await response.json().catch(() => ({}))) as CreateOrderResponse
       if (!response.ok) {
         throw new Error(payload.error || '创建订单失败，请稍后重试')
       }
@@ -213,15 +278,20 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
         payload?.order?.payment_method === 'wechat' || payload?.order?.payment_method === 'alipay'
           ? payload.order.payment_method
           : paymentMethod
+      const createdMode: PaymentMode = payload?.payment?.mode === 'official' ? 'official' : 'manual'
       const codeUrl = typeof payload?.payment?.codeUrl === 'string' ? payload.payment.codeUrl : ''
+      const shouldManualReview = Boolean(payload?.manualReviewRequired ?? createdMode === 'manual')
+
       setOrderId(createdOrderId)
       setPaymentMethod(createdPaymentMethod)
+      setPaymentMode(createdMode)
+      setManualReviewRequired(shouldManualReview)
       setWechatCodeUrl(codeUrl)
       setShowQR(true)
       setCountdown(secondsUntil(payload?.order?.expires_at))
       const firstCheck = await pollOrder(createdOrderId)
       if (firstCheck === 'pending') {
-        startPolling(createdOrderId)
+        startPolling(createdOrderId, createdMode)
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : '创建订单失败，请稍后重试'
@@ -230,6 +300,16 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
       setCountdown(0)
     } finally {
       setCreatingOrder(false)
+    }
+  }
+
+  const handleCopyOrderId = async () => {
+    if (!orderId) return
+    try {
+      await navigator.clipboard.writeText(orderId)
+      setCopiedOrderId(true)
+    } catch {
+      setErrorMessage('复制失败，请手动长按复制订单号')
     }
   }
 
@@ -244,13 +324,13 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
     if (!paymentSuccess) return
 
     if (redirectCountdown <= 0) {
-      window.location.assign('/membership?payment=success')
+      window.location.assign(successRedirect)
       return
     }
 
     const timer = setTimeout(() => setRedirectCountdown((prev) => prev - 1), 1000)
     return () => clearTimeout(timer)
-  }, [paymentSuccess, redirectCountdown])
+  }, [paymentSuccess, redirectCountdown, successRedirect])
 
   useEffect(() => {
     if (!creatingOrder) {
@@ -271,6 +351,12 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
     }
   }, [])
 
+  useEffect(() => {
+    if (!copiedOrderId) return
+    const timer = setTimeout(() => setCopiedOrderId(false), 1800)
+    return () => clearTimeout(timer)
+  }, [copiedOrderId])
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -287,12 +373,18 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
           ? 'loading'
           : 'idle'
 
+  const previewMode: PaymentMode = paymentMethod === 'wechat' ? paymentMode : 'manual'
+  const previewManualFlow = previewMode === 'manual'
+
   if (!showQR) {
     return (
       <Card className="border-[#c9ddd6] shadow-[0_20px_46px_-30px_rgba(13,59,58,0.45)]">
         <CardHeader className="space-y-3">
           <CardTitle className="text-2xl font-display text-[var(--brand-ink)]">确认支付信息</CardTitle>
-          <CardDescription>选择支付方式并生成订单。订单有效期 10 分钟，完成后自动开通会员。</CardDescription>
+          <CardDescription>
+            选择支付方式并生成订单。
+            {previewManualFlow ? ' 支付后进入人工核销流程。' : ' 订单有效期 10 分钟，完成后自动开通权益。'}
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-5">
@@ -328,7 +420,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
               当前账号：<span className="font-medium text-slate-800">{userEmail}</span>
             </p>
             <p className="mt-1">
-              本次支付金额：<span className="font-semibold text-[var(--brand-fresh)]">¥{MEMBERSHIP_PRICE}</span>
+              本次支付金额：<span className="font-semibold text-[var(--brand-fresh)]">¥{amountYuan}</span>
             </p>
           </div>
 
@@ -338,7 +430,7 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
             size="lg"
             disabled={creatingOrder}
           >
-            {creatingOrder ? `创建订单中${'.'.repeat(loadingDots)}` : `生成支付订单（¥${MEMBERSHIP_PRICE}）`}
+            {creatingOrder ? `创建订单中${'.'.repeat(loadingDots)}` : `生成支付订单（¥${amountYuan}）`}
           </Button>
 
           {creatingOrder && (
@@ -349,8 +441,8 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
           )}
 
           <div className="space-y-1 text-center text-xs text-slate-500">
-            <p>支付备注请填写订单号，避免到账后无法自动匹配</p>
-            <p>系统会在支付完成后自动检测并开通权限</p>
+            <p>支付备注请填写订单号，避免到账后无法匹配</p>
+            <p>{previewManualFlow ? '支付后由后台人工核销开通权益' : '系统会在支付完成后自动检测并开通权益'}</p>
           </div>
 
           {errorMessage && <p className="text-center text-sm text-red-600">{errorMessage}</p>}
@@ -363,7 +455,9 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
     <Card className="border-[#c9ddd6] shadow-[0_20px_46px_-30px_rgba(13,59,58,0.45)]">
       <CardHeader className="space-y-2">
         <CardTitle className="text-2xl font-display text-[var(--brand-ink)]">扫码支付</CardTitle>
-        <CardDescription>请在 10 分钟内完成付款并填写订单号备注。</CardDescription>
+        <CardDescription>
+          {manualReviewRequired ? '请完成付款并等待后台核销。' : '请在 10 分钟内完成付款并填写订单号备注。'}
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -392,12 +486,12 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
           </section>
 
           <section className="space-y-4">
-            <StatusBanner state={stageState} redirectCountdown={redirectCountdown} />
+            <StatusBanner state={stageState} redirectCountdown={redirectCountdown} paymentMode={paymentMode} />
 
             <div className="grid gap-3 sm:grid-cols-2">
               <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
                 <p className="text-xs uppercase tracking-[0.15em] text-slate-500">金额</p>
-                <p className="mt-1 text-3xl font-display text-[var(--brand-fresh)]">¥{MEMBERSHIP_PRICE}</p>
+                <p className="mt-1 text-3xl font-display text-[var(--brand-fresh)]">¥{amountYuan}</p>
               </article>
               <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
                 <p className="text-xs uppercase tracking-[0.15em] text-slate-500">剩余时间</p>
@@ -408,20 +502,36 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
             </div>
 
             <article className="rounded-2xl border border-[#f0d88d] bg-[#fff9e8] p-4">
-              <p className="text-sm font-semibold text-slate-900">订单信息</p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-900">订单信息</p>
+                <span className="rounded-full border border-[#f0d88d] bg-white px-2.5 py-1 text-xs text-slate-600">
+                  {productLabel}
+                </span>
+                <span className="rounded-full border border-[#f0d88d] bg-white px-2.5 py-1 text-xs text-slate-600">
+                  {manualReviewRequired ? '人工核销' : '自动检测'}
+                </span>
+              </div>
               <p className="mt-2 text-xs text-slate-600">订单编号（支付备注必填）</p>
-              <p className="mt-1 break-all rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900">{orderId}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <p className="min-w-0 flex-1 break-all rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900">
+                  {orderId}
+                </p>
+                <Button variant="outline" size="sm" onClick={handleCopyOrderId} className="shrink-0">
+                  <Copy className="h-3.5 w-3.5" />
+                  {copiedOrderId ? '已复制' : '复制'}
+                </Button>
+              </div>
               <p className="mt-2 text-sm font-semibold text-red-600">请务必在支付备注中填写订单编号</p>
             </article>
 
             {paymentSuccess ? (
               <Button
                 onClick={() => {
-                  window.location.assign('/membership?payment=success')
+                  window.location.assign(successRedirect)
                 }}
                 className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
               >
-                立即查看会员状态
+                立即查看状态
               </Button>
             ) : (
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -437,7 +547,11 @@ export default function PaymentForm({ userEmail }: PaymentFormProps) {
               </div>
             )}
 
-            <p className="text-xs text-slate-500">如支付成功 1 分钟后仍未开通，请保留订单号并联系客服处理。</p>
+            <p className="text-xs text-slate-500">
+              {manualReviewRequired
+                ? '如支付后 15 分钟仍未开通，请保留订单号并联系客服人工核销。'
+                : '如支付成功 1 分钟后仍未开通，请保留订单号并联系客服处理。'}
+            </p>
 
             {errorMessage && <p className="text-center text-sm text-red-600">{errorMessage}</p>}
           </section>
