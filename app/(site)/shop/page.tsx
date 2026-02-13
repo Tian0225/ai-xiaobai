@@ -3,7 +3,6 @@
 import { ExternalLink, ShieldCheck, Sparkles, Truck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Navbar from "@/components/marketing/navbar";
 
 const products = [
   {
@@ -75,8 +74,6 @@ const faqs = [
 
 export default function ShopPage() {
   return (
-    <>
-      <Navbar />
       <main className="min-h-screen pb-16 pt-28 sm:pt-32">
         <section className="layout-grid">
           <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 sm:p-10">
@@ -207,6 +204,5 @@ export default function ShopPage() {
           </Card>
         </section>
       </main>
-    </>
   );
 }

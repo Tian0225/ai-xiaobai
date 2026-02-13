@@ -1,5 +1,3 @@
-import Navbar from "@/components/marketing/navbar";
-import Footer from "@/components/marketing/footer";
 import { siteProfile } from "@/lib/site-profile";
 
 const contactItems = [
@@ -22,8 +20,6 @@ const contactItems = [
 
 export default function ContactPage() {
   return (
-    <>
-      <Navbar />
       <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-16">
         <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 rounded-3xl border border-[#d8e6df] bg-white p-6 sm:p-8">
@@ -48,7 +44,5 @@ export default function ContactPage() {
           </div>
         </section>
       </main>
-      <Footer />
-    </>
   );
 }
