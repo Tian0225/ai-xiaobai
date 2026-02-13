@@ -18,6 +18,10 @@
 
 前置：存在 `pending` 订单，`expires_at < now`。
 
+备注：
+- 官方模式默认有效期 10 分钟。
+- 人工核销模式建议配置 `ORDER_EXPIRE_MINUTES_MANUAL=1440`，避免订单过早过期。
+
 步骤：
 1. 调用 `/api/orders/check?orderId=...` 或执行 `/api/orders/reconcile`。
 
@@ -51,6 +55,33 @@
 - 系统尝试将本次订单从 `paid` 回滚到 `pending`。
 - 若回滚成功：订单保持 `pending`，可重试处理。
 - 若回滚失败：返回 `rollbackSucceeded=false`，进入人工介入清单。
+
+## Case 5: 代币订单发放
+
+前置：存在 `TOK100_` 或 `TOK300_` 前缀的 `pending` 订单。
+
+步骤：
+1. 调用 `/api/orders/verify` 确认支付。
+2. 查询 `profiles.token_balance`。
+
+期望：
+- 订单变为 `paid`。
+- 代币订单不会修改 `is_member` 与 `membership_expires_at`。
+- `profiles.token_balance` 增加对应代币数量（100 或 300）。
+- `token_ledger` 新增一条对应流水，`change_amount` 与发放数量一致。
+
+## Case 6: 代币消耗（幂等 requestId）
+
+前置：用户 `token_balance >= 10`。
+
+步骤：
+1. 调用 `POST /api/tokens/consume`，传 `amount=10`、`requestId=CONSUME_xxx`。
+2. 使用同一个 `requestId` 再次调用一次。
+
+期望：
+- 首次调用成功，`token_balance` 扣减 10。
+- 第二次调用命中幂等，返回 `idempotent=true`，余额不重复扣减。
+- `token_ledger` 仅有一条该 `requestId` 的 `token_consume` 流水。
 
 ## 冒烟脚本建议
 
