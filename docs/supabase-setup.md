@@ -29,6 +29,7 @@ CREATE TABLE profiles (
   email TEXT NOT NULL,
   is_member BOOLEAN DEFAULT FALSE,
   membership_expires_at TIMESTAMP WITH TIME ZONE,
+  token_balance INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -44,6 +45,10 @@ CREATE POLICY "Users can view own profile"
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
   USING (auth.uid() = id);
+
+-- 若你已经有 profiles 表，请补充代币字段
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS token_balance INTEGER NOT NULL DEFAULT 0;
 
 -- 创建触发器：新用户注册时自动创建 profile
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -139,6 +144,28 @@ CREATE POLICY "Service can manage enterprise consultations"
 - 粘贴到 Supabase SQL Editor
 - 点击 Run（执行一次即可）
 
+### 3.4 创建 admin_operation_logs 表（后台操作审计）
+
+后台会员与核销操作会写入 `admin_operation_logs`，用于审计追踪。
+
+直接执行：
+
+- 打开 `/Users/jitian/Documents/ai-xiaobai/docs/sql/admin_operation_logs.sql`
+- 全选复制
+- 粘贴到 Supabase SQL Editor
+- 点击 Run（执行一次即可）
+
+### 3.5 创建 token_ledger 表（代币流水审计）
+
+代币购买核销后会写入 `token_ledger`，用于查询“发放时间、变动数量、发放后余额”。
+
+直接执行：
+
+- 打开 `/Users/jitian/Documents/ai-xiaobai/docs/sql/token_ledger.sql`
+- 全选复制
+- 粘贴到 Supabase SQL Editor
+- 点击 Run（执行一次即可）
+
 ## 4. 配置认证
 
 ### 4.1 启用邮箱认证
@@ -174,6 +201,17 @@ npm run dev
 - `ADMIN_EMAILS`
 
 ## 7. 支付集成
+
+### 7.0 支付模式开关（建议先跑通人工核销）
+
+建议先使用人工核销模式，等备案与商户官方配置完成后再切回微信官方回调：
+
+- `PAYMENT_MODE=manual`
+- `NEXT_PUBLIC_PAYMENT_MODE=manual`
+- `ORDER_EXPIRE_MINUTES_MANUAL=1440`（人工核销建议 24 小时）
+- `ORDER_EXPIRE_MINUTES_OFFICIAL=10`
+
+切换到官方模式时，将 `PAYMENT_MODE` 与 `NEXT_PUBLIC_PAYMENT_MODE` 改为 `official`。
 
 ### 7.1 微信支付官方闭环（已接入）
 

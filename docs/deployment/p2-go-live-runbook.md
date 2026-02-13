@@ -3,6 +3,23 @@
 更新时间：2026-02-12（本地时区）
 项目路径：`/Users/jitian/Documents/ai-xiaobai`
 
+## 0) 文档索引与适用范围
+
+- P1 后台运营与权限上线检查清单：
+- `docs/deployment/p1-admin-ops-go-live-checklist.md`
+- P2 支付/部署全链路 Runbook（本文）：
+- `docs/deployment/p2-go-live-runbook.md`
+- 已知问题模板：
+- `docs/deployment/known-issues-template.md`
+- 发布前最终演练单：
+- `docs/deployment/final-preflight-drill.md`
+- 发布执行记录模板：
+- `docs/deployment/release-execution-record-template.md`
+
+使用建议：
+- 仅上线后台运营能力（管理员权限、核销、会员、审计）时，优先执行 P1 清单。
+- 涉及支付、对账、Vercel 发布与回滚时，执行本文 P2 Runbook。
+
 ## 1) 环境变量梳理与校验（本地 / Vercel / Supabase）
 
 ### 1.1 运行自动校验
