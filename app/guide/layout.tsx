@@ -1,16 +1,14 @@
 import Navbar from '@/components/marketing/navbar'
-import Footer from '@/components/marketing/footer'
 
-export default function MarketingLayout({
+export default function GuideLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <>
       <Navbar />
       {children}
-      <Footer />
     </>
   )
 }

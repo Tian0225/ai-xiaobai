@@ -112,15 +112,26 @@ export async function POST(request: NextRequest) {
       detail: {
         idempotent: false,
         transactionId: safeTransactionId,
+        grantType: result.grantType ?? 'membership',
         membershipExpiresAt: result.membershipExpiresAt ?? null,
+        tokenGranted: result.tokenGranted ?? null,
+        tokenBalance: result.tokenBalance ?? null,
       },
     })
+
+    const successMessage =
+      result.grantType === 'token'
+        ? `支付成功，已发放代币 ${result.tokenGranted ?? 0}`
+        : '支付成功，会员已开通'
 
     return NextResponse.json({
       success: true,
       idempotent: false,
-      message: '支付成功，会员已开通',
+      message: successMessage,
+      grantType: result.grantType ?? 'membership',
       membershipExpiresAt: result.membershipExpiresAt,
+      tokenGranted: result.tokenGranted,
+      tokenBalance: result.tokenBalance,
     })
   } catch (error) {
     console.error('验证支付错误:', error)

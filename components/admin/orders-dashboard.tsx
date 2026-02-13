@@ -200,7 +200,8 @@ export default function OrdersDashboard({ adminEmail }: OrdersDashboardProps) {
         throw new Error(payload.error || "确认支付失败");
       }
 
-      setSuccessMessage(`订单 ${orderId} 已确认支付并开通会员`);
+      const message = typeof payload.message === "string" ? payload.message : `订单 ${orderId} 已确认支付`;
+      setSuccessMessage(message);
       setCheckedOrders((prev) => ({ ...prev, [orderId]: false }));
       setTransactionInputs((prev) => ({ ...prev, [orderId]: "" }));
       await loadOrders(true);

@@ -6,7 +6,6 @@ import { BookOpen, CheckCircle2, Crown, MessageCircle, Sparkles, TrendingUp } fr
 import { Button } from "@/components/ui/button";
 import PaymentForm from "@/components/payment/payment-form";
 import { createClient } from "@/lib/supabase/client";
-import Navbar from "@/components/marketing/navbar";
 import { hasActiveMembership } from "@/lib/membership";
 
 const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499);
@@ -94,8 +93,6 @@ export default function MembershipPage() {
   }, []);
 
   return (
-    <>
-      <Navbar />
       <div className="min-h-screen pb-20 pt-28 sm:pt-32">
       <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
@@ -178,7 +175,7 @@ export default function MembershipPage() {
               </div>
 
               <p className="mt-4 text-xs text-slate-500">
-                支付完成后系统会检测到账；如未自动开通，请联系客服处理。
+                支付完成后请保留订单号。系统会自动刷新状态；若仍未开通，请联系客服人工核销。
               </p>
             </>
           )}
@@ -208,6 +205,5 @@ export default function MembershipPage() {
         </div>
       </section>
       </div>
-    </>
   );
 }

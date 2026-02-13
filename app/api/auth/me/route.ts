@@ -16,11 +16,20 @@ export async function GET() {
       );
     }
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("token_balance")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const safeTokenBalance = Number((profile as { token_balance?: number | null } | null)?.token_balance ?? 0);
+
     return NextResponse.json(
       {
         user: {
           email: user.email,
           isAdmin: isAdminEmail(user.email),
+          tokenBalance: Number.isFinite(safeTokenBalance) ? safeTokenBalance : 0,
         },
       },
       { headers: { "Cache-Control": "no-store" } }

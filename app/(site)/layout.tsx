@@ -1,10 +1,10 @@
 import Navbar from '@/components/marketing/navbar'
 import Footer from '@/components/marketing/footer'
 
-export default function MarketingLayout({
+export default function SiteLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <>
