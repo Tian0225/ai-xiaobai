@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Project Deployment Docs
+
+- Deployment docs entry:
+- `/Users/jitian/Documents/ai-xiaobai/docs/deployment/README.md`
+- P1 admin/ops go-live checklist:
+- `/Users/jitian/Documents/ai-xiaobai/docs/deployment/p1-admin-ops-go-live-checklist.md`
+- P2 full go-live runbook:
+- `/Users/jitian/Documents/ai-xiaobai/docs/deployment/p2-go-live-runbook.md`
+- Final preflight drill:
+- `/Users/jitian/Documents/ai-xiaobai/docs/deployment/final-preflight-drill.md`
+- Release execution record template:
+- `/Users/jitian/Documents/ai-xiaobai/docs/deployment/release-execution-record-template.md`
+- Release execution record sample (P1):
+- `/Users/jitian/Documents/ai-xiaobai/docs/deployment/release-execution-record-2026-02-13-p1-sample.md`
