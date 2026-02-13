@@ -8,6 +8,7 @@
  *    - email (text)
  *    - is_member (boolean, default false)
  *    - membership_expires_at (timestamp)
+ *    - token_balance (integer, default 0)
  *    - created_at (timestamp)
  *    - updated_at (timestamp)
  *
@@ -23,6 +24,17 @@
  *    - created_at (timestamp)
  *    - paid_at (timestamp, nullable)
  *    - expires_at (timestamp)
+ *
+ * 3. token_ledger 表（代币流水）
+ *    - id (uuid, primary key)
+ *    - user_id (uuid, references auth.users)
+ *    - user_email (text)
+ *    - order_id (text, nullable)
+ *    - biz_type (text: 'token_basic' | 'token_pro' | 'token_consume')
+ *    - change_amount (integer)
+ *    - balance_after (integer)
+ *    - note (text, nullable)
+ *    - created_at (timestamp)
  */
 
 export interface Database {
@@ -34,6 +46,7 @@ export interface Database {
           email: string
           is_member: boolean
           membership_expires_at: string | null
+          token_balance: number
           created_at: string
           updated_at: string
         }
@@ -42,6 +55,7 @@ export interface Database {
           email: string
           is_member?: boolean
           membership_expires_at?: string | null
+          token_balance?: number
           created_at?: string
           updated_at?: string
         }
@@ -50,6 +64,7 @@ export interface Database {
           email?: string
           is_member?: boolean
           membership_expires_at?: string | null
+          token_balance?: number
           created_at?: string
           updated_at?: string
         }
@@ -95,6 +110,41 @@ export interface Database {
           expires_at?: string
         }
       }
+      token_ledger: {
+        Row: {
+          id: string
+          user_id: string
+          user_email: string
+          order_id: string | null
+          biz_type: 'token_basic' | 'token_pro' | 'token_consume'
+          change_amount: number
+          balance_after: number
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          user_email: string
+          order_id?: string | null
+          biz_type: 'token_basic' | 'token_pro' | 'token_consume'
+          change_amount: number
+          balance_after?: number
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          user_email?: string
+          order_id?: string | null
+          biz_type?: 'token_basic' | 'token_pro' | 'token_consume'
+          change_amount?: number
+          balance_after?: number
+          note?: string | null
+          created_at?: string
+        }
+      }
       admin_operation_logs: {
         Row: {
           id: string
@@ -137,5 +187,9 @@ export interface Database {
         }
       }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
