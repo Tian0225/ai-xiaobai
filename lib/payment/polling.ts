@@ -1,9 +1,10 @@
 /**
  * 支付对账适配层
  *
- * 使用环境变量配置微信/支付宝账单查询 API（或你自己的支付网关），
- * 并统一标准化交易记录结构供订单对账使用。
+ * 直接查询 Supabase orders 表来检测支付状态（绕过 XPay 后端）
  */
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type PaymentMethod = 'wechat' | 'alipay'
 
@@ -16,22 +17,12 @@ export interface Transaction {
   status: string
 }
 
-interface ProviderConfig {
-  method: PaymentMethod
-  url?: string
-  token?: string
-}
-
-const REQUEST_TIMEOUT_MS = Number(process.env.PAYMENT_ADAPTER_TIMEOUT_MS ?? 10_000)
-const POLL_WINDOW_MINUTES = Number(process.env.PAYMENT_POLL_WINDOW_MINUTES ?? 20)
-const SUCCESS_STATUSES = new Set(['SUCCESS', 'PAY_SUCCESS', 'TRADE_SUCCESS', 'TRADE_FINISHED'])
-
-function toSafeString(value: unknown) {
+function toSafeString(value: unknown): string {
   if (value == null) return ''
   return String(value).trim()
 }
 
-function toISODate(value: unknown) {
+function toISODate(value: unknown): string {
   const raw = toSafeString(value)
   if (!raw) return new Date().toISOString()
   const date = new Date(raw)
@@ -39,7 +30,7 @@ function toISODate(value: unknown) {
   return date.toISOString()
 }
 
-function toAmountYuan(value: unknown, fenValue: unknown) {
+function toAmountYuan(value: unknown, fenValue: unknown): number {
   const fenRaw = toSafeString(fenValue)
   if (fenRaw) {
     const fen = Number(fenRaw)
@@ -92,74 +83,8 @@ function normalizeTransaction(raw: Record<string, unknown>, method: PaymentMetho
   }
 }
 
-function getProviderConfig(method: PaymentMethod): ProviderConfig {
-  if (method === 'wechat') {
-    return {
-      method,
-      url: process.env.WECHAT_BILL_API_URL,
-      token: process.env.WECHAT_BILL_API_TOKEN,
-    }
-  }
-
-  return {
-    method,
-    url: process.env.ALIPAY_BILL_API_URL,
-    token: process.env.ALIPAY_BILL_API_TOKEN,
-  }
-}
-
-async function fetchTransactionsFromProvider(
-  config: ProviderConfig,
-  startTime: Date,
-  endTime: Date
-): Promise<Transaction[]> {
-  if (!config.url || !config.token) {
-    throw new Error(`${config.method} 账单 API 未配置`)
-  }
-
-  const endpoint = new URL(config.url)
-  endpoint.searchParams.set('startTime', startTime.toISOString())
-  endpoint.searchParams.set('endTime', endTime.toISOString())
-  endpoint.searchParams.set('paymentMethod', config.method)
-
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
-
-  try {
-    const response = await fetch(endpoint.toString(), {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${config.token}`,
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-      cache: 'no-store',
-    })
-
-    if (!response.ok) {
-      const text = await response.text()
-      throw new Error(`${config.method} 账单 API 调用失败: ${response.status} ${text.slice(0, 160)}`)
-    }
-
-    const payload = await response.json()
-    const rows: unknown[] = Array.isArray(payload)
-      ? payload
-      : Array.isArray(payload.transactions)
-        ? payload.transactions
-        : Array.isArray(payload.data)
-          ? payload.data
-          : []
-
-    return rows
-      .filter((row): row is Record<string, unknown> => row != null && typeof row === 'object')
-      .map((row) => normalizeTransaction(row, config.method))
-      .filter((row): row is Transaction => row !== null)
-  } finally {
-    clearTimeout(timeout)
-  }
-}
-
 function isMatchedOrder(transaction: Transaction, orderId: string, amount: number) {
+  const SUCCESS_STATUSES = new Set(['SUCCESS', 'PAY_SUCCESS', 'TRADE_SUCCESS', 'TRADE_FINISHED', '1'])
   return (
     transaction.remark.includes(orderId) &&
     transaction.amount >= amount &&
@@ -167,25 +92,66 @@ function isMatchedOrder(transaction: Transaction, orderId: string, amount: numbe
   )
 }
 
-export async function getWechatTransactions(startTime: Date, endTime: Date): Promise<Transaction[]> {
-  return fetchTransactionsFromProvider(getProviderConfig('wechat'), startTime, endTime)
-}
-
-export async function getAlipayTransactions(startTime: Date, endTime: Date): Promise<Transaction[]> {
-  return fetchTransactionsFromProvider(getProviderConfig('alipay'), startTime, endTime)
-}
-
+/**
+ * 直接查 Supabase orders 表检测支付状态
+ */
 export async function checkPaymentStatus(
   orderId: string,
   amount: number,
   paymentMethod: PaymentMethod
 ): Promise<boolean> {
-  const now = new Date()
-  const startTime = new Date(now.getTime() - POLL_WINDOW_MINUTES * 60 * 1000)
-  const transactions =
-    paymentMethod === 'wechat'
-      ? await getWechatTransactions(startTime, now)
-      : await getAlipayTransactions(startTime, now)
+  // 使用 service role key 获取完整权限
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-  return transactions.some((transaction) => isMatchedOrder(transaction, orderId, amount))
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase 环境变量未配置')
+  }
+
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  if (!supabase) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY 未配置')
+  }
+
+  try {
+    // 查询订单状态
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('status, paid_at,created_at')
+      .eq('order_id', orderId)
+      .maybeSingle()
+
+    if (error || !order) {
+      console.log(`Supabase: 订单 ${orderId} 不存在`)
+      return false
+    }
+
+    if (order.status === 'paid') {
+      console.log(`Supabase: 订单 ${orderId} 已支付`)
+      return true
+    }
+
+    // 检查是否过期（超过20分钟未支付）
+    const expiresAt = new Date(order.created_at || Date.now())
+    const now = new Date()
+    const minutesSinceCreation = (now.getTime() - expiresAt.getTime()) / 60000
+
+    if (minutesSinceCreation > 20) {
+      console.log(`Supabase: 订单 ${orderId} 已过期（${Math.floor(minutesSinceCreation)} 分钟）`)
+      // 更新为过期状态
+      await supabase
+        .from('orders')
+        .update({ status: 'expired' })
+        .eq('order_id', orderId)
+        .eq('status', 'pending')
+      return false
+    }
+
+    return false
+  } catch (error) {
+    console.error('Supabase 查询订单失败:', error)
+    return false
+  }
 }
