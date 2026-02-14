@@ -60,6 +60,7 @@ export default function MembershipPage() {
     ? (MEMBERSHIP_PRICE / 12).toFixed(1)
     : "41.6";
   const isMemberActive = hasActiveMembership(memberProfile);
+  const isPaymentFlow = !isMemberActive && showPayment;
 
   useEffect(() => {
     const supabase = createClient();
@@ -94,6 +95,30 @@ export default function MembershipPage() {
 
   return (
       <div className="min-h-screen pb-20 pt-28 sm:pt-32">
+      {isPaymentFlow ? (
+        <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="surface-card rounded-3xl border border-[#d8e6df] p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Membership Checkout</p>
+            <h1 className="mt-3 font-display text-3xl text-[var(--brand-ink)] sm:text-4xl">完成扫码支付</h1>
+            <p className="mt-2 text-sm text-slate-600">支付完成后系统会自动刷新；若未开通可联系客服人工核销。</p>
+
+            <div className="mt-6">
+              {!userEmail ? (
+                <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
+              ) : (
+                <PaymentForm userEmail={userEmail} />
+              )}
+            </div>
+
+            <div className="mt-5">
+              <Button variant="outline" onClick={() => setShowPayment(false)}>
+                返回会员介绍
+              </Button>
+            </div>
+          </div>
+        </section>
+      ) : (
+      <>
       <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
@@ -157,21 +182,15 @@ export default function MembershipPage() {
           ) : (
             <>
               <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
-                {!showPayment ? (
-                  <Button
-                    size="lg"
-                    className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                    disabled={loadingUser || !userEmail}
-                    onClick={() => setShowPayment(true)}
-                  >
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    {loadingUser ? "加载账户中..." : userEmail ? "立即开通会员" : "请先登录"}
-                  </Button>
-                ) : !userEmail ? (
-                  <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
-                ) : (
-                  <PaymentForm userEmail={userEmail} />
-                )}
+                <Button
+                  size="lg"
+                  className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                  disabled={loadingUser || !userEmail}
+                  onClick={() => setShowPayment(true)}
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  {loadingUser ? "加载账户中..." : userEmail ? "立即开通会员" : "请先登录"}
+                </Button>
               </div>
 
               <p className="mt-4 text-xs text-slate-500">
@@ -204,6 +223,8 @@ export default function MembershipPage() {
           ))}
         </div>
       </section>
+      </>
+      )}
       </div>
   );
 }
