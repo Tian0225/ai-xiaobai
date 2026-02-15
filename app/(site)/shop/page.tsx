@@ -7,18 +7,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const products = [
   {
     name: "ChatGPT Plus 月卡",
-    price: "¥150",
+    price: "¥168",
     originalPrice: "$19.99/月",
     features: ["自充模式，账号独享", "支持 GPT-4 级别模型", "自动发货，到账快", "售后问题可追踪处理"],
-    link: "https://zichong.online/chatgpt-plus-monthly",
+    link: "https://pay.ldxp.cn/item/p29128",
+    ctaLabel: "购买月卡",
     badge: "热门",
   },
   {
     name: "ChatGPT Plus 年卡",
-    price: "¥988",
+    price: "¥599",
     originalPrice: "$239.88/年",
-    features: ["折算每月约 ¥82.3", "比月卡更省", "优先售后支持", "适合长期高频使用"],
-    link: "https://zichong.online/chatgpt-plus-yearly",
+    features: ["折算每月约 ¥49.9", "比月卡更省", "优先售后支持", "适合长期高频使用"],
+    link: "https://pay.ldxp.cn/item/chxl0y",
+    ctaLabel: "购买年卡",
     badge: "性价比",
   },
   {
@@ -26,7 +28,8 @@ const products = [
     price: "¥299",
     originalPrice: "批发价",
     features: ["月卡/年卡阶梯采购", "专属代理后台", "面向团队合作", "适合稳定复购场景"],
-    link: "https://zichong.online/reseller",
+    link: "https://pay.ldxp.cn/item/ikdrz4",
+    ctaLabel: "购买代理",
     badge: "渠道",
   },
 ];
@@ -126,7 +129,7 @@ export default function ShopPage() {
                     className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
                     onClick={() => window.open(product.link, "_blank")}
                   >
-                    立即购买
+                    {product.ctaLabel}
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </CardContent>
