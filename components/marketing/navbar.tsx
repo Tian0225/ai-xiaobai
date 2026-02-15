@@ -12,7 +12,6 @@ const navigation = [
   { name: "首页", href: "/" },
   { name: "教程", href: "/guide" },
   { name: "会员", href: "/membership" },
-  { name: "代币", href: "/tokens" },
   { name: "商城", href: "/shop" },
   { name: "企业服务", href: "/enterprise" },
 ];
@@ -20,7 +19,6 @@ const navigation = [
 interface CurrentUser {
   email: string;
   isAdmin: boolean;
-  tokenBalance: number;
 }
 
 export default function Navbar() {
@@ -178,9 +176,6 @@ export default function Navbar() {
                   <div className="absolute right-0 top-12 w-64 rounded-2xl border border-[#c7ddd5] bg-white p-3 shadow-[0_24px_48px_-30px_rgba(13,59,58,0.55)]">
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-500">已登录账号</p>
                     <p className="mt-1 truncate text-sm font-medium text-slate-800">{currentUser.email}</p>
-                    <p className="mt-2 text-xs text-slate-500">代币余额</p>
-                    <p className="text-sm font-semibold text-[var(--brand-fresh)]">{currentUser.tokenBalance}</p>
-
                     <div className="mt-3 space-y-1 border-t border-[#dce8e3] pt-3">
                       <Link
                         href="/membership"
@@ -189,14 +184,6 @@ export default function Navbar() {
                       >
                         <UserCircle2 className="h-4 w-4" />
                         会员中心
-                      </Link>
-                      <Link
-                        href="/tokens"
-                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-700 transition hover:bg-[#edf7f2]"
-                        onClick={() => setAccountOpen(false)}
-                      >
-                        <UserCircle2 className="h-4 w-4" />
-                        代币中心
                       </Link>
                       {currentUser.isAdmin && (
                         <Link
@@ -288,17 +275,10 @@ export default function Navbar() {
                   <div className="rounded-2xl border border-[#d8e6df] bg-white/85 p-3">
                     <p className="text-xs text-slate-500">当前账号</p>
                     <p className="mt-1 truncate text-sm text-slate-700">{currentUser.email}</p>
-                    <p className="mt-2 text-xs text-slate-500">代币余额</p>
-                    <p className="text-sm font-semibold text-[var(--brand-fresh)]">{currentUser.tokenBalance}</p>
                   </div>
                   <Button variant="outline" className="w-full" asChild>
                     <Link href="/membership" onClick={() => setIsOpen(false)}>
                       会员中心
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/tokens" onClick={() => setIsOpen(false)}>
-                      代币中心
                     </Link>
                   </Button>
                   {currentUser.isAdmin && (

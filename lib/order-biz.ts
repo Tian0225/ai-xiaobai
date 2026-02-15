@@ -14,7 +14,7 @@ function safePositiveNumber(raw: string | undefined, fallback: number): number {
 }
 
 export function getOrderBizConfig(type: OrderBizType): OrderBizConfig {
-  const membershipPrice = safePositiveNumber(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE, 499)
+  const membershipPrice = 499
   const tokenBasicPrice = safePositiveNumber(process.env.TOKEN_PACK_BASIC_PRICE, 39)
   const tokenProPrice = safePositiveNumber(process.env.TOKEN_PACK_PRO_PRICE, 99)
 

@@ -8,7 +8,7 @@ import RedeemForm from "@/components/payment/redeem-form";
 import { createClient } from "@/lib/supabase/client";
 import { hasActiveMembership } from "@/lib/membership";
 
-const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499);
+const MEMBERSHIP_PRICE = 499;
 const MEMBERSHIP_PURCHASE_URL =
   process.env.NEXT_PUBLIC_MEMBERSHIP_PURCHASE_URL ?? "https://pay.ldxp.cn/item/5mti07";
 

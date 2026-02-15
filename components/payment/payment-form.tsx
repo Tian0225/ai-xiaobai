@@ -1,12 +1,41 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { AlertTriangle, CheckCircle2, Copy, LoaderCircle } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import Image from 'next/image'
-import { getClientPaymentMode, type PaymentMode } from '@/lib/payment/mode'
-import type { OrderBizType } from '@/lib/order-biz'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  AlertCircle,
+  CheckCircle2,
+  Copy,
+  LoaderCircle,
+  Lock,
+  QrCode,
+  XCircle,
+} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { checkPaymentStatus, type PaymentMethod } from '@/lib/payment/polling'
+import { getOrderBizConfig, type OrderBizType } from '@/lib/order-biz'
+
+const PAYMENT_METHODS = [
+  { value: 'wechat' as const, label: '微信支付', icon: '💬', color: 'bg-[#ebf8f1] border-[#d8e6df]' },
+  { value: 'alipay' as const, label: '支付宝', icon: '🔵', color: 'bg-[#eef6ff] border-[#d8e6df]' },
+]
+
+type PollingStatus = 'idle' | 'loading' | 'success' | 'expired' | 'error'
+
+interface OrderResponse {
+  success: boolean
+  order?: {
+    order_id: string
+    amount: number
+    payment_method: PaymentMethod
+    expires_at: string
+  }
+  payment?: {
+    method: PaymentMethod
+    mode: string
+    codeUrl: string | null
+  }
+  error?: string
+}
 
 interface PaymentFormProps {
   userEmail: string
@@ -16,547 +45,350 @@ interface PaymentFormProps {
   successRedirect?: string
 }
 
-interface CheckOrderResponse {
-  paid?: boolean
-  expired?: boolean
-  status?: string
-  isMember?: boolean
+function generateOrderId(prefix: string): string {
+  const now = new Date()
+  const date = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate()
+  const random = Math.random().toString(36).substring(2, 10).toUpperCase()
+  return `${prefix}_${date}_${random}`
 }
 
-interface CreateOrderResponse {
-  order?: {
-    order_id?: string
-    payment_method?: 'wechat' | 'alipay'
-    expires_at?: string
-  }
-  payment?: {
-    method?: 'wechat' | 'alipay'
-    mode?: PaymentMode
-    codeUrl?: string | null
-    prepayId?: string | null
-  }
-  manualReviewRequired?: boolean
-  error?: string
-}
+export default function PaymentForm({ userEmail, bizType = 'membership', amountYuan, successRedirect }: PaymentFormProps) {
+  // Determine if this is a token purchase or membership
+  const isTokenFlow = bizType !== 'membership'
+  const actualBizType: OrderBizType = bizType ?? 'membership'
+  const initialAmount = amountYuan ?? getOrderBizConfig('membership').amountYuan
 
-const PAYMENT_METHOD_TEXT = {
-  wechat: '微信支付',
-  alipay: '支付宝支付',
-} as const
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('wechat')
+  const [orderId, setOrderId] = useState<string>('')
+  const [amount, setAmount] = useState<number>(initialAmount)
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
+  const [pollingStatus, setPollingStatus] = useState<PollingStatus>('idle')
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [copied, setCopied] = useState(false)
+  const [showQrCode, setShowQrCode] = useState(false)
 
-const DEFAULT_CLIENT_MODE = getClientPaymentMode()
-const OFFICIAL_POLL_INTERVAL_MS = 5000
-const MANUAL_POLL_INTERVAL_MS = 15000
-const OFFICIAL_POLL_TIMEOUT_MS = 10 * 60 * 1000
-const MANUAL_POLL_TIMEOUT_MS = 30 * 60 * 1000
+  // Update amount when bizType changes
+  useEffect(() => {
+    const config = getOrderBizConfig(actualBizType)
+    setAmount(config.amountYuan)
+  }, [actualBizType])
 
-function secondsUntil(expiresAt: string | undefined): number {
-  if (!expiresAt) return 600
-  const end = new Date(expiresAt)
-  if (Number.isNaN(end.getTime())) return 600
-  return Math.max(0, Math.floor((end.getTime() - Date.now()) / 1000))
-}
+  // Generate order ID when component mounts or payment method changes
+  useEffect(() => {
+    const bizConfig = getOrderBizConfig(actualBizType)
+    const newOrderId = generateOrderId(bizConfig.orderPrefix)
+    setOrderId(newOrderId)
+  }, [paymentMethod, actualBizType])
 
-function StatusBanner({
-  state,
-  redirectCountdown,
-  paymentMode,
-}: {
-  state: 'loading' | 'success' | 'warning' | 'error' | 'idle'
-  redirectCountdown: number
-  paymentMode: PaymentMode
-}) {
-  const pollIntervalSeconds = paymentMode === 'official' ? 5 : 15
+  // Create order and start polling
+  const createOrder = useCallback(async () => {
+    if (!orderId) return
 
-  if (state === 'success') {
-    return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-        <p className="inline-flex items-center gap-2 font-semibold text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" />
-          支付已确认，权益已开通
-        </p>
-        <p className="mt-2 text-emerald-700">{redirectCountdown} 秒后自动跳转。</p>
-      </div>
-    )
-  }
-
-  if (state === 'warning') {
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-        <p className="inline-flex items-center gap-2 font-semibold">
-          <AlertTriangle className="h-4 w-4" />
-          订单已过期
-        </p>
-        <p className="mt-2">
-          {paymentMode === 'official'
-            ? '请重新生成新订单并在 10 分钟内完成支付。'
-            : '请重新生成新订单，并在支付后联系管理员核销。'}
-        </p>
-      </div>
-    )
-  }
-
-  if (state === 'error') {
-    return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-        <p className="inline-flex items-center gap-2 font-semibold">
-          <AlertTriangle className="h-4 w-4" />
-          支付状态获取失败
-        </p>
-        <p className="mt-2">网络波动或接口异常，请稍后重试。</p>
-      </div>
-    )
-  }
-
-  if (state === 'loading') {
-    return (
-      <div className="flex items-center gap-2 rounded-2xl border border-[#bfe2d2] bg-[#eef8f3] p-4 text-sm text-[var(--brand-fresh)]">
-        <LoaderCircle className="h-4 w-4 animate-spin" />
-        {paymentMode === 'official'
-          ? `正在检测支付状态，每 ${pollIntervalSeconds} 秒自动刷新一次`
-          : `正在等待人工核销，每 ${pollIntervalSeconds} 秒自动刷新一次`}
-      </div>
-    )
-  }
-
-  return (
-    <div className="rounded-2xl border border-[#d8e6df] bg-white px-4 py-3 text-sm text-slate-600">
-      {paymentMode === 'official'
-        ? '扫码后请勿关闭页面，系统会自动完成到账检测。'
-        : '扫码后请勿关闭页面，后台确认到账后会自动开通。'}
-    </div>
-  )
-}
-
-function resolvePollingConfig(mode: PaymentMode) {
-  return mode === 'official'
-    ? { intervalMs: OFFICIAL_POLL_INTERVAL_MS, timeoutMs: OFFICIAL_POLL_TIMEOUT_MS }
-    : { intervalMs: MANUAL_POLL_INTERVAL_MS, timeoutMs: MANUAL_POLL_TIMEOUT_MS }
-}
-
-export default function PaymentForm({
-  userEmail,
-  bizType = 'membership',
-  amountYuan = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499),
-  productLabel = '会员权益',
-  successRedirect = '/membership?payment=success',
-}: PaymentFormProps) {
-  const [orderId, setOrderId] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'wechat' | 'alipay'>('wechat')
-  const [paymentMode, setPaymentMode] = useState<PaymentMode>(DEFAULT_CLIENT_MODE)
-  const [manualReviewRequired, setManualReviewRequired] = useState(DEFAULT_CLIENT_MODE === 'manual')
-  const [showQR, setShowQR] = useState(false)
-  const [polling, setPolling] = useState(false)
-  const [countdown, setCountdown] = useState(0)
-  const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [paymentExpired, setPaymentExpired] = useState(false)
-  const [redirectCountdown, setRedirectCountdown] = useState(3)
-  const [loadingDots, setLoadingDots] = useState(1)
-  const [creatingOrder, setCreatingOrder] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [wechatCodeUrl, setWechatCodeUrl] = useState('')
-  const [copiedOrderId, setCopiedOrderId] = useState(false)
-  const pollingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const stopPolling = () => {
-    if (pollingTimerRef.current) {
-      clearInterval(pollingTimerRef.current)
-      pollingTimerRef.current = null
-    }
-    if (pollingTimeoutRef.current) {
-      clearTimeout(pollingTimeoutRef.current)
-      pollingTimeoutRef.current = null
-    }
-    setPolling(false)
-  }
-
-  const markAsPaid = () => {
-    stopPolling()
-    setPaymentExpired(false)
-    setPaymentSuccess(true)
-    setRedirectCountdown(3)
+    setPollingStatus('loading')
     setErrorMessage('')
-  }
-
-  const resetOrderView = () => {
-    stopPolling()
-    setShowQR(false)
-    setCountdown(0)
-    setOrderId('')
-    setWechatCodeUrl('')
-    setPaymentSuccess(false)
-    setPaymentExpired(false)
-    setErrorMessage('')
-    setCopiedOrderId(false)
-    setPaymentMode(DEFAULT_CLIENT_MODE)
-    setManualReviewRequired(DEFAULT_CLIENT_MODE === 'manual')
-  }
-
-  const generateOrderId = () => {
-    const date = new Date()
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '')
-    const timeStr = `${date.getTime().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`
-    const prefixMap: Record<OrderBizType, string> = {
-      membership: 'ORDER',
-      token_basic: 'TOK100',
-      token_pro: 'TOK300',
-    }
-    return `${prefixMap[bizType]}_${dateStr}_${timeStr}`
-  }
-
-  const pollOrder = async (targetOrderId: string): Promise<'paid' | 'expired' | 'pending'> => {
-    try {
-      const res = await fetch(`/api/orders/check?orderId=${targetOrderId}`, { cache: 'no-store' })
-      const data = (await res.json()) as CheckOrderResponse
-
-      if (!res.ok) {
-        return 'pending'
-      }
-
-      if (data.paid || data.status === 'paid') {
-        markAsPaid()
-        return 'paid'
-      }
-
-      if (data.expired || data.status === 'expired') {
-        stopPolling()
-        setPaymentExpired(true)
-        setCountdown(0)
-        return 'expired'
-      }
-    } catch {
-      // 避免因偶发网络抖动导致用户误判支付失败。
-    }
-
-    return 'pending'
-  }
-
-  const startPolling = (targetOrderId: string, mode: PaymentMode) => {
-    stopPolling()
-    const config = resolvePollingConfig(mode)
-    setPolling(true)
-    pollingTimerRef.current = setInterval(() => {
-      void pollOrder(targetOrderId)
-    }, config.intervalMs)
-
-    pollingTimeoutRef.current = setTimeout(() => {
-      stopPolling()
-    }, config.timeoutMs)
-  }
-
-  const handleCreateOrder = async () => {
-    if (creatingOrder) return
-
-    setErrorMessage('')
-    setPaymentSuccess(false)
-    setPaymentExpired(false)
-    setCreatingOrder(true)
-    setWechatCodeUrl('')
-    setCopiedOrderId(false)
-
-    const newOrderId = generateOrderId()
+    setQrCodeUrl(null)
+    setShowQrCode(false)
 
     try {
       const response = await fetch('/api/orders/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          orderId: newOrderId,
+          orderId,
           paymentMethod,
-          bizType,
+          bizType: actualBizType,
         }),
       })
 
-      const payload = (await response.json().catch(() => ({}))) as CreateOrderResponse
-      if (!response.ok) {
-        throw new Error(payload.error || '创建订单失败，请稍后重试')
+      const data = (await response.json()) as OrderResponse
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || '创建订单失败')
       }
 
-      const createdOrderId = typeof payload?.order?.order_id === 'string' ? payload.order.order_id : newOrderId
-      const createdPaymentMethod =
-        payload?.order?.payment_method === 'wechat' || payload?.order?.payment_method === 'alipay'
-          ? payload.order.payment_method
-          : paymentMethod
-      const createdMode: PaymentMode = payload?.payment?.mode === 'official' ? 'official' : 'manual'
-      const codeUrl = typeof payload?.payment?.codeUrl === 'string' ? payload.payment.codeUrl : ''
-      const shouldManualReview = Boolean(payload?.manualReviewRequired ?? createdMode === 'manual')
-
-      setOrderId(createdOrderId)
-      setPaymentMethod(createdPaymentMethod)
-      setPaymentMode(createdMode)
-      setManualReviewRequired(shouldManualReview)
-      setWechatCodeUrl(codeUrl)
-      setShowQR(true)
-      setCountdown(secondsUntil(payload?.order?.expires_at))
-      const firstCheck = await pollOrder(createdOrderId)
-      if (firstCheck === 'pending') {
-        startPolling(createdOrderId, createdMode)
+      // Set QR code URL if available
+      if (data.payment?.codeUrl) {
+        setQrCodeUrl(data.payment.codeUrl)
+      } else {
+        // For manual payment mode, show static QR code
+        setQrCodeUrl('manual')
       }
+
+      // Start polling for payment status
+      await startPolling()
     } catch (error) {
-      const message = error instanceof Error ? error.message : '创建订单失败，请稍后重试'
+      const message = error instanceof Error ? error.message : '创建订单失败，请重试'
       setErrorMessage(message)
-      setShowQR(false)
-      setCountdown(0)
-    } finally {
-      setCreatingOrder(false)
+      setPollingStatus('error')
     }
-  }
+  }, [orderId, paymentMethod, actualBizType])
 
-  const handleCopyOrderId = async () => {
-    if (!orderId) return
+  // Start polling for payment detection
+  const startPolling = useCallback(async () => {
+    const intervals = [5000, 10000, 15000] // 5s, 10s, 15s
+    let attempt = 0
+
+    const poll = async (): Promise<void> => {
+      const interval = intervals[Math.min(attempt, intervals.length - 1)]
+
+      const isPaid = await checkPaymentStatus(orderId, amount, paymentMethod)
+
+      if (isPaid) {
+        setPollingStatus('success')
+        return
+      }
+
+      attempt++
+      setTimeout(poll, interval)
+    }
+
+    await poll()
+  }, [orderId, amount, paymentMethod])
+
+  // Copy order ID to clipboard
+  const copyOrderId = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(orderId)
-      setCopiedOrderId(true)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch {
-      setErrorMessage('复制失败，请手动长按复制订单号')
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = orderId
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
-  }
+  }, [orderId])
 
+  // Retry order creation
+  const handleRetry = useCallback(() => {
+    const bizConfig = getOrderBizConfig(actualBizType)
+    const newOrderId = generateOrderId(bizConfig.orderPrefix)
+    setOrderId(newOrderId)
+    setPollingStatus('idle')
+    setErrorMessage('')
+    setQrCodeUrl(null)
+    setShowQrCode(false)
+  }, [actualBizType])
+
+  // Auto-create order when component is ready
   useEffect(() => {
-    if (countdown <= 0) return
-
-    const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000)
-    return () => clearTimeout(timer)
-  }, [countdown])
-
-  useEffect(() => {
-    if (!paymentSuccess) return
-
-    if (redirectCountdown <= 0) {
-      window.location.assign(successRedirect)
-      return
+    if (orderId && pollingStatus === 'idle' && !errorMessage) {
+      void createOrder()
     }
+  }, [orderId, pollingStatus, errorMessage, createOrder])
 
-    const timer = setTimeout(() => setRedirectCountdown((prev) => prev - 1), 1000)
-    return () => clearTimeout(timer)
-  }, [paymentSuccess, redirectCountdown, successRedirect])
-
+  // Redirect on success for token flow
   useEffect(() => {
-    if (!creatingOrder) {
-      setLoadingDots(1)
-      return
+    if (pollingStatus === 'success' && successRedirect) {
+      const timer = setTimeout(() => {
+        window.location.href = successRedirect
+      }, 1500)
+      return () => clearTimeout(timer)
     }
+  }, [pollingStatus, successRedirect])
 
-    const timer = setInterval(() => {
-      setLoadingDots((prev) => (prev >= 3 ? 1 : prev + 1))
-    }, 360)
-
-    return () => clearInterval(timer)
-  }, [creatingOrder])
-
-  useEffect(() => {
-    return () => {
-      stopPolling()
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!copiedOrderId) return
-    const timer = setTimeout(() => setCopiedOrderId(false), 1800)
-    return () => clearTimeout(timer)
-  }, [copiedOrderId])
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const stageState: 'loading' | 'success' | 'warning' | 'error' | 'idle' = paymentSuccess
-    ? 'success'
-    : paymentExpired
-      ? 'warning'
-      : errorMessage && showQR
-        ? 'error'
-        : polling
-          ? 'loading'
-          : 'idle'
-
-  const previewMode: PaymentMode = paymentMethod === 'wechat' ? paymentMode : 'manual'
-  const previewManualFlow = previewMode === 'manual'
-
-  if (!showQR) {
+  // Success state
+  if (pollingStatus === 'success') {
     return (
-      <Card className="border-[#c9ddd6] shadow-[0_20px_46px_-30px_rgba(13,59,58,0.45)]">
-        <CardHeader className="space-y-3">
-          <CardTitle className="text-2xl font-display text-[var(--brand-ink)]">确认支付信息</CardTitle>
-          <CardDescription>
-            选择支付方式并生成订单。
-            {previewManualFlow ? ' 支付后进入人工核销流程。' : ' 订单有效期 10 分钟，完成后自动开通权益。'}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <Card className="border-emerald-200 bg-emerald-50">
+        <CardContent className="p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+          </div>
+          <h3 className="text-2xl font-semibold text-emerald-900">支付成功</h3>
+          <p className="mt-2 text-emerald-700">
+            {isTokenFlow ? '代币已发放，正在跳转...' : '会员已开通，正在跳转...'}
+          </p>
+          <p className="mt-1 text-sm text-emerald-600">
+            订单号：<span className="font-mono">{orderId}</span>
+          </p>
+          <div className="mt-6">
             <button
-              onClick={() => setPaymentMethod('wechat')}
-              className={`rounded-2xl border-2 p-4 text-left transition ${
-                paymentMethod === 'wechat'
-                  ? 'border-[#2db86f] bg-[#ebf8f1]'
-                  : 'border-[#d8e6df] bg-white hover:border-[#9bc6b7]'
-              }`}
+              onClick={() => window.location.reload()}
+              className="rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
-              <Image src="/icons/wechat.svg" alt="微信图标" width={30} height={30} className="mb-2" />
-              <div className="font-semibold text-slate-900">微信支付</div>
-              <div className="mt-1 text-xs text-slate-500">建议手机扫码完成</div>
-            </button>
-            <button
-              onClick={() => setPaymentMethod('alipay')}
-              className={`rounded-2xl border-2 p-4 text-left transition ${
-                paymentMethod === 'alipay'
-                  ? 'border-[#5aa8ff] bg-[#eef6ff]'
-                  : 'border-[#d8e6df] bg-white hover:border-[#9bc6b7]'
-              }`}
-            >
-              <Image src="/icons/alipay.svg" alt="支付宝图标" width={30} height={30} className="mb-2" />
-              <div className="font-semibold text-slate-900">支付宝</div>
-              <div className="mt-1 text-xs text-slate-500">建议手机扫码完成</div>
+              刷新页面
             </button>
           </div>
-
-          <div className="rounded-2xl border border-[#d8e6df] bg-[#f6faf8] p-4 text-sm text-slate-600">
-            <p>
-              当前账号：<span className="font-medium text-slate-800">{userEmail}</span>
-            </p>
-            <p className="mt-1">
-              本次支付金额：<span className="font-semibold text-[var(--brand-fresh)]">¥{amountYuan}</span>
-            </p>
-          </div>
-
-          <Button
-            onClick={handleCreateOrder}
-            className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-            size="lg"
-            disabled={creatingOrder}
-          >
-            {creatingOrder ? `创建订单中${'.'.repeat(loadingDots)}` : `生成支付订单（¥${amountYuan}）`}
-          </Button>
-
-          {creatingOrder && (
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-[#cfe5dc] bg-[#eff8f3] px-3 py-2 text-sm text-[var(--brand-fresh)]">
-              <LoaderCircle className="h-4 w-4 animate-spin" />
-              正在初始化支付信息
-            </div>
-          )}
-
-          <div className="space-y-1 text-center text-xs text-slate-500">
-            <p>支付备注请填写订单号，避免到账后无法匹配</p>
-            <p>{previewManualFlow ? '支付后由后台人工核销开通权益' : '系统会在支付完成后自动检测并开通权益'}</p>
-          </div>
-
-          {errorMessage && <p className="text-center text-sm text-red-600">{errorMessage}</p>}
         </CardContent>
       </Card>
     )
   }
 
-  return (
-    <Card className="border-[#c9ddd6] shadow-[0_20px_46px_-30px_rgba(13,59,58,0.45)]">
-      <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl font-display text-[var(--brand-ink)]">扫码支付</CardTitle>
-        <CardDescription>
-          {manualReviewRequired ? '请完成付款并等待后台核销。' : '请在 10 分钟内完成付款并填写订单号备注。'}
-        </CardDescription>
-      </CardHeader>
+  // Expired state
+  if (pollingStatus === 'expired') {
+    return (
+      <Card className="border-amber-200 bg-amber-50">
+        <CardContent className="p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+            <XCircle className="h-10 w-10 text-amber-600" />
+          </div>
+          <h3 className="text-2xl font-semibold text-amber-900">订单已过期</h3>
+          <p className="mt-2 text-amber-700">订单超过20分钟未支付，已自动过期</p>
+          <p className="mt-1 text-sm text-amber-600">
+            订单号：<span className="font-mono">{orderId}</span>
+          </p>
+          <div className="mt-6">
+            <button
+              onClick={handleRetry}
+              className="rounded-full bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700"
+            >
+              重新创建订单
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
-      <CardContent>
-        <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
-          <section className="rounded-2xl border border-[#d2e4dc] bg-[linear-gradient(165deg,#ffffff,#eef8f3)] p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-800">{PAYMENT_METHOD_TEXT[paymentMethod]}</p>
-              <span className="rounded-full border border-[#d8e6df] bg-white px-2.5 py-1 text-xs text-slate-500">扫码付款</span>
+  // Error state
+  if (pollingStatus === 'error') {
+    return (
+      <Card className="border-rose-200 bg-rose-50">
+        <CardContent className="p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100">
+            <AlertCircle className="h-10 w-10 text-rose-600" />
+          </div>
+          <h3 className="text-2xl font-semibold text-rose-900">创建订单失败</h3>
+          <p className="mt-2 text-rose-700">{errorMessage}</p>
+          <div className="mt-6 flex justify-center gap-3">
+            <button
+              onClick={handleRetry}
+              className="rounded-full bg-rose-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700"
+            >
+              重试
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-full border border-rose-600 bg-transparent px-6 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+            >
+              刷新页面
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Loading state with QR code
+  return (
+    <div className="space-y-6">
+      {/* Order ID Display - Prominently shown */}
+      <Card className="border-[#b7e0d0] bg-[#eef9f4]">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-[#1f7a56]">你的订单号</p>
+              <p className="mt-1 font-mono text-2xl font-bold text-[#1f7a56]">{orderId || '生成中...'}</p>
+              <p className="mt-2 text-sm text-[#1f7a56]/80">
+                此订单号已自动填入支付备注，无需手动输入
+              </p>
             </div>
-            <div className="relative mx-auto h-56 w-56 rounded-2xl bg-white p-3 shadow-[inset_0_0_0_1px_rgba(13,59,58,0.08)]">
-              {paymentMethod === 'wechat' && wechatCodeUrl ? (
-                <Image
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(wechatCodeUrl)}`}
-                  alt="微信官方支付二维码"
-                  fill
-                  unoptimized
-                  className="object-contain p-2"
-                />
-              ) : paymentMethod === 'wechat' ? (
-                <Image src="/payment/wechat-qr.png" alt="微信收款码" fill className="object-contain p-2" />
+            <button
+              onClick={copyOrderId}
+              disabled={!orderId || copied}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1f7a56]/10 text-[#1f7a56] transition hover:bg-[#1f7a56]/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {copied ? (
+                <CheckCircle2 className="h-5 w-5" />
               ) : (
-                <Image src="/payment/alipay-qr.png" alt="支付宝收款码" fill className="object-contain p-2" />
+                <Copy className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment Method Selection */}
+      <div>
+        <p className="mb-3 text-sm font-medium text-slate-700">选择支付方式</p>
+        <div className="grid grid-cols-2 gap-3">
+          {PAYMENT_METHODS.map((method) => (
+            <button
+              key={method.value}
+              type="button"
+              onClick={() => setPaymentMethod(method.value as 'wechat' | 'alipay')}
+              disabled={pollingStatus === 'loading'}
+              className={`rounded-xl border-2 p-4 text-left transition ${
+                paymentMethod === method.value
+                  ? method.color
+                  : 'border-[#d8e6df] bg-white hover:bg-[#f8fbf9]'
+              }`}
+            >
+              <span className="text-2xl">{method.icon}</span>
+              <span className="mt-2 block font-semibold">{method.label}</span>
+              <span className="mt-1 text-sm text-slate-600">¥{amount}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* QR Code Display with blur protection */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#e3f0eb] text-[var(--brand-fresh)]">
+              {pollingStatus === 'loading' ? (
+                <LoaderCircle className="h-6 w-6 animate-spin" />
+              ) : (
+                <QrCode className="h-6 w-6" />
               )}
             </div>
-            <p className="mt-3 text-center text-xs text-slate-500">请打开手机 {PAYMENT_METHOD_TEXT[paymentMethod]} 扫码</p>
-          </section>
 
-          <section className="space-y-4">
-            <StatusBanner state={stageState} redirectCountdown={redirectCountdown} paymentMode={paymentMode} />
+            <h3 className="text-xl font-semibold text-slate-900">
+              {pollingStatus === 'loading' ? '扫码支付' : '支付二维码'}
+            </h3>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.15em] text-slate-500">金额</p>
-                <p className="mt-1 text-3xl font-display text-[var(--brand-fresh)]">¥{amountYuan}</p>
-              </article>
-              <article className="rounded-2xl border border-[#d8e6df] bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.15em] text-slate-500">剩余时间</p>
-                <p className="mt-1 text-3xl font-display text-[var(--brand-ink)]">
-                  {paymentSuccess ? '已支付' : countdown > 0 ? formatTime(countdown) : '已过期'}
-                </p>
-              </article>
-            </div>
-
-            <article className="rounded-2xl border border-[#f0d88d] bg-[#fff9e8] p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-slate-900">订单信息</p>
-                <span className="rounded-full border border-[#f0d88d] bg-white px-2.5 py-1 text-xs text-slate-600">
-                  {productLabel}
-                </span>
-                <span className="rounded-full border border-[#f0d88d] bg-white px-2.5 py-1 text-xs text-slate-600">
-                  {manualReviewRequired ? '人工核销' : '自动检测'}
-                </span>
-              </div>
-              <p className="mt-2 text-xs text-slate-600">订单编号（支付备注必填）</p>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <p className="min-w-0 flex-1 break-all rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900">
-                  {orderId}
-                </p>
-                <Button variant="outline" size="sm" onClick={handleCopyOrderId} className="shrink-0">
-                  <Copy className="h-3.5 w-3.5" />
-                  {copiedOrderId ? '已复制' : '复制'}
-                </Button>
-              </div>
-              <p className="mt-2 text-sm font-semibold text-red-600">请务必在支付备注中填写订单编号</p>
-            </article>
-
-            {paymentSuccess ? (
-              <Button
-                onClick={() => {
-                  window.location.assign(successRedirect)
-                }}
-                className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-              >
-                立即查看状态
-              </Button>
-            ) : (
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button variant="outline" onClick={resetOrderView} className="flex-1">
-                  返回重选
-                </Button>
-                <Button
-                  onClick={resetOrderView}
-                  className="flex-1 rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                >
-                  重新生成订单
-                </Button>
-              </div>
-            )}
-
-            <p className="text-xs text-slate-500">
-              {manualReviewRequired
-                ? '如支付后 15 分钟仍未开通，请保留订单号并联系客服人工核销。'
-                : '如支付成功 1 分钟后仍未开通，请保留订单号并联系客服处理。'}
+            <p className="mt-2 text-sm text-slate-600">
+              使用{paymentMethod === 'wechat' ? '微信' : '支付宝'}扫描二维码完成支付
             </p>
 
-            {errorMessage && <p className="text-center text-sm text-red-600">{errorMessage}</p>}
-          </section>
-        </div>
-      </CardContent>
-    </Card>
+            <div className="mt-6 rounded-xl border-2 border-dashed border-[#d8e6df] bg-[#f8fbf9] p-6 relative">
+              {!showQrCode ? (
+                <div
+                  className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 backdrop-blur-sm"
+                  style={{ backdropFilter: 'blur(8px)' }}
+                  onClick={() => setShowQrCode(true)}
+                >
+                    <Lock className="h-12 w-12 text-emerald-400 mx-auto mb-2" />
+                    <p className="text-lg font-semibold">点击查看收款码</p>
+                    <p className="text-sm text-slate-300">保护你的隐私安全</p>
+                  </div>
+                ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/payment/wechat.jpg"
+                    alt="微信支付"
+                    className="h-48 w-48"
+                  />
+                  {/* eslint-enable-next-line @next/next/no-img-element */}
+                </>
+              )}
+            </div>
+
+            <div className="mt-6 space-y-2 text-sm text-slate-600">
+              <p className="font-semibold">支付说明</p>
+              <p>1. 点击按钮查看收款码</p>
+              <p>2. 扫描上方二维码</p>
+              <p>3. 确认支付金额：¥{amount}</p>
+              <p>4. 订单号已自动填入备注</p>
+              <p className="font-semibold text-[var(--brand-fresh)]">5. 支付完成后会员将自动开通</p>
+            </div>
+
+            <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+              <span>正在检测支付状态...</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
+}
 }
