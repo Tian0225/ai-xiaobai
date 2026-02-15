@@ -1,36 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ExternalLink, ShieldCheck, Sparkles, Truck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/client";
+import { hasActiveMembership, type MembershipProfile } from "@/lib/membership";
 
 const products = [
   {
     name: "ChatGPT Plus 月卡",
-    price: "¥168",
+    retailPrice: 168,
+    memberPrice: 158,
     originalPrice: "$19.99/月",
     features: ["自充模式，账号独享", "支持 GPT-4 级别模型", "自动发货，到账快", "售后问题可追踪处理"],
-    link: "https://pay.ldxp.cn/item/p29128",
-    ctaLabel: "购买月卡",
+    retailLink: "https://pay.ldxp.cn/item/p29128",
+    memberLink: process.env.NEXT_PUBLIC_PLUS_MONTH_MEMBER_URL ?? "https://pay.ldxp.cn/item/p29128",
     badge: "热门",
   },
   {
     name: "ChatGPT Plus 年卡",
-    price: "¥599",
+    retailPrice: 599,
+    memberPrice: 569,
     originalPrice: "$239.88/年",
     features: ["折算每月约 ¥49.9", "比月卡更省", "优先售后支持", "适合长期高频使用"],
-    link: "https://pay.ldxp.cn/item/chxl0y",
-    ctaLabel: "购买年卡",
+    retailLink: "https://pay.ldxp.cn/item/chxl0y",
+    memberLink: process.env.NEXT_PUBLIC_PLUS_YEAR_MEMBER_URL ?? "https://pay.ldxp.cn/item/chxl0y",
     badge: "性价比",
-  },
-  {
-    name: "代理会员",
-    price: "¥299",
-    originalPrice: "批发价",
-    features: ["月卡/年卡阶梯采购", "专属代理后台", "面向团队合作", "适合稳定复购场景"],
-    link: "https://pay.ldxp.cn/item/ikdrz4",
-    ctaLabel: "购买代理",
-    badge: "渠道",
   },
 ];
 
@@ -76,6 +72,44 @@ const faqs = [
 ];
 
 export default function ShopPage() {
+  const [isMember, setIsMember] = useState(false);
+  const [loadingMember, setLoadingMember] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let mounted = true;
+
+    const load = async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+
+      if (!user) {
+        if (mounted) {
+          setIsMember(false);
+          setLoadingMember(false);
+        }
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_member, membership_expires_at")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (mounted) {
+        setIsMember(hasActiveMembership((profile as MembershipProfile | null) ?? null));
+        setLoadingMember(false);
+      }
+    };
+
+    void load();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
       <main className="min-h-screen pb-16 pt-28 sm:pt-32">
         <section className="layout-grid">
@@ -97,10 +131,18 @@ export default function ShopPage() {
         <section className="layout-grid space-section">
           <div className="mb-8">
             <h2 className="font-display text-3xl text-[var(--brand-ink)]">ChatGPT Plus 服务</h2>
-            <p className="mt-2 text-slate-600">统一交付标准，按使用周期选择更合适的方案。</p>
+            <p className="mt-2 text-slate-600">提供原价与会员价两个档位，会员可享专属优惠。</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="mb-4 rounded-xl border border-[#d8e6df] bg-[#f6fbf8] p-4 text-sm text-slate-700">
+            {loadingMember
+              ? "正在识别会员身份..."
+              : isMember
+                ? "当前已识别为会员账号，已展示会员专属价格。"
+                : "当前显示原价。开通会员后可解锁会员专属价格。"}
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {products.map((product) => (
               <Card key={product.name} className="surface-card relative rounded-2xl border-[#d8e6df]">
                 <span className="absolute right-4 top-4 rounded-full border border-[#c7ddd5] bg-white px-2.5 py-1 text-xs font-semibold text-[var(--brand-fresh)]">
@@ -110,7 +152,12 @@ export default function ShopPage() {
                   <CardTitle className="text-2xl text-[var(--brand-ink)]">{product.name}</CardTitle>
                   <CardDescription>
                     <div className="mt-1 flex items-end gap-2">
-                      <span className="font-display text-4xl text-slate-900">{product.price}</span>
+                      <span className="font-display text-4xl text-slate-900">
+                        ¥{isMember ? product.memberPrice : product.retailPrice}
+                      </span>
+                      <span className="rounded-full border border-[#c7ddd5] px-2 py-0.5 text-[11px] font-semibold text-[var(--brand-fresh)]">
+                        {isMember ? "会员价" : "原价"}
+                      </span>
                       <span className="pb-1 text-xs text-slate-500 line-through">{product.originalPrice}</span>
                     </div>
                   </CardDescription>
@@ -127,9 +174,9 @@ export default function ShopPage() {
                   </ul>
                   <Button
                     className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                    onClick={() => window.open(product.link, "_blank")}
+                    onClick={() => window.open(isMember ? product.memberLink : product.retailLink, "_blank")}
                   >
-                    {product.ctaLabel}
+                    {isMember ? "按会员价购买" : "按原价购买"}
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </CardContent>

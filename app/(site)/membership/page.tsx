@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, CheckCircle2, Crown, ExternalLink, MessageCircle, TrendingUp } from "lucide-react";
+import { BookOpen, CheckCircle2, Crown, ExternalLink, MessageCircle, TrendingUp, BadgePercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RedeemForm from "@/components/payment/redeem-form";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +27,11 @@ const benefits = [
     icon: MessageCircle,
     title: "社群优先答疑",
     description: "遇到卡点时，优先获得解决路径与实操建议。",
+  },
+  {
+    icon: BadgePercent,
+    title: "账号会员价优惠",
+    description: "Plus 服务享会员专属价格，长期使用更省成本。",
   },
 ];
 
@@ -120,7 +125,7 @@ export default function MembershipPage() {
             不是只看教程，而是持续获得可落地的方法、模板与反馈，帮助你把 AI 真正用到业务和项目里。
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {benefits.map((item) => {
               const Icon = item.icon;
               return (
