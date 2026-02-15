@@ -35,6 +35,17 @@
  *    - balance_after (integer)
  *    - note (text, nullable)
  *    - created_at (timestamp)
+ *
+ * 4. redeem_codes 表（卡密兑换）
+ *    - code (text, primary key)
+ *    - status (text: 'unused' | 'used' | 'disabled')
+ *    - source (text, nullable)
+ *    - used_by (uuid, references auth.users, nullable)
+ *    - used_by_email (text, nullable)
+ *    - used_at (timestamp, nullable)
+ *    - expires_at (timestamp, nullable)
+ *    - created_at (timestamp)
+ *    - updated_at (timestamp)
  */
 
 export interface Database {
@@ -143,6 +154,41 @@ export interface Database {
           balance_after?: number
           note?: string | null
           created_at?: string
+        }
+      }
+      redeem_codes: {
+        Row: {
+          code: string
+          status: 'unused' | 'used' | 'disabled'
+          source: string | null
+          used_by: string | null
+          used_by_email: string | null
+          used_at: string | null
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          status?: 'unused' | 'used' | 'disabled'
+          source?: string | null
+          used_by?: string | null
+          used_by_email?: string | null
+          used_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          status?: 'unused' | 'used' | 'disabled'
+          source?: string | null
+          used_by?: string | null
+          used_by_email?: string | null
+          used_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
       admin_operation_logs: {

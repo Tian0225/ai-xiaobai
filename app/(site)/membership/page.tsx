@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, CheckCircle2, Crown, MessageCircle, Sparkles, TrendingUp } from "lucide-react";
+import { BookOpen, CheckCircle2, Crown, ExternalLink, MessageCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PaymentForm from "@/components/payment/payment-form";
+import RedeemForm from "@/components/payment/redeem-form";
 import { createClient } from "@/lib/supabase/client";
 import { hasActiveMembership } from "@/lib/membership";
 
 const MEMBERSHIP_PRICE = Number(process.env.NEXT_PUBLIC_MEMBERSHIP_PRICE ?? 499);
+const MEMBERSHIP_PURCHASE_URL =
+  process.env.NEXT_PUBLIC_MEMBERSHIP_PURCHASE_URL ?? "https://pay.ldxp.cn/item/5mti07";
 
 const benefits = [
   {
@@ -52,7 +54,7 @@ function formatDate(dateString: string | null) {
 }
 
 export default function MembershipPage() {
-  const [showPayment, setShowPayment] = useState(false);
+  const [showRedeem, setShowRedeem] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [memberProfile, setMemberProfile] = useState<MemberProfile | null>(null);
@@ -60,7 +62,14 @@ export default function MembershipPage() {
     ? (MEMBERSHIP_PRICE / 12).toFixed(1)
     : "41.6";
   const isMemberActive = hasActiveMembership(memberProfile);
-  const isPaymentFlow = !isMemberActive && showPayment;
+
+  const handleRedeemSuccess = (membershipExpiresAt: string | null) => {
+    setMemberProfile({
+      is_member: true,
+      membership_expires_at: membershipExpiresAt,
+    });
+    setShowRedeem(false);
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -94,31 +103,7 @@ export default function MembershipPage() {
   }, []);
 
   return (
-      <div className="min-h-screen pb-20 pt-28 sm:pt-32">
-      {isPaymentFlow ? (
-        <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="surface-card rounded-3xl border border-[#d8e6df] p-6 sm:p-8">
-            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Membership Checkout</p>
-            <h1 className="mt-3 font-display text-3xl text-[var(--brand-ink)] sm:text-4xl">完成扫码支付</h1>
-            <p className="mt-2 text-sm text-slate-600">支付完成后系统会自动刷新；若未开通可联系客服人工核销。</p>
-
-            <div className="mt-6">
-              {!userEmail ? (
-                <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
-              ) : (
-                <PaymentForm userEmail={userEmail} />
-              )}
-            </div>
-
-            <div className="mt-5">
-              <Button variant="outline" onClick={() => setShowPayment(false)}>
-                返回会员介绍
-              </Button>
-            </div>
-          </div>
-        </section>
-      ) : (
-      <>
+    <div className="min-h-screen pb-20 pt-28 sm:pt-32">
       <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
@@ -182,19 +167,42 @@ export default function MembershipPage() {
           ) : (
             <>
               <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
-                <Button
-                  size="lg"
-                  className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                  disabled={loadingUser || !userEmail}
-                  onClick={() => setShowPayment(true)}
-                >
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  {loadingUser ? "加载账户中..." : userEmail ? "立即开通会员" : "请先登录"}
-                </Button>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    size="lg"
+                    className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                    asChild
+                  >
+                    <a href={MEMBERSHIP_PURCHASE_URL} target="_blank" rel="noreferrer noopener">
+                      去支付平台购买卡密
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full rounded-full border-[#b9d1c9] bg-white/80"
+                    disabled={loadingUser || !userEmail}
+                    onClick={() => setShowRedeem((previous) => !previous)}
+                  >
+                    {loadingUser ? "加载账户中..." : userEmail ? "我已购买，输入卡密兑换" : "请先登录"}
+                  </Button>
+                </div>
+
+                {showRedeem ? (
+                  <div className="mt-4">
+                    {userEmail ? (
+                      <RedeemForm onSuccess={handleRedeemSuccess} />
+                    ) : (
+                      <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
 
               <p className="mt-4 text-xs text-slate-500">
-                支付完成后请保留订单号。系统会自动刷新状态；若仍未开通，请联系客服人工核销。
+                支付流程：在外部平台购买会员卡密，复制后返回本站兑换，系统会自动开通会员。
               </p>
             </>
           )}
@@ -223,8 +231,6 @@ export default function MembershipPage() {
           ))}
         </div>
       </section>
-      </>
-      )}
-      </div>
+    </div>
   );
 }
