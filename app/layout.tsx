@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   title: `${siteProfile.siteName} - 小白学AI不焦虑`,
   description: "从零开始掌握 AI 工作流，真实经验·避坑指南·实战项目。教程、会员、企业服务一体化学习平台。",
   keywords: ["AI教程", "小白学AI", "实战项目", "AI工作流", "会员课程"],
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   authors: [{ name: "金田" }],
   creator: "金田",
   openGraph: {
