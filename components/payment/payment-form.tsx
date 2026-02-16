@@ -391,4 +391,3 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
     </div>
   )
 }
-}
