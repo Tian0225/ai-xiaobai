@@ -43,14 +43,14 @@ export default function CaseStudies() {
     <section className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
-          <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">行业案例</h2>
-          <p className="mt-3 text-lg text-slate-600">真实项目脱敏后整理，可用于评估落地预期。</p>
+          <h2 className="font-display text-3xl tracking-tight text-[var(--uipro-enterprise-text)] sm:text-4xl">行业案例</h2>
+          <p className="mt-3 text-lg text-[color-mix(in_oklab,var(--uipro-enterprise-text)_68%,white)]">真实项目脱敏后整理，可用于评估落地预期。</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {cases.map((caseStudy) => (
-            <article key={caseStudy.company} className="surface-card rounded-2xl border border-[#d8e6df] p-7">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#e6f2ec] px-3 py-1 text-sm font-medium text-[var(--brand-fresh)]">
+            <article key={caseStudy.company} className="uipro-enterprise-surface rounded-2xl p-7">
+              <div className="uipro-enterprise-pill mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium">
                 <Building className="h-4 w-4" />
                 {caseStudy.industry}
               </div>
@@ -67,15 +67,15 @@ export default function CaseStudies() {
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-[#d8e6df] pt-5">
+              <div className="mt-6 border-t border-[color-mix(in_oklab,var(--uipro-enterprise-secondary)_24%,white)] pt-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">结果</p>
                 <div className="mt-3 space-y-3">
                   {caseStudy.results.map((result) => {
                     const Icon = result.icon;
                     return (
-                      <div key={result.label} className="flex items-center gap-3 rounded-xl bg-white/90 p-3">
-                        <div className="rounded-lg bg-[#e3f0eb] p-2">
-                          <Icon className="h-4 w-4 text-[var(--brand-fresh)]" />
+                      <div key={result.label} className="flex items-center gap-3 rounded-xl border border-[color-mix(in_oklab,var(--uipro-enterprise-secondary)_20%,white)] bg-white/90 p-3">
+                        <div className="rounded-lg bg-[color-mix(in_oklab,var(--uipro-enterprise-cta)_12%,white)] p-2">
+                          <Icon className="h-4 w-4 text-[var(--uipro-enterprise-cta)]" />
                         </div>
                         <div>
                           <div className="text-xs text-slate-500">{result.label}</div>

@@ -1,0 +1,36 @@
+## UI Pro Max Search Results
+**Domain:** style | **Query:** legal terms privacy refund policy
+**Source:** styles.csv | **Found:** 2 results
+
+### Result 1
+- **Style Category:** Trust & Authority
+- **Type:** Landing Page
+- **Keywords:** Certificates/badges displayed, expert credentials, case studies with metrics, before/after comparisons, industry recognition, security badges
+- **Primary Colors:** Professional colors (blue/grey), trust colors, certification badge colors (gold/silver accents)
+- **Effects & Animation:** Badge hover effects, metric pulse animations, certificate carousel, smooth stat reveal
+- **Best For:** Healthcare/medical landing pages, financial services, enterprise software, premium/luxury products, legal services
+- **Performance:** ⚡ Excellent
+- **Accessibility:** ✓ WCAG AAA
+- **Framework Compatibility:** Tailwind 10/10, Bootstrap 9/10
+- **Complexity:** Medium
+- **AI Prompt Keywords:** Design a trust-focused landing page. Use: certification badges, security indicators, expert credentials, industry awards, case study metrics, compliance logos (GDPR, SOC2), guarantee badges, professional photography.
+- **CSS/Technical Keywords:** badge grid layout, shield icons, lock icons for security, certificate styling, metric cards with icons, professional color scheme (blue/grey), subtle shadows for depth
+- **Implementation Checklist:** ☐ Security badges visible, ☐ Certifications verified, ☐ Metrics with sources, ☐ Professional imagery, ☐ Guarantee clearly stated, ☐ Contact info accessible
+- **Design System Variables:** --badge-height: 48px, --trust-color: #1E40AF, --security-green: #059669, --card-shadow: 0 4px 6px rgba(0,0,0,0.1), --metric-highlight: #F59E0B
+
+### Result 2
+- **Style Category:** Accessible & Ethical
+- **Type:** General
+- **Keywords:** High contrast, large text (16px+), keyboard navigation, screen reader friendly, WCAG compliant, focus state, semantic
+- **Primary Colors:** WCAG AA/AAA (4.5:1 min), simple primary, clear secondary, high luminosity (7:1+)
+- **Effects & Animation:** Clear focus rings (3-4px), ARIA labels, skip links, responsive design, reduced motion, 44x44px touch targets
+- **Best For:** Government, healthcare, education, inclusive products, large audience, legal compliance, public
+- **Performance:** ⚡ Excellent
+- **Accessibility:** ✓ WCAG AAA
+- **Framework Compatibility:** All frameworks 10/10
+- **Complexity:** Low
+- **AI Prompt Keywords:** Design with WCAG AAA compliance. Include: high contrast (7:1+), large text (16px+), keyboard navigation, screen reader compatibility, focus states visible (3-4px ring), semantic HTML, ARIA labels, skip links, reduced motion support (prefers-reduced-motion), 44x44px touch targets.
+- **CSS/Technical Keywords:** color-contrast: 7:1+, font-size: 16px+, outline: 3-4px on :focus-visible, aria-label, role attributes, @media (prefers-reduced-motion), touch-target: 44x44px, cursor: pointer
+- **Implementation Checklist:** ☐ WCAG AAA verified, ☐ 7:1+ contrast checked, ☐ Keyboard navigation tested, ☐ Screen reader tested, ☐ Focus visible 3-4px, ☐ Semantic HTML used, ☐ Touch targets 44x44px
+- **Design System Variables:** --contrast-ratio: 7:1, --font-size-min: 16px, --focus-ring: 3-4px, --touch-target: 44x44px, --wcag-level: AAA, --keyboard-accessible: true, --sr-tested: true
+

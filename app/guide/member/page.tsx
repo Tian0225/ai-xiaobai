@@ -27,32 +27,35 @@ export default async function MemberGuidePage() {
   }
 
   return (
-    <div className="min-h-screen pt-28 sm:pt-32">
+    <div className="uipro-guide-canvas min-h-screen pt-28 sm:pt-32">
       <section className="layout-grid">
-        <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 sm:p-10">
+        <div className="uipro-guide-surface rounded-3xl p-8 sm:p-10">
           <p className="text-sm text-slate-500">首页 &gt; 教程 &gt; 会员专区</p>
-          <h1 className="mt-4 font-display text-4xl leading-tight text-[var(--brand-ink)] sm:text-5xl">会员专区</h1>
-          <p className="mt-4 max-w-3xl text-base text-slate-600 sm:text-lg">
+          <div className="uipro-guide-pill mt-4 inline-flex rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em]">
+            Member Zone
+          </div>
+          <h1 className="mt-4 font-display text-4xl leading-tight text-[var(--uipro-guide-text)] sm:text-5xl">会员专区</h1>
+          <p className="mt-4 max-w-3xl text-base text-[color-mix(in_oklab,var(--uipro-guide-text)_72%,black)] sm:text-lg">
             这里聚合进阶实战内容，覆盖工作流、模板和持续更新教程。
           </p>
 
           {isMember ? (
-            <p className="feedback-success mt-6 inline-flex rounded-full border border-[#c8ddd6] px-4 py-2 text-sm font-medium">
+            <p className="uipro-guide-pill mt-6 inline-flex rounded-full px-4 py-2 text-sm font-medium">
               当前账号已开通会员，可查看全部专享教程
             </p>
           ) : (
-            <div className="mt-6 rounded-2xl border border-[#d8e6df] bg-white/90 p-4 sm:p-5">
+            <div className="uipro-guide-surface mt-6 rounded-2xl p-4 sm:p-5">
               <p className="text-sm text-slate-700">你现在看到的是会员教程预览，开通后可查看完整内容。</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link
                   href="/membership"
-                  className="inline-flex rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] px-4 py-2 text-sm font-semibold text-white"
+                  className="uipro-guide-cta inline-flex rounded-full px-4 py-2 text-sm font-semibold"
                 >
                   去开通会员
                 </Link>
                 <Link
                   href="/guide"
-                  className="inline-flex rounded-full border border-[#c8ddd6] bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                  className="uipro-guide-outline inline-flex rounded-full px-4 py-2 text-sm font-semibold"
                 >
                   查看免费教程
                 </Link>

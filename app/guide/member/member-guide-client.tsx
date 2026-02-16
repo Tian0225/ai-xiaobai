@@ -176,7 +176,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
   return (
     <section className="layout-grid py-10">
       <div className="mb-8 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-        <section className="surface-card rounded-2xl border border-[#d8e6df] p-5">
+        <section className="uipro-guide-surface rounded-2xl p-5">
           <h2 className="text-lg font-semibold text-slate-900">最近更新</h2>
           {latestUpdates.length === 0 ? (
             <p className="mt-3 text-sm text-slate-500">测试阶段暂未发布会员教程。</p>
@@ -186,7 +186,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
                 <li key={tutorial.slug} className="flex items-start justify-between gap-3 text-sm">
                   <Link
                     href={`/guide/${tutorial.slug}`}
-                    className="font-medium text-slate-800 hover:text-[var(--brand-fresh)]"
+                    className="font-medium text-slate-800 hover:text-[var(--uipro-guide-primary)]"
                   >
                     {tutorial.title}
                   </Link>
@@ -199,7 +199,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
           )}
         </section>
 
-        <section className="surface-card rounded-2xl border border-[#d8e6df] p-5">
+        <section className="uipro-guide-surface rounded-2xl p-5">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">专区概览</h2>
           <p className="mt-3 font-display text-4xl text-slate-900">{tutorials.length}</p>
           <p className="text-sm text-slate-600">当前会员专享教程总数</p>
@@ -213,7 +213,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
         </section>
       </div>
 
-      <section className="sticky top-24 z-20 mb-6 rounded-2xl border border-[#d8e6df] bg-white/95 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/85">
+      <section className="uipro-guide-surface sticky top-24 z-20 mb-6 rounded-2xl bg-white/95 p-5 backdrop-blur supports-[backdrop-filter]:bg-white/85">
         <h2 className="text-base font-semibold text-slate-900">筛选与排序</h2>
 
         {hasActiveFilters && (
@@ -224,7 +224,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
                 <button
                   type="button"
                   onClick={() => updateFilters({ difficulty: 'all' })}
-                  className="inline-flex items-center gap-1 rounded-full border border-[#b9d1c9] bg-[#eef9f4] px-3 py-1 text-xs font-semibold text-[var(--brand-fresh)]"
+                  className="uipro-guide-pill inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold"
                 >
                   <span>难度: {difficultyLabelMap[difficultyFilter]}</span>
                   <span aria-hidden>×</span>
@@ -234,7 +234,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
                 <button
                   type="button"
                   onClick={() => updateFilters({ sort: 'latest' })}
-                  className="inline-flex items-center gap-1 rounded-full border border-[#b9d1c9] bg-[#eef9f4] px-3 py-1 text-xs font-semibold text-[var(--brand-fresh)]"
+                  className="uipro-guide-pill inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold"
                 >
                   <span>排序: {sortLabelMap[sortOption]}</span>
                   <span aria-hidden>×</span>
@@ -245,7 +245,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
                   key={`chip-tag-${tag}`}
                   type="button"
                   onClick={() => updateFilters({ tags: selectedTags.filter((item) => item !== tag) })}
-                  className="inline-flex items-center gap-1 rounded-full border border-[#b9d1c9] bg-[#eef9f4] px-3 py-1 text-xs font-semibold text-[var(--brand-fresh)]"
+                  className="uipro-guide-pill inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold"
                 >
                   <span>标签: {tag}</span>
                   <span aria-hidden>×</span>
@@ -263,10 +263,10 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
                 key={option.value}
                 type="button"
                 onClick={() => updateFilters({ difficulty: option.value })}
-                className={`rounded-full border px-3 py-1.5 text-sm transition ${
+                className={`rounded-full px-3 py-1.5 text-sm transition ${
                   difficultyFilter === option.value
-                    ? 'border-[var(--brand-fresh)] bg-[#eef9f4] text-[var(--brand-fresh)]'
-                    : 'border-[#d8e6df] bg-white text-slate-700 hover:border-[#b9d1c9]'
+                    ? 'uipro-guide-pill'
+                    : 'uipro-guide-outline hover:opacity-90'
                 }`}
               >
                 {option.label}
@@ -283,10 +283,10 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
                 key={option.value}
                 type="button"
                 onClick={() => updateFilters({ sort: option.value })}
-                className={`rounded-full border px-3 py-1.5 text-sm transition ${
+                className={`rounded-full px-3 py-1.5 text-sm transition ${
                   sortOption === option.value
-                    ? 'border-[var(--brand-fresh)] bg-[#eef9f4] text-[var(--brand-fresh)]'
-                    : 'border-[#d8e6df] bg-white text-slate-700 hover:border-[#b9d1c9]'
+                    ? 'uipro-guide-pill'
+                    : 'uipro-guide-outline hover:opacity-90'
                 }`}
               >
                 {option.label}
@@ -301,7 +301,7 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
             <button
               type="button"
               onClick={() => updateFilters({ tags: [] })}
-              className="mt-2 inline-flex rounded-full border border-[#c8ddd6] bg-white px-3 py-1 text-xs font-semibold text-slate-600 hover:border-[#b9d1c9]"
+              className="uipro-guide-outline mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold"
             >
               清空标签
             </button>
@@ -321,10 +321,10 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
                     : [...selectedTags, tag]
                   updateFilters({ tags: nextTags })
                 }}
-                className={`rounded-full border px-3 py-1.5 text-sm transition ${
+                className={`rounded-full px-3 py-1.5 text-sm transition ${
                   (tag === 'all' && selectedTags.length === 0) || selectedTags.includes(tag)
-                    ? 'border-[var(--brand-fresh)] bg-[#eef9f4] text-[var(--brand-fresh)]'
-                    : 'border-[#d8e6df] bg-white text-slate-700 hover:border-[#b9d1c9]'
+                    ? 'uipro-guide-pill'
+                    : 'uipro-guide-outline hover:opacity-90'
                 }`}
               >
                 {tag === 'all' ? '全部标签' : tag}
@@ -335,16 +335,16 @@ export default function MemberGuideClient({ tutorials, isMember }: MemberGuideCl
       </section>
 
       {tutorials.length === 0 ? (
-        <div className="surface-card rounded-2xl border border-dashed border-[#c8ddd6] p-10 text-center text-slate-500">
+        <div className="uipro-guide-surface rounded-2xl border border-dashed p-10 text-center text-slate-500">
           测试阶段暂未添加会员教程，稍后会持续更新。
         </div>
       ) : visibleTutorials.length === 0 ? (
-        <div className="surface-card rounded-2xl border border-[#d8e6df] p-8 text-center">
+        <div className="uipro-guide-surface rounded-2xl p-8 text-center">
           <p className="text-sm text-slate-600">当前筛选条件下没有教程。</p>
           <button
             type="button"
             onClick={() => updateFilters({ difficulty: 'all', sort: 'latest', tags: [] })}
-            className="mt-3 inline-flex rounded-full border border-[#c8ddd6] bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+            className="uipro-guide-outline mt-3 inline-flex rounded-full px-4 py-2 text-sm font-semibold"
           >
             重置筛选
           </button>

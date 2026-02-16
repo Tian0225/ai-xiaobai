@@ -1,0 +1,40 @@
+## UI Pro Max Search Results
+**Domain:** color | **Query:** membership subscription learning community payment
+**Source:** colors.csv | **Found:** 4 results
+
+### Result 1
+- **Product Type:** Membership/Community
+- **Primary (Hex):** #7C3AED
+- **Secondary (Hex):** #A78BFA
+- **CTA (Hex):** #22C55E
+- **Background (Hex):** #FAF5FF
+- **Text (Hex):** #4C1D95
+- **Notes:** Community purple + join green
+
+### Result 2
+- **Product Type:** Language Learning App
+- **Primary (Hex):** #4F46E5
+- **Secondary (Hex):** #818CF8
+- **CTA (Hex):** #22C55E
+- **Background (Hex):** #EEF2FF
+- **Text (Hex):** #312E81
+- **Notes:** Learning indigo + progress green
+
+### Result 3
+- **Product Type:** Subscription Box Service
+- **Primary (Hex):** #D946EF
+- **Secondary (Hex):** #E879F9
+- **CTA (Hex):** #F97316
+- **Background (Hex):** #FDF4FF
+- **Text (Hex):** #86198F
+- **Notes:** Excitement purple + urgency orange
+
+### Result 4
+- **Product Type:** Online Course/E-learning
+- **Primary (Hex):** #0D9488
+- **Secondary (Hex):** #2DD4BF
+- **CTA (Hex):** #F97316
+- **Background (Hex):** #F0FDFA
+- **Text (Hex):** #134E4A
+- **Notes:** Progress teal + achievement orange
+

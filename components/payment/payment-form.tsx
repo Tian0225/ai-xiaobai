@@ -15,8 +15,20 @@ import { checkPaymentStatus, type PaymentMethod } from '@/lib/payment/polling'
 import { getOrderBizConfig, type OrderBizType } from '@/lib/order-biz'
 
 const PAYMENT_METHODS = [
-  { value: 'wechat' as const, label: '微信支付', icon: '💬', color: 'bg-[#ebf8f1] border-[#d8e6df]' },
-  { value: 'alipay' as const, label: '支付宝', icon: '🔵', color: 'bg-[#eef6ff] border-[#d8e6df]' },
+  {
+    value: 'wechat' as const,
+    label: '微信支付',
+    shortLabel: 'WX',
+    hint: '推荐个人支付场景',
+    color: 'uipro-pay-loading',
+  },
+  {
+    value: 'alipay' as const,
+    label: '支付宝',
+    shortLabel: 'ALI',
+    hint: '支持企业与个人账户',
+    color: 'uipro-pay-loading',
+  },
 ]
 
 type PollingStatus = 'idle' | 'loading' | 'success' | 'expired' | 'error'
@@ -35,6 +47,12 @@ interface OrderResponse {
     codeUrl: string | null
   }
   error?: string
+}
+
+interface OrderCheckResponse {
+  paid?: boolean
+  expired?: boolean
+  status?: string
 }
 
 interface PaymentFormProps {
@@ -80,6 +98,46 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
     setOrderId(newOrderId)
   }, [paymentMethod, actualBizType])
 
+  // Start polling for payment detection
+  const startPolling = useCallback(async () => {
+    const intervals = [5000, 10000, 15000] // 5s, 10s, 15s
+    let attempt = 0
+
+    const poll = async (): Promise<void> => {
+      const interval = intervals[Math.min(attempt, intervals.length - 1)]
+
+      try {
+        // 优先检测本站订单状态，确保后台人工核销后能即时感知并自动开通
+        const orderRes = await fetch(`/api/orders/check?orderId=${encodeURIComponent(orderId)}`, { cache: 'no-store' })
+        if (orderRes.ok) {
+          const orderData = (await orderRes.json()) as OrderCheckResponse
+          if (orderData.paid || orderData.status === 'paid') {
+            setPollingStatus('success')
+            return
+          }
+          if (orderData.expired || orderData.status === 'expired') {
+            setPollingStatus('expired')
+            return
+          }
+        }
+
+        // 外部支付对账兜底
+        const isPaid = await checkPaymentStatus(orderId, amount, paymentMethod)
+        if (isPaid) {
+          setPollingStatus('success')
+          return
+        }
+      } catch (error) {
+        console.error('轮询支付状态失败:', error)
+      }
+
+      attempt++
+      setTimeout(poll, interval)
+    }
+
+    await poll()
+  }, [orderId, amount, paymentMethod])
+
   // Create order and start polling
   const createOrder = useCallback(async () => {
     if (!orderId) return
@@ -121,29 +179,7 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
       setErrorMessage(message)
       setPollingStatus('error')
     }
-  }, [orderId, paymentMethod, actualBizType])
-
-  // Start polling for payment detection
-  const startPolling = useCallback(async () => {
-    const intervals = [5000, 10000, 15000] // 5s, 10s, 15s
-    let attempt = 0
-
-    const poll = async (): Promise<void> => {
-      const interval = intervals[Math.min(attempt, intervals.length - 1)]
-
-      const isPaid = await checkPaymentStatus(orderId, amount, paymentMethod)
-
-      if (isPaid) {
-        setPollingStatus('success')
-        return
-      }
-
-      attempt++
-      setTimeout(poll, interval)
-    }
-
-    await poll()
-  }, [orderId, amount, paymentMethod])
+  }, [orderId, paymentMethod, actualBizType, startPolling])
 
   // Copy order ID to clipboard
   const copyOrderId = useCallback(async () => {
@@ -195,24 +231,24 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
   // Success state
   if (pollingStatus === 'success') {
     return (
-      <Card className="border-emerald-200 bg-emerald-50">
+      <Card className="uipro-pay-success border-none">
         <CardContent className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-            <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/80">
+            <CheckCircle2 className="h-10 w-10" />
           </div>
-          <h3 className="text-2xl font-semibold text-emerald-900">支付成功</h3>
-          <p className="mt-2 text-emerald-700">
-            {isTokenFlow ? '代币已发放，正在跳转...' : '会员已开通，正在跳转...'}
+          <h3 className="text-2xl font-semibold">支付已完成</h3>
+          <p className="mt-2">
+            {isTokenFlow ? '系统已确认支付，代币发放中，页面即将自动跳转。' : '系统已确认支付，正在开通会员权限并自动跳转。'}
           </p>
-          <p className="mt-1 text-sm text-emerald-600">
+          <p className="mt-1 text-sm">
             订单号：<span className="font-mono">{orderId}</span>
           </p>
           <div className="mt-6">
             <button
               onClick={() => window.location.reload()}
-              className="rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+              className="rounded-full bg-emerald-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
             >
-              刷新页面
+              刷新支付状态
             </button>
           </div>
         </CardContent>
@@ -223,20 +259,21 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
   // Expired state
   if (pollingStatus === 'expired') {
     return (
-      <Card className="border-amber-200 bg-amber-50">
+      <Card className="uipro-pay-warning border-none">
         <CardContent className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-            <XCircle className="h-10 w-10 text-amber-600" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/80">
+            <XCircle className="h-10 w-10" />
           </div>
-          <h3 className="text-2xl font-semibold text-amber-900">订单已过期</h3>
-          <p className="mt-2 text-amber-700">订单超过20分钟未支付，已自动过期</p>
-          <p className="mt-1 text-sm text-amber-600">
+          <h3 className="text-2xl font-semibold">订单已过期</h3>
+          <p className="mt-2">订单超过 20 分钟未支付，已自动失效。</p>
+          <p className="mt-1 text-sm">
             订单号：<span className="font-mono">{orderId}</span>
           </p>
+          <p className="mt-3 text-xs">建议重新生成订单后尽快完成支付，避免重复失效。</p>
           <div className="mt-6">
             <button
               onClick={handleRetry}
-              className="rounded-full bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700"
+              className="rounded-full bg-amber-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-800"
             >
               重新创建订单
             </button>
@@ -249,23 +286,26 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
   // Error state
   if (pollingStatus === 'error') {
     return (
-      <Card className="border-rose-200 bg-rose-50">
+      <Card className="uipro-pay-error border-none">
         <CardContent className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100">
-            <AlertCircle className="h-10 w-10 text-rose-600" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/80">
+            <AlertCircle className="h-10 w-10" />
           </div>
-          <h3 className="text-2xl font-semibold text-rose-900">创建订单失败</h3>
-          <p className="mt-2 text-rose-700">{errorMessage}</p>
+          <h3 className="text-2xl font-semibold">创建订单失败</h3>
+          <p className="mt-2">{errorMessage}</p>
+          <p className="mt-3 text-xs">
+            可先重试；若仍失败，请保留订单号截图并联系人工支持处理。
+          </p>
           <div className="mt-6 flex justify-center gap-3">
             <button
               onClick={handleRetry}
-              className="rounded-full bg-rose-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700"
+              className="rounded-full bg-rose-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-800"
             >
               重试
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="rounded-full border border-rose-600 bg-transparent px-6 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+              className="rounded-full border border-rose-700 bg-transparent px-6 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-white/60"
             >
               刷新页面
             </button>
@@ -277,22 +317,23 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
 
   // Loading state with QR code
   return (
-    <div className="space-y-6">
+    <div className="uipro-pay-canvas space-y-6 rounded-3xl p-4 sm:p-6">
       {/* Order ID Display - Prominently shown */}
-      <Card className="border-[#b7e0d0] bg-[#eef9f4]">
+      <Card className="uipro-pay-surface border-none">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-sm font-medium text-[#1f7a56]">你的订单号</p>
-              <p className="mt-1 font-mono text-2xl font-bold text-[#1f7a56]">{orderId || '生成中...'}</p>
-              <p className="mt-2 text-sm text-[#1f7a56]/80">
+              <p className="text-sm font-medium text-[var(--uipro-pay-text)]">订单号</p>
+              <p className="mt-1 font-mono text-2xl font-bold text-[var(--uipro-pay-text)]">{orderId || '生成中...'}</p>
+              <p className="mt-2 text-sm text-[color-mix(in_oklab,var(--uipro-pay-text)_72%,white)]">
                 此订单号已自动填入支付备注，无需手动输入
               </p>
             </div>
             <button
               onClick={copyOrderId}
               disabled={!orderId || copied}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1f7a56]/10 text-[#1f7a56] transition hover:bg-[#1f7a56]/20 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={copied ? '订单号已复制' : '复制订单号'}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--uipro-pay-secondary)_16%,white)] text-[var(--uipro-pay-text)] transition hover:bg-[color-mix(in_oklab,var(--uipro-pay-secondary)_24%,white)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {copied ? (
                 <CheckCircle2 className="h-5 w-5" />
@@ -314,25 +355,28 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
               type="button"
               onClick={() => setPaymentMethod(method.value as 'wechat' | 'alipay')}
               disabled={pollingStatus === 'loading'}
-              className={`rounded-xl border-2 p-4 text-left transition ${
+              className={`rounded-xl border p-4 text-left transition ${
                 paymentMethod === method.value
                   ? method.color
-                  : 'border-[#d8e6df] bg-white hover:bg-[#f8fbf9]'
+                  : 'border-[color-mix(in_oklab,var(--uipro-pay-secondary)_24%,white)] bg-white hover:bg-[color-mix(in_oklab,var(--uipro-pay-secondary)_8%,white)]'
               }`}
             >
-              <span className="text-2xl">{method.icon}</span>
-              <span className="mt-2 block font-semibold">{method.label}</span>
-              <span className="mt-1 text-sm text-slate-600">¥{amount}</span>
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-xs font-semibold text-[var(--uipro-pay-text)]">
+                {method.shortLabel}
+              </span>
+              <span className="mt-2 block font-semibold text-slate-900">{method.label}</span>
+              <span className="mt-1 block text-xs text-slate-500">{method.hint}</span>
+              <span className="mt-2 block text-sm text-slate-600">支付金额：¥{amount}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* QR Code Display with blur protection */}
-      <Card>
+      <Card className="uipro-pay-surface border-none">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#e3f0eb] text-[var(--brand-fresh)]">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--uipro-pay-secondary)_14%,white)] text-[var(--uipro-pay-text)]">
               {pollingStatus === 'loading' ? (
                 <LoaderCircle className="h-6 w-6 animate-spin" />
               ) : (
@@ -341,30 +385,39 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
             </div>
 
             <h3 className="text-xl font-semibold text-slate-900">
-              {pollingStatus === 'loading' ? '扫码支付' : '支付二维码'}
+              {pollingStatus === 'loading' ? '等待扫码支付' : '支付二维码'}
             </h3>
 
             <p className="mt-2 text-sm text-slate-600">
               使用{paymentMethod === 'wechat' ? '微信' : '支付宝'}扫描二维码完成支付
             </p>
+            <p className="mt-1 text-xs text-slate-500">当前账号：{userEmail}</p>
 
-            <div className="mt-6 rounded-xl border-2 border-dashed border-[#d8e6df] bg-[#f8fbf9] p-6 relative">
+            <div className="relative mt-6 rounded-xl border-2 border-dashed border-[color-mix(in_oklab,var(--uipro-pay-secondary)_26%,white)] bg-white p-6">
               {!showQrCode ? (
                 <div
                   className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 backdrop-blur-sm"
                   style={{ backdropFilter: 'blur(8px)' }}
                   onClick={() => setShowQrCode(true)}
                 >
+                  <div className="text-center text-white">
                     <Lock className="h-12 w-12 text-emerald-400 mx-auto mb-2" />
                     <p className="text-lg font-semibold">点击查看收款码</p>
                     <p className="text-sm text-slate-300">保护你的隐私安全</p>
                   </div>
-                ) : (
+                </div>
+              ) : (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/payment/wechat.jpg"
-                    alt="微信支付"
+                    src={
+                      qrCodeUrl && qrCodeUrl !== 'manual'
+                        ? `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(qrCodeUrl)}`
+                        : paymentMethod === 'wechat'
+                          ? "/payment/wechat-qr-clean.png"
+                          : "/payment/alipay-qr.png"
+                    }
+                    alt={paymentMethod === 'wechat' ? "微信支付" : "支付宝支付"}
                     className="h-48 w-48"
                   />
                   {/* eslint-enable-next-line @next/next/no-img-element */}
@@ -378,10 +431,12 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
               <p>2. 扫描上方二维码</p>
               <p>3. 确认支付金额：¥{amount}</p>
               <p>4. 订单号已自动填入备注</p>
-              <p className="font-semibold text-[var(--brand-fresh)]">5. 支付完成后会员将自动开通</p>
+              <p className="font-semibold text-[var(--uipro-pay-text)]">
+                5. 系统会每 5-15 秒自动检测支付结果，完成后自动开通
+              </p>
             </div>
 
-            <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
+            <div className="uipro-pay-loading mt-6 flex items-center gap-2 rounded-full px-4 py-2 text-sm" aria-live="polite">
               <LoaderCircle className="h-4 w-4 animate-spin" />
               <span>正在检测支付状态...</span>
             </div>
@@ -390,5 +445,4 @@ export default function PaymentForm({ userEmail, bizType = 'membership', amountY
       </Card>
     </div>
   )
-}
 }

@@ -103,20 +103,20 @@ export default function MembershipPage() {
   }, []);
 
   return (
-    <div className="min-h-screen pb-20 pt-28 sm:pt-32">
+    <div className="uipro-member-canvas min-h-screen pb-20 pt-28 sm:pt-32">
       <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
+          <div className="uipro-member-pill mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold">
             <Crown className="h-4 w-4" />
             年度会员
           </div>
 
-          <h1 className="font-display text-4xl leading-tight text-[var(--brand-ink)] sm:text-5xl">
+          <h1 className="font-display text-4xl leading-tight text-[var(--uipro-member-text)] sm:text-5xl">
             一次订阅，
             <br />
             全年获得可执行增长路径
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-600">
+          <p className="mt-5 max-w-2xl text-lg text-[color-mix(in_oklab,var(--uipro-member-text)_72%,black)]">
             不是只看教程，而是持续获得可落地的方法、模板与反馈，帮助你把 AI 真正用到业务和项目里。
           </p>
 
@@ -124,24 +124,28 @@ export default function MembershipPage() {
             {benefits.map((item) => {
               const Icon = item.icon;
               return (
-                <article key={item.title} className="surface-card rounded-2xl border border-[#d8e6df] p-5">
-                  <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#e3f0eb] text-[var(--brand-fresh)]">
+                <article key={item.title} className="uipro-member-surface rounded-2xl p-5">
+                  <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--uipro-member-secondary)_20%,white)] text-[var(--uipro-member-primary)]">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base font-semibold text-slate-900">{item.title}</h2>
-                  <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+                  <h2 className="text-base font-semibold text-[var(--uipro-member-text)]">{item.title}</h2>
+                  <p className="mt-2 text-sm text-[color-mix(in_oklab,var(--uipro-member-text)_72%,black)]">{item.description}</p>
                 </article>
               );
             })}
           </div>
         </div>
 
-        <div className="surface-card rounded-3xl border border-[#d8e6df] p-6 sm:p-8 reveal-up reveal-delay-1">
-          <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Membership</p>
-          <div className="mt-3 text-5xl font-display text-[var(--brand-ink)]">
+        <div className="uipro-member-surface rounded-3xl p-6 sm:p-8 reveal-up reveal-delay-1">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[color-mix(in_oklab,var(--uipro-member-text)_62%,white)]">
+            Membership
+          </p>
+          <div className="mt-3 text-5xl font-display text-[var(--uipro-member-text)]">
             ¥{MEMBERSHIP_PRICE}<span className="text-lg text-slate-500">/年</span>
           </div>
-          <p className="mt-2 text-sm text-slate-600">平均每月 ¥{monthlyPrice}，持续获得增量内容。</p>
+          <p className="mt-2 text-sm text-[color-mix(in_oklab,var(--uipro-member-text)_72%,black)]">
+            平均每月 ¥{monthlyPrice}，持续获得增量内容。
+          </p>
 
           {isMemberActive ? (
             <div className="mt-6 rounded-2xl border border-[#b7e0d0] bg-[#eef9f4] p-5">
@@ -156,24 +160,24 @@ export default function MembershipPage() {
                 到期时间：<span className="font-medium">{formatDate(memberProfile?.membership_expires_at ?? null)}</span>
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
+                <Button className="uipro-member-cta rounded-full hover:opacity-95" asChild>
                   <Link href="/guide/member">查看会员内容</Link>
                 </Button>
-                <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                <Button variant="outline" className="uipro-member-outline rounded-full" asChild>
                   <Link href="/growth-camp">AI 变现实战陪跑</Link>
                 </Button>
-                <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                <Button variant="outline" className="uipro-member-outline rounded-full" asChild>
                   <Link href="/guide">继续学习</Link>
                 </Button>
               </div>
             </div>
           ) : (
             <>
-              <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
+              <div className="uipro-member-surface mt-6 rounded-2xl p-4">
                 <div className="flex flex-col gap-3">
                   <Button
                     size="lg"
-                    className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                    className="uipro-member-cta w-full rounded-full hover:opacity-95"
                     asChild
                   >
                     <a href={MEMBERSHIP_PURCHASE_URL} target="_blank" rel="noreferrer noopener">
@@ -185,7 +189,7 @@ export default function MembershipPage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="w-full rounded-full border-[#b9d1c9] bg-white/80"
+                    className="uipro-member-outline w-full rounded-full"
                     disabled={loadingUser || !userEmail}
                     onClick={() => setShowRedeem((previous) => !previous)}
                   >
@@ -213,11 +217,11 @@ export default function MembershipPage() {
       </section>
 
       <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="surface-card overflow-hidden rounded-3xl border border-[#d8e6df]">
-          <div className="border-b border-[#d8e6df] px-6 py-5">
-            <h2 className="font-display text-2xl text-[var(--brand-ink)]">权益对比</h2>
+        <div className="uipro-member-surface overflow-hidden rounded-3xl">
+          <div className="border-b border-[color-mix(in_oklab,var(--uipro-member-secondary)_34%,white)] px-6 py-5">
+            <h2 className="font-display text-2xl text-[var(--uipro-member-text)]">权益对比</h2>
           </div>
-          <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr] bg-[#f8fbf9] px-6 py-3 text-sm font-semibold text-slate-600">
+          <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr] bg-[color-mix(in_oklab,var(--uipro-member-bg)_75%,white)] px-6 py-3 text-sm font-semibold text-[color-mix(in_oklab,var(--uipro-member-text)_62%,white)]">
             <span>项目</span>
             <span>免费用户</span>
             <span>会员</span>
@@ -225,11 +229,11 @@ export default function MembershipPage() {
           {comparison.map((row) => (
             <div
               key={row.feature}
-              className="grid grid-cols-[1.2fr_0.9fr_0.9fr] border-t border-[#d8e6df] px-6 py-4 text-sm"
+              className="grid grid-cols-[1.2fr_0.9fr_0.9fr] border-t border-[color-mix(in_oklab,var(--uipro-member-secondary)_34%,white)] px-6 py-4 text-sm"
             >
-              <span className="text-slate-800">{row.feature}</span>
-              <span className="text-slate-500">{row.free}</span>
-              <span className="font-semibold text-[var(--brand-fresh)]">{row.member}</span>
+              <span className="text-[var(--uipro-member-text)]">{row.feature}</span>
+              <span className="text-[color-mix(in_oklab,var(--uipro-member-text)_58%,white)]">{row.free}</span>
+              <span className="font-semibold text-[var(--uipro-member-primary)]">{row.member}</span>
             </div>
           ))}
         </div>

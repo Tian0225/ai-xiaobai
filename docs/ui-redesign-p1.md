@@ -40,7 +40,7 @@
 - 桌面端：导航右侧常驻账号菜单（头像 + 下拉）
 - 移动端：顶部栏常驻账号触达入口（登录按钮或头像），不再依赖先展开汉堡菜单
 - 统一能力：会员中心、管理后台（管理员）、退出登录全部保持一致
-- 当前覆盖页面：`/`、`/guide`、`/guide/[slug]`、`/membership`、`/shop`、`/enterprise`
+- 当前覆盖页面：`/`、`/guide`、`/guide/[slug]`、`/guide/member`、`/membership`、`/shop`、`/enterprise`、`/contact`、`/legal/terms`、`/legal/refund`
 
 ## 3) 支付页视觉与文案策略
 
@@ -74,7 +74,7 @@
 
 - 导航与账户：`/Users/jitian/Documents/ai-xiaobai/components/marketing/navbar.tsx`
 - 支付核心：`/Users/jitian/Documents/ai-xiaobai/components/payment/payment-form.tsx`
-- 商城页模板：`/Users/jitian/Documents/ai-xiaobai/app/shop/page.tsx`
+- 商城页模板：`/Users/jitian/Documents/ai-xiaobai/app/(site)/shop/page.tsx`
 - 通用按钮：`/Users/jitian/Documents/ai-xiaobai/components/ui/button.tsx`
 - 通用卡片：`/Users/jitian/Documents/ai-xiaobai/components/ui/card.tsx`
 - 全局 token/工具类：`/Users/jitian/Documents/ai-xiaobai/app/globals.css`
@@ -87,4 +87,30 @@
 - 教程页列表视觉统一（筛选器、状态条、卡片区间距与容器）：已完成
 - 教程详情页视觉统一（标题区、目录卡、正文容器、会员锁定态）：已完成
 - 会员专区页视觉统一（概览卡、最近更新区、权限提示与入口按钮）：已完成
+- 企业页视觉统一（Hero、能力卡、套餐、案例、表单状态）：已完成
+- 联系页视觉统一（高对比信息卡、动作入口、处理说明）：已完成
+- 法务页视觉统一（条款/退款页层级、引导动作、可读性）：已完成
 - 路由级布局统一（`(marketing)`、`(site)` 与 `guide` 使用布局注入 Navbar/Footer，移除页面重复引入）：已完成
+
+## 7) UI UX Pro Max 接入落地
+
+- 已安装 skill：`/Users/jitian/.codex/skills/ui-ux-pro-max`
+- 已生成设计系统主规范：
+  - `/Users/jitian/Documents/ai-xiaobai/design-system/MASTER.md`
+  - `/Users/jitian/Documents/ai-xiaobai/design-system/pages/*.md`
+- 使用方式：
+  - 页面优先读取 `design-system/pages/<page>.md`
+  - 无页面覆写时读取 `design-system/MASTER.md`
+
+## 8) 发布兜底开关（UI_REVAMP）
+
+- 环境变量：`NEXT_PUBLIC_UI_REVAMP_ENABLED`
+  - `true`：使用新 UI（默认）
+  - `false`：回退到 legacy 导航/页脚壳
+- 布局切换已接入：
+  - `app/(marketing)/layout.tsx`
+  - `app/(site)/layout.tsx`
+  - `app/guide/layout.tsx`
+- 快速切换命令：
+  - `npm run deploy:ui-on`
+  - `npm run deploy:ui-off`

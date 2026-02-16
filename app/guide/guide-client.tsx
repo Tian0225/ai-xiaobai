@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import type { TutorialMeta } from '@/lib/mdx'
 import { TutorialCard } from '@/components/guide/tutorial-card'
 import { createClient } from '@/lib/supabase/client'
@@ -76,16 +77,21 @@ export default function GuideClientPage({ tutorials }: GuideClientPageProps) {
   const premiumCount = tutorials.length - freeCount
 
   return (
-    <div className="min-h-screen pt-28 sm:pt-32">
+    <div className="uipro-guide-canvas min-h-screen pb-16 pt-28 sm:pt-32">
       <section className="layout-grid">
-        <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 sm:p-10">
+        <div className="uipro-guide-surface rounded-3xl p-8 sm:p-10">
           <p className="text-sm text-slate-500">首页 &gt; 教程</p>
-          <h1 className="mt-4 font-display text-4xl leading-tight text-[var(--brand-ink)] sm:text-5xl">教程中心</h1>
-          <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">
-            免费教程打底，会员教程做深度扩展，按难度持续更新。
+          <div className="uipro-guide-pill mt-4 inline-flex rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em]">
+            Learning Library
+          </div>
+          <h1 className="mt-4 font-display text-4xl leading-tight text-[var(--uipro-guide-text)] sm:text-5xl">
+            教程中心
+          </h1>
+          <p className="mt-4 max-w-2xl text-base text-[color-mix(in_oklab,var(--uipro-guide-text)_72%,black)] sm:text-lg">
+            免费教程先打基础，会员教程负责深度实战。每周持续更新，可直接用于工作流和项目交付。
           </p>
 
-          <div className="feedback-success mt-6 inline-flex rounded-full border border-[#c8ddd6] px-4 py-2 text-sm">
+          <div className="uipro-guide-pill mt-6 inline-flex rounded-full px-4 py-2 text-sm font-medium">
             {membershipLoading
               ? '正在识别会员权限...'
               : isMember
@@ -98,10 +104,10 @@ export default function GuideClientPage({ tutorials }: GuideClientPageProps) {
               <button
                 key={option.value}
                 onClick={() => setSelectedDifficulty(option.value)}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                   selectedDifficulty === option.value
-                    ? 'border-[var(--brand-fresh)] bg-[var(--brand-fresh)] text-white'
-                    : 'border-[#c8ddd6] bg-white text-slate-700 hover:border-[#9bc6b7] hover:bg-[#f2faf6]'
+                    ? 'uipro-guide-cta'
+                    : 'uipro-guide-outline hover:opacity-90'
                 }`}
               >
                 {option.label}
@@ -113,8 +119,20 @@ export default function GuideClientPage({ tutorials }: GuideClientPageProps) {
 
       <section className="layout-grid pb-16 pt-10">
         {filteredTutorials.length === 0 ? (
-          <div className="surface-card rounded-2xl border border-[#d8e6df] py-12 text-center">
-            <p className="text-slate-500">暂无该难度的教程</p>
+          <div className="uipro-guide-surface rounded-2xl py-12 text-center">
+            <p className="text-slate-600">暂无该难度的教程，先查看全部内容或前往会员专区。</p>
+            <div className="mt-4 flex justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedDifficulty('all')}
+                className="uipro-guide-outline inline-flex rounded-full px-4 py-2 text-sm font-semibold"
+              >
+                查看全部难度
+              </button>
+              <Link href="/guide/member" className="uipro-guide-cta inline-flex rounded-full px-4 py-2 text-sm font-semibold">
+                打开会员专区
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -124,10 +142,19 @@ export default function GuideClientPage({ tutorials }: GuideClientPageProps) {
           </div>
         )}
 
-        <div className="surface-card mt-12 rounded-2xl border border-[#d8e6df] p-6 text-center">
-          <p className="text-slate-700">年度会员：持续更新的教程与模板</p>
-          <p className="mt-1 text-slate-700">多模型协同：Claude/GPT/Gemini 实战路径</p>
-          <p className="mt-1 text-slate-700">会员权益：每月更新 + 答疑支持</p>
+        <div className="uipro-guide-surface mt-12 rounded-2xl p-6 text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[color-mix(in_oklab,var(--uipro-guide-text)_62%,white)]">
+            会员加速区
+          </p>
+          <p className="mt-2 text-lg font-semibold text-[var(--uipro-guide-text)]">年度会员：持续更新教程 + 模板 + 答疑支持</p>
+          <p className="mt-1 text-sm text-[color-mix(in_oklab,var(--uipro-guide-text)_68%,black)]">
+            覆盖 Claude / GPT / Gemini 协同工作流，直接对齐业务场景。
+          </p>
+          <div className="mt-4">
+            <Link href="/membership" className="uipro-guide-cta inline-flex rounded-full px-5 py-2 text-sm font-semibold">
+              去开通会员
+            </Link>
+          </div>
         </div>
       </section>
     </div>

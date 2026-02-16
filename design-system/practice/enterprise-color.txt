@@ -1,0 +1,49 @@
+## UI Pro Max Search Results
+**Domain:** color | **Query:** enterprise ai consulting b2b services
+**Source:** colors.csv | **Found:** 5 results
+
+### Result 1
+- **Product Type:** B2B Service
+- **Primary (Hex):** #0F172A
+- **Secondary (Hex):** #334155
+- **CTA (Hex):** #0369A1
+- **Background (Hex):** #F8FAFC
+- **Text (Hex):** #020617
+- **Notes:** Professional navy + blue CTA
+
+### Result 2
+- **Product Type:** Consulting Firm
+- **Primary (Hex):** #0F172A
+- **Secondary (Hex):** #334155
+- **CTA (Hex):** #CA8A04
+- **Background (Hex):** #F8FAFC
+- **Text (Hex):** #020617
+- **Notes:** Authority navy + premium gold
+
+### Result 3
+- **Product Type:** Hyperlocal Services
+- **Primary (Hex):** #059669
+- **Secondary (Hex):** #10B981
+- **CTA (Hex):** #F97316
+- **Background (Hex):** #ECFDF5
+- **Text (Hex):** #064E3B
+- **Notes:** Location green + action orange
+
+### Result 4
+- **Product Type:** Legal Services
+- **Primary (Hex):** #1E3A8A
+- **Secondary (Hex):** #1E40AF
+- **CTA (Hex):** #B45309
+- **Background (Hex):** #F8FAFC
+- **Text (Hex):** #0F172A
+- **Notes:** Authority navy + trust gold
+
+### Result 5
+- **Product Type:** Home Services (Plumber/Electrician)
+- **Primary (Hex):** #1E40AF
+- **Secondary (Hex):** #3B82F6
+- **CTA (Hex):** #F97316
+- **Background (Hex):** #EFF6FF
+- **Text (Hex):** #1E3A8A
+- **Notes:** Professional blue + urgent orange
+

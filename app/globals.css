@@ -101,6 +101,48 @@
   --state-warning-bg: #fff8e6;
   --state-error: #be123c;
   --state-error-bg: #fff1f2;
+
+  --uipro-member-primary: #7c3aed;
+  --uipro-member-secondary: #a78bfa;
+  --uipro-member-cta: #22c55e;
+  --uipro-member-bg: #faf5ff;
+  --uipro-member-text: #4c1d95;
+
+  --uipro-shop-primary: #059669;
+  --uipro-shop-secondary: #10b981;
+  --uipro-shop-cta: #f97316;
+  --uipro-shop-bg: #ecfdf5;
+  --uipro-shop-text: #064e3b;
+
+  --uipro-guide-primary: #4f46e5;
+  --uipro-guide-secondary: #818cf8;
+  --uipro-guide-cta: #22c55e;
+  --uipro-guide-bg: #eef2ff;
+  --uipro-guide-text: #312e81;
+
+  --uipro-enterprise-primary: #0f172a;
+  --uipro-enterprise-secondary: #334155;
+  --uipro-enterprise-cta: #0369a1;
+  --uipro-enterprise-bg: #f8fafc;
+  --uipro-enterprise-text: #020617;
+
+  --uipro-contact-primary: #0f172a;
+  --uipro-contact-secondary: #334155;
+  --uipro-contact-cta: #0369a1;
+  --uipro-contact-bg: #f8fafc;
+  --uipro-contact-text: #020617;
+
+  --uipro-legal-primary: #1e3a8a;
+  --uipro-legal-secondary: #1e40af;
+  --uipro-legal-cta: #b45309;
+  --uipro-legal-bg: #f8fafc;
+  --uipro-legal-text: #0f172a;
+
+  --uipro-pay-primary: #0d9488;
+  --uipro-pay-secondary: #14b8a6;
+  --uipro-pay-cta: #f97316;
+  --uipro-pay-bg: #f0fdfa;
+  --uipro-pay-text: #134e4a;
 }
 
 .dark {
@@ -140,6 +182,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
   body {
     @apply bg-background text-foreground;
@@ -157,10 +200,215 @@
     width: min(100%, var(--content-max));
     margin-inline: auto;
     padding-inline: var(--space-4);
+    box-sizing: border-box;
   }
 
   .space-section {
     padding-block: var(--space-16);
+  }
+
+  .uipro-member-canvas {
+    background:
+      radial-gradient(65% 85% at 12% 8%, color-mix(in oklab, var(--uipro-member-secondary) 26%, white), transparent 70%),
+      radial-gradient(55% 75% at 90% 16%, color-mix(in oklab, var(--uipro-member-primary) 16%, white), transparent 72%),
+      linear-gradient(180deg, #fefbff, var(--uipro-member-bg));
+  }
+
+  .uipro-member-surface {
+    background: color-mix(in oklab, white 84%, var(--uipro-member-bg));
+    border: 1px solid color-mix(in oklab, var(--uipro-member-secondary) 30%, white);
+    box-shadow: 0 14px 34px -26px rgba(76, 29, 149, 0.42);
+  }
+
+  .uipro-member-pill {
+    background: color-mix(in oklab, var(--uipro-member-secondary) 16%, white);
+    color: var(--uipro-member-text);
+    border: 1px solid color-mix(in oklab, var(--uipro-member-secondary) 36%, white);
+  }
+
+  .uipro-member-cta {
+    background: linear-gradient(120deg, var(--uipro-member-primary), var(--uipro-member-cta));
+    color: white;
+  }
+
+  .uipro-member-outline {
+    border: 1px solid color-mix(in oklab, var(--uipro-member-secondary) 40%, white);
+    background: color-mix(in oklab, white 84%, var(--uipro-member-bg));
+    color: var(--uipro-member-text);
+  }
+
+  .uipro-shop-canvas {
+    background:
+      radial-gradient(70% 90% at 8% 10%, color-mix(in oklab, var(--uipro-shop-secondary) 16%, white), transparent 68%),
+      radial-gradient(60% 80% at 92% 14%, color-mix(in oklab, var(--uipro-shop-cta) 14%, white), transparent 70%),
+      linear-gradient(180deg, #f8fffc, var(--uipro-shop-bg));
+  }
+
+  .uipro-shop-surface {
+    background: color-mix(in oklab, white 88%, var(--uipro-shop-bg));
+    border: 1px solid color-mix(in oklab, var(--uipro-shop-secondary) 26%, white);
+    box-shadow: 0 16px 42px -30px rgba(6, 78, 59, 0.38);
+  }
+
+  .uipro-shop-bento {
+    border-radius: 1.25rem;
+    border: 1px solid color-mix(in oklab, var(--uipro-shop-secondary) 30%, white);
+    background: white;
+    box-shadow: 0 12px 28px -24px rgba(6, 78, 59, 0.4);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .uipro-shop-bento:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 34px -24px rgba(6, 78, 59, 0.45);
+  }
+
+  .uipro-shop-cta {
+    background: linear-gradient(120deg, var(--uipro-shop-primary), var(--uipro-shop-cta));
+    color: white;
+  }
+
+  .uipro-shop-pill {
+    background: color-mix(in oklab, var(--uipro-shop-secondary) 12%, white);
+    color: var(--uipro-shop-text);
+    border: 1px solid color-mix(in oklab, var(--uipro-shop-secondary) 34%, white);
+  }
+
+  .uipro-guide-canvas {
+    background:
+      radial-gradient(65% 85% at 10% 8%, color-mix(in oklab, var(--uipro-guide-secondary) 18%, white), transparent 72%),
+      radial-gradient(55% 80% at 90% 16%, color-mix(in oklab, var(--uipro-guide-primary) 12%, white), transparent 72%),
+      linear-gradient(180deg, #fafbff, var(--uipro-guide-bg));
+  }
+
+  .uipro-guide-surface {
+    background: color-mix(in oklab, white 86%, var(--uipro-guide-bg));
+    border: 1px solid color-mix(in oklab, var(--uipro-guide-secondary) 28%, white);
+    box-shadow: 0 16px 38px -30px rgba(49, 46, 129, 0.45);
+  }
+
+  .uipro-guide-pill {
+    background: color-mix(in oklab, var(--uipro-guide-secondary) 14%, white);
+    color: var(--uipro-guide-text);
+    border: 1px solid color-mix(in oklab, var(--uipro-guide-secondary) 34%, white);
+  }
+
+  .uipro-guide-cta {
+    background: linear-gradient(120deg, var(--uipro-guide-primary), var(--uipro-guide-cta));
+    color: white;
+  }
+
+  .uipro-guide-outline {
+    border: 1px solid color-mix(in oklab, var(--uipro-guide-secondary) 36%, white);
+    background: color-mix(in oklab, white 90%, var(--uipro-guide-bg));
+    color: var(--uipro-guide-text);
+  }
+
+  .uipro-enterprise-canvas {
+    background:
+      radial-gradient(68% 88% at 9% 12%, color-mix(in oklab, var(--uipro-enterprise-secondary) 16%, white), transparent 72%),
+      radial-gradient(50% 76% at 90% 18%, color-mix(in oklab, var(--uipro-enterprise-cta) 12%, white), transparent 72%),
+      linear-gradient(180deg, #fcfdff, var(--uipro-enterprise-bg));
+  }
+
+  .uipro-enterprise-surface {
+    background: color-mix(in oklab, white 90%, var(--uipro-enterprise-bg));
+    border: 1px solid color-mix(in oklab, var(--uipro-enterprise-secondary) 24%, white);
+    box-shadow: 0 16px 42px -32px rgba(2, 6, 23, 0.38);
+  }
+
+  .uipro-enterprise-pill {
+    background: color-mix(in oklab, var(--uipro-enterprise-secondary) 14%, white);
+    color: var(--uipro-enterprise-primary);
+    border: 1px solid color-mix(in oklab, var(--uipro-enterprise-secondary) 34%, white);
+  }
+
+  .uipro-enterprise-cta {
+    background: linear-gradient(120deg, var(--uipro-enterprise-primary), var(--uipro-enterprise-cta));
+    color: white;
+  }
+
+  .uipro-enterprise-outline {
+    border: 1px solid color-mix(in oklab, var(--uipro-enterprise-secondary) 34%, white);
+    background: white;
+    color: var(--uipro-enterprise-text);
+  }
+
+  .uipro-contact-canvas {
+    background:
+      radial-gradient(65% 86% at 12% 9%, color-mix(in oklab, var(--uipro-contact-cta) 10%, white), transparent 72%),
+      linear-gradient(180deg, #ffffff, var(--uipro-contact-bg));
+  }
+
+  .uipro-contact-surface {
+    background: white;
+    border: 1px solid color-mix(in oklab, var(--uipro-contact-secondary) 22%, white);
+    box-shadow: 0 14px 34px -30px rgba(2, 6, 23, 0.2);
+  }
+
+  .uipro-contact-pill {
+    background: color-mix(in oklab, var(--uipro-contact-cta) 10%, white);
+    color: var(--uipro-contact-primary);
+    border: 1px solid color-mix(in oklab, var(--uipro-contact-secondary) 30%, white);
+  }
+
+  .uipro-contact-cta {
+    background: linear-gradient(120deg, var(--uipro-contact-primary), var(--uipro-contact-cta));
+    color: white;
+  }
+
+  .uipro-legal-canvas {
+    background:
+      radial-gradient(66% 84% at 10% 10%, color-mix(in oklab, var(--uipro-legal-secondary) 16%, white), transparent 70%),
+      linear-gradient(180deg, #fcfdff, var(--uipro-legal-bg));
+  }
+
+  .uipro-legal-surface {
+    background: color-mix(in oklab, white 92%, var(--uipro-legal-bg));
+    border: 1px solid color-mix(in oklab, var(--uipro-legal-secondary) 28%, white);
+    box-shadow: 0 16px 36px -30px rgba(15, 23, 42, 0.3);
+  }
+
+  .uipro-legal-pill {
+    background: color-mix(in oklab, var(--uipro-legal-secondary) 14%, white);
+    color: var(--uipro-legal-primary);
+    border: 1px solid color-mix(in oklab, var(--uipro-legal-secondary) 32%, white);
+  }
+
+  .uipro-pay-canvas {
+    background:
+      radial-gradient(64% 86% at 10% 8%, color-mix(in oklab, var(--uipro-pay-secondary) 18%, white), transparent 70%),
+      linear-gradient(180deg, #fcfffe, var(--uipro-pay-bg));
+  }
+
+  .uipro-pay-surface {
+    background: color-mix(in oklab, white 92%, var(--uipro-pay-bg));
+    border: 1px solid color-mix(in oklab, var(--uipro-pay-secondary) 26%, white);
+    box-shadow: 0 16px 36px -30px rgba(19, 78, 74, 0.3);
+  }
+
+  .uipro-pay-loading {
+    background: color-mix(in oklab, var(--uipro-pay-secondary) 12%, white);
+    color: var(--uipro-pay-text);
+    border: 1px solid color-mix(in oklab, var(--uipro-pay-secondary) 32%, white);
+  }
+
+  .uipro-pay-success {
+    background: color-mix(in oklab, #22c55e 14%, white);
+    color: #166534;
+    border: 1px solid color-mix(in oklab, #22c55e 30%, white);
+  }
+
+  .uipro-pay-warning {
+    background: color-mix(in oklab, #f59e0b 14%, white);
+    color: #92400e;
+    border: 1px solid color-mix(in oklab, #f59e0b 32%, white);
+  }
+
+  .uipro-pay-error {
+    background: color-mix(in oklab, #e11d48 12%, white);
+    color: #9f1239;
+    border: 1px solid color-mix(in oklab, #e11d48 28%, white);
   }
 
   .text-gradient {

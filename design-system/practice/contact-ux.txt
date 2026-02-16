@@ -1,0 +1,37 @@
+## UI Pro Max Search Results
+**Domain:** ux | **Query:** contact support help center faq
+**Source:** ux-guidelines.csv | **Found:** 3 results
+
+### Result 1
+- **Category:** Forms
+- **Issue:** Autofill Support
+- **Platform:** Web
+- **Description:** Help browsers autofill correctly
+- **Do:** Use autocomplete attribute properly
+- **Don't:** Block or ignore autofill
+- **Code Example Good:** autocomplete='email'
+- **Code Example Bad:** autocomplete='off' everywhere
+- **Severity:** Medium
+
+### Result 2
+- **Category:** Search
+- **Issue:** Autocomplete
+- **Platform:** Web
+- **Description:** Help users find results faster
+- **Do:** Show predictions as user types
+- **Don't:** Require full type and enter
+- **Code Example Good:** Debounced fetch + dropdown
+- **Code Example Bad:** No suggestions
+- **Severity:** Medium
+
+### Result 3
+- **Category:** Feedback
+- **Issue:** Error Recovery
+- **Platform:** All
+- **Description:** Help users recover from errors
+- **Do:** Provide clear next steps
+- **Don't:** Error without recovery path
+- **Code Example Good:** Try again button + help link
+- **Code Example Bad:** Error message only
+- **Severity:** Medium
+

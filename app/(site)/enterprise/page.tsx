@@ -12,12 +12,12 @@ export const metadata = {
 
 export default function EnterprisePage() {
   return (
-      <div className="min-h-screen pt-24">
-        <EnterpriseHero />
-        <EnterpriseFeatures />
-        <PricingPlans />
-        <CaseStudies />
-        <ConsultationForm />
-      </div>
+    <div className="uipro-enterprise-canvas min-h-screen pt-24">
+      <EnterpriseHero />
+      <EnterpriseFeatures />
+      <PricingPlans />
+      <CaseStudies />
+      <ConsultationForm />
+    </div>
   );
 }

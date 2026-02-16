@@ -93,6 +93,7 @@ export default function AuthForm() {
               placeholder="请输入邮箱"
               required
               disabled={loading}
+              autoComplete="email"
             />
           </div>
           <div className="space-y-2">
@@ -115,7 +116,7 @@ export default function AuthForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-2 flex items-center justify-center gap-1 text-slate-500 transition hover:text-slate-900"
+                className="absolute inset-y-0 right-2 flex min-h-10 min-w-10 items-center justify-center gap-1 text-slate-500 transition hover:text-slate-900"
                 disabled={loading}
                 aria-label={showPassword ? '切换为隐藏密码' : '切换为显示密码'}
               >
@@ -145,7 +146,7 @@ export default function AuthForm() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-2 flex items-center justify-center gap-1 text-slate-500 transition hover:text-slate-900"
+                  className="absolute inset-y-0 right-2 flex min-h-10 min-w-10 items-center justify-center gap-1 text-slate-500 transition hover:text-slate-900"
                   disabled={loading}
                   aria-label={showConfirmPassword ? '切换为隐藏确认密码' : '切换为显示确认密码'}
                 >
