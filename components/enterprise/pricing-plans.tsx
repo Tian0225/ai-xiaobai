@@ -53,12 +53,12 @@ export default function PricingPlans() {
             <article
               key={plan.name}
               className={cn(
-                "surface-card relative rounded-3xl border border-[#d8e6df] p-7",
-                plan.popular && "ring-2 ring-[#80b7a8]"
+                "surface-card relative rounded-3xl border border-[#dbe7ff] p-7",
+                plan.popular && "ring-2 ring-[#93c5fd]"
               )}
             >
               {plan.popular && (
-                <span className="absolute -top-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] px-4 py-1.5 text-xs font-semibold text-white">
+                <span className="absolute -top-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-[linear-gradient(120deg,#1d4ed8,#0ea5e9)] px-4 py-1.5 text-xs font-semibold text-white">
                   <Star className="h-3.5 w-3.5" />
                   推荐方案
                 </span>
@@ -74,14 +74,14 @@ export default function PricingPlans() {
                 <ul className="mt-3 space-y-2">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
-                      <Check className="mt-0.5 h-4 w-4 text-[var(--brand-fresh)]" />
+                      <Check className="mt-0.5 h-4 w-4 text-[#2563eb]" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mt-6 border-t border-[#d8e6df] pt-5">
+              <div className="mt-6 border-t border-[#dbe7ff] pt-5">
                 <p className="text-sm font-semibold text-slate-900">交付物</p>
                 <ul className="mt-3 space-y-1 text-sm text-slate-600">
                   {plan.deliverables.map((item) => (
@@ -94,8 +94,8 @@ export default function PricingPlans() {
                 className={cn(
                   "mt-7 w-full rounded-full",
                   plan.popular
-                    ? "bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                    : "bg-white text-slate-900 border border-[#b9d1c9] hover:bg-[#f7fbf9]"
+                    ? "bg-[linear-gradient(120deg,#1d4ed8,#0ea5e9)] hover:opacity-95"
+                    : "border border-[#bfdbfe] bg-white text-slate-900 hover:bg-[#eff6ff]"
                 )}
                 onClick={scrollToForm}
               >

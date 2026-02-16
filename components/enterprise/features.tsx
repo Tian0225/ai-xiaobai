@@ -40,7 +40,7 @@ export default function EnterpriseFeatures() {
     <section className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14">
-          <p className="text-sm font-semibold text-[var(--brand-fresh)]">Execution Principles</p>
+          <p className="text-sm font-semibold text-[#1d4ed8]">Execution Principles</p>
           <h2 className="mt-2 font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">
             关注可交付结果，而不是演示效果
           </h2>
@@ -53,8 +53,8 @@ export default function EnterpriseFeatures() {
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <article key={feature.title} className="surface-card rounded-2xl border border-[#d8e6df] p-7">
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#e3f0eb] text-[var(--brand-fresh)]">
+              <article key={feature.title} className="surface-card rounded-2xl border border-[#dbe7ff] p-7">
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#e8f1ff] text-[#1d4ed8]">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900">{feature.title}</h3>
