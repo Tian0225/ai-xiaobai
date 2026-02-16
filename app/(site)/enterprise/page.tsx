@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function EnterprisePage() {
   return (
-      <div className="enterprise-theme min-h-screen pt-24">
+      <div className="min-h-screen pt-24">
         <EnterpriseHero />
         <EnterpriseFeatures />
         <PricingPlans />

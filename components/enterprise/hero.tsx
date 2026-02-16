@@ -11,12 +11,12 @@ export default function EnterpriseHero() {
 
   return (
     <section className="relative overflow-hidden pb-20 pt-28 sm:pt-32">
-      <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-[#2563eb]/18 blur-3xl" />
-      <div className="absolute -right-20 top-40 h-64 w-64 rounded-full bg-[#38bdf8]/25 blur-3xl" />
+      <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-[#f4a259]/25 blur-3xl" />
+      <div className="absolute -right-20 top-40 h-64 w-64 rounded-full bg-[#3a7d6b]/25 blur-3xl" />
 
       <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e8f1ff] px-4 py-2 text-sm font-semibold text-[#1d4ed8]">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
             <Building2 className="h-4 w-4" />
             Enterprise AI
           </div>
@@ -32,13 +32,13 @@ export default function EnterpriseHero() {
           <div className="mt-10 flex flex-wrap gap-3">
             <Button
               size="lg"
-              className="rounded-full bg-[linear-gradient(120deg,#1d4ed8,#0ea5e9)] px-8 hover:opacity-95"
+              className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] px-8 hover:opacity-95"
               onClick={scrollToForm}
             >
               <Sparkles className="mr-2 h-5 w-5" />
               预约免费诊断
             </Button>
-            <Button size="lg" variant="outline" className="rounded-full border-[#bfdbfe] bg-white/90 px-8 text-[#1d4ed8]" asChild>
+            <Button size="lg" variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80 px-8" asChild>
               <a href="#pricing">
                 查看服务套餐
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -47,7 +47,7 @@ export default function EnterpriseHero() {
           </div>
         </div>
 
-        <div className="surface-card reveal-up reveal-delay-1 rounded-3xl border border-[#dbe7ff] p-6 sm:p-8">
+        <div className="surface-card reveal-up reveal-delay-1 rounded-3xl border border-[#d8e6df] p-6 sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Delivery Metrics</p>
           <div className="mt-6 grid grid-cols-1 gap-4">
             <div className="rounded-2xl bg-white p-5">

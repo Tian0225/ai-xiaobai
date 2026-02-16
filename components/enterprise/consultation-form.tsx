@@ -63,9 +63,9 @@ export default function ConsultationForm() {
     return (
       <section id="consultation-form" className="py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <div className="surface-card rounded-3xl border border-[#dbe7ff] p-8 text-center sm:p-10">
-            <div className="mx-auto mb-6 inline-flex rounded-full bg-[#e8f1ff] p-4">
-              <CheckCircle2 className="h-12 w-12 text-[#1d4ed8]" />
+          <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 text-center sm:p-10">
+            <div className="mx-auto mb-6 inline-flex rounded-full bg-[#e3f0eb] p-4">
+              <CheckCircle2 className="h-12 w-12 text-[var(--brand-fresh)]" />
             </div>
             <h3 className="font-display text-3xl text-[var(--brand-ink)]">预约成功</h3>
             <p className="mt-4 text-slate-600">
@@ -73,7 +73,7 @@ export default function ConsultationForm() {
             </p>
             <Button
               variant="outline"
-              className="mt-8 rounded-full border-[#bfdbfe] bg-white/90 text-[#1d4ed8]"
+              className="mt-8 rounded-full border-[#b9d1c9] bg-white/80"
               onClick={() => setIsSubmitted(false)}
             >
               继续预约
@@ -87,7 +87,7 @@ export default function ConsultationForm() {
   return (
     <section id="consultation-form" className="py-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="surface-card rounded-3xl border border-[#dbe7ff] p-7 sm:p-10">
+        <div className="surface-card rounded-3xl border border-[#d8e6df] p-7 sm:p-10">
           <div className="mb-8 text-center">
             <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">预约免费诊断</h2>
             <p className="mt-3 text-lg text-slate-600">填写关键信息，我们会给出可执行的初步路线建议。</p>
@@ -196,7 +196,7 @@ export default function ConsultationForm() {
               </p>
             )}
 
-            <div className="rounded-xl border border-[#bfdbfe] bg-[#eff6ff] p-4 text-sm text-slate-600">
+            <div className="rounded-xl border border-[#c8ddd6] bg-[#f8fbf9] p-4 text-sm text-slate-600">
               <p className="font-semibold text-slate-800">我们承诺</p>
               <p className="mt-1">信息仅用于咨询沟通，24 小时内响应，免费诊断无隐藏费用。</p>
             </div>
@@ -204,7 +204,7 @@ export default function ConsultationForm() {
             <Button
               type="submit"
               size="lg"
-              className="w-full rounded-full bg-[linear-gradient(120deg,#1d4ed8,#0ea5e9)] hover:opacity-95"
+              className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

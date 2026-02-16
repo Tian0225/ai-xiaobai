@@ -49,8 +49,8 @@ export default function CaseStudies() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {cases.map((caseStudy) => (
-            <article key={caseStudy.company} className="surface-card rounded-2xl border border-[#dbe7ff] p-7">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#e8f1ff] px-3 py-1 text-sm font-medium text-[#1d4ed8]">
+            <article key={caseStudy.company} className="surface-card rounded-2xl border border-[#d8e6df] p-7">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#e6f2ec] px-3 py-1 text-sm font-medium text-[var(--brand-fresh)]">
                 <Building className="h-4 w-4" />
                 {caseStudy.industry}
               </div>
@@ -67,15 +67,15 @@ export default function CaseStudies() {
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-[#dbe7ff] pt-5">
+              <div className="mt-6 border-t border-[#d8e6df] pt-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">结果</p>
                 <div className="mt-3 space-y-3">
                   {caseStudy.results.map((result) => {
                     const Icon = result.icon;
                     return (
                       <div key={result.label} className="flex items-center gap-3 rounded-xl bg-white/90 p-3">
-                        <div className="rounded-lg bg-[#e8f1ff] p-2">
-                          <Icon className="h-4 w-4 text-[#1d4ed8]" />
+                        <div className="rounded-lg bg-[#e3f0eb] p-2">
+                          <Icon className="h-4 w-4 text-[var(--brand-fresh)]" />
                         </div>
                         <div>
                           <div className="text-xs text-slate-500">{result.label}</div>
