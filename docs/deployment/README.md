@@ -29,6 +29,10 @@
 - 文档：`docs/deployment/release-execution-record-2026-02-13-p1-sample.md`
 - 范围：基于当前改动预填，发布时补值班信息与现场结果即可。
 
+7. 对账调度（GitHub Actions）
+- 文档：`docs/deployment/order-reconcile-github-actions.md`
+- 范围：Hobby 计划下替代 Vercel Cron 的对账定时方案。
+
 ## 推荐执行顺序
 
 1. 先跑 P1 清单，确保后台权限与运营功能可控可追踪。

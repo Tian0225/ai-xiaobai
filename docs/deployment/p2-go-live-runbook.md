@@ -44,7 +44,6 @@ node scripts/deploy/validate-env.mjs
 - `NEXT_PUBLIC_MEMBERSHIP_PRICE`
 - `PAYMENT_VERIFY_TOKEN`
 - `ORDER_RECONCILE_TOKEN`
-- `CRON_SECRET`
 - `WECHAT_PAY_MCH_ID`
 - `WECHAT_PAY_APP_ID`
 - `WECHAT_PAY_MCH_SERIAL_NO`
@@ -126,6 +125,14 @@ bash scripts/deploy/acceptance.sh
 - `profiles.membership_expires_at` 按规则延长
 - 对同一订单重复触发 `/api/orders/verify`，应返回幂等（不重复发放）。
 - 人工对账接口 `/api/orders/reconcile` 带 token 触发后返回统计结果。
+
+### 3.3 对账调度（GitHub Actions）
+
+- 工作流文件：`.github/workflows/order-reconcile.yml`
+- 触发频率：每 5 分钟（GitHub Actions 最小粒度）
+- 需要配置仓库 Secrets：
+  - `ORDER_RECONCILE_URL`（生产域名下的 `/api/orders/reconcile`）
+  - `ORDER_RECONCILE_TOKEN`（与 Vercel 环境变量同值）
 
 ## 4) 一键回滚策略与已知问题模板
 

@@ -1,0 +1,40 @@
+name: Order Reconcile Scheduler
+
+on:
+  schedule:
+    # GitHub Actions 最小粒度为 5 分钟
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger reconcile endpoint
+        env:
+          RECONCILE_URL: ${{ secrets.ORDER_RECONCILE_URL }}
+          RECONCILE_TOKEN: ${{ secrets.ORDER_RECONCILE_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${RECONCILE_URL}" ] || [ -z "${RECONCILE_TOKEN}" ]; then
+            echo "Missing required secrets: ORDER_RECONCILE_URL / ORDER_RECONCILE_TOKEN"
+            exit 1
+          fi
+
+          echo "Triggering: ${RECONCILE_URL}"
+
+          response_file="$(mktemp)"
+          status_code="$(curl -sS -o "${response_file}" -w '%{http_code}' \
+            -X POST "${RECONCILE_URL}" \
+            -H 'Content-Type: application/json' \
+            -H "x-order-reconcile-token: ${RECONCILE_TOKEN}")"
+
+          echo "HTTP status: ${status_code}"
+          cat "${response_file}"
+
+          if [ "${status_code}" -lt 200 ] || [ "${status_code}" -ge 300 ]; then
+            echo "Reconcile request failed"
+            exit 1
+          fi
