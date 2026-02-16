@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, CheckCircle2, Crown, ExternalLink, MessageCircle, TrendingUp, BadgePercent } from "lucide-react";
+import { BookOpen, CheckCircle2, Crown, ExternalLink, MessageCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RedeemForm from "@/components/payment/redeem-form";
 import { createClient } from "@/lib/supabase/client";
@@ -27,11 +27,6 @@ const benefits = [
     icon: MessageCircle,
     title: "社群优先答疑",
     description: "遇到卡点时，优先获得解决路径与实操建议。",
-  },
-  {
-    icon: BadgePercent,
-    title: "账号会员价优惠",
-    description: "Plus 服务享会员专属价格，长期使用更省成本。",
   },
 ];
 
@@ -109,14 +104,14 @@ export default function MembershipPage() {
 
   return (
     <div className="min-h-screen pb-20 pt-28 sm:pt-32">
-      <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 stitch-section">
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
-          <div className="stitch-kicker mb-6">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
             <Crown className="h-4 w-4" />
             年度会员
           </div>
 
-          <h1 className="stitch-h1">
+          <h1 className="font-display text-4xl leading-tight text-[var(--brand-ink)] sm:text-5xl">
             一次订阅，
             <br />
             全年获得可执行增长路径
@@ -125,11 +120,11 @@ export default function MembershipPage() {
             不是只看教程，而是持续获得可落地的方法、模板与反馈，帮助你把 AI 真正用到业务和项目里。
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {benefits.map((item) => {
               const Icon = item.icon;
               return (
-                <article key={item.title} className="surface-card stitch-card rounded-2xl p-5">
+                <article key={item.title} className="surface-card rounded-2xl border border-[#d8e6df] p-5">
                   <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#e3f0eb] text-[var(--brand-fresh)]">
                     <Icon className="h-5 w-5" />
                   </div>
@@ -141,7 +136,7 @@ export default function MembershipPage() {
           </div>
         </div>
 
-        <div className="surface-card stitch-card rounded-3xl p-6 sm:p-8 reveal-up reveal-delay-1">
+        <div className="surface-card rounded-3xl border border-[#d8e6df] p-6 sm:p-8 reveal-up reveal-delay-1">
           <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Membership</p>
           <div className="mt-3 text-5xl font-display text-[var(--brand-ink)]">
             ¥{MEMBERSHIP_PRICE}<span className="text-lg text-slate-500">/年</span>
@@ -175,38 +170,62 @@ export default function MembershipPage() {
           ) : (
             <>
               <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
-                <div className="flex flex-col gap-3">
-                  <Button
-                    size="lg"
-                    className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                    asChild
-                  >
-                    <a href={MEMBERSHIP_PURCHASE_URL} target="_blank" rel="noreferrer noopener">
-                      去支付平台购买卡密
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full rounded-full border-[#b9d1c9] bg-white/80"
-                    disabled={loadingUser || !userEmail}
-                    onClick={() => setShowRedeem((previous) => !previous)}
-                  >
-                    {loadingUser ? "加载账户中..." : userEmail ? "我已购买，输入卡密兑换" : "请先登录"}
-                  </Button>
-                </div>
-
-                {showRedeem ? (
-                  <div className="mt-4">
-                    {userEmail ? (
-                      <RedeemForm onSuccess={handleRedeemSuccess} />
-                    ) : (
-                      <p className="text-sm text-red-600">未识别到登录账号，请刷新页面后重试。</p>
-                    )}
+                {loadingUser ? (
+                  <p className="text-sm text-slate-600">正在识别登录状态...</p>
+                ) : !userEmail ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-slate-700">
+                      先看清会员权益，再决定是否开通。登录或注册后可兑换卡密并自动同步会员状态。
+                    </p>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        size="lg"
+                        className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                        asChild
+                      >
+                        <Link href="/auth?next=/membership&mode=login">登录</Link>
+                      </Button>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full rounded-full border-[#b9d1c9] bg-white/80"
+                        asChild
+                      >
+                        <Link href="/auth?next=/membership&mode=register">注册</Link>
+                      </Button>
+                    </div>
                   </div>
-                ) : null}
+                ) : (
+                  <>
+                    <div className="flex flex-col gap-3">
+                      <Button
+                        size="lg"
+                        className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                        asChild
+                      >
+                        <a href={MEMBERSHIP_PURCHASE_URL} target="_blank" rel="noreferrer noopener">
+                          去支付平台购买卡密
+                          <ExternalLink className="ml-2 h-4 w-4" />
+                        </a>
+                      </Button>
+
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full rounded-full border-[#b9d1c9] bg-white/80"
+                        onClick={() => setShowRedeem((previous) => !previous)}
+                      >
+                        我已购买，输入卡密兑换
+                      </Button>
+                    </div>
+
+                    {showRedeem ? (
+                      <div className="mt-4">
+                        <RedeemForm onSuccess={handleRedeemSuccess} />
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </div>
 
               <p className="mt-4 text-xs text-slate-500">
@@ -218,9 +237,9 @@ export default function MembershipPage() {
       </section>
 
       <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="surface-card stitch-card overflow-hidden rounded-3xl">
+        <div className="surface-card overflow-hidden rounded-3xl border border-[#d8e6df]">
           <div className="border-b border-[#d8e6df] px-6 py-5">
-            <h2 className="stitch-h2 text-2xl">权益对比</h2>
+            <h2 className="font-display text-2xl text-[var(--brand-ink)]">权益对比</h2>
           </div>
           <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr] bg-[#f8fbf9] px-6 py-3 text-sm font-semibold text-slate-600">
             <span>项目</span>

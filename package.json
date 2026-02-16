@@ -11,6 +11,7 @@
     "redeem:sql": "node scripts/payment/generate-redeem-import-sql.mjs",
     "deploy:check-env": "node scripts/deploy/validate-env.mjs",
     "deploy:acceptance": "bash scripts/deploy/acceptance.sh",
+    "deploy:acceptance:growth-camp": "node scripts/deploy/acceptance-growth-camp.mjs",
     "deploy:rollback": "bash scripts/deploy/rollback-vercel.sh"
   },
   "dependencies": {

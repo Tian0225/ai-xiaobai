@@ -1,24 +1,24 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import OrdersDashboard from "@/components/admin/orders-dashboard";
+import type { Metadata } from "next";
+import GrowthCampApplicationsDashboard from "@/components/admin/growth-camp-applications-dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin";
-import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "【后台】订单核销中心 - AI-xiaobai",
-  description: "AI-xiaobai 管理后台：订单核销与会员管理",
+  title: "【后台】陪跑报名线索 - AI-xiaobai",
+  description: "AI-xiaobai 管理后台：AI 变现陪跑报名线索管理",
 };
 
-export default async function AdminOrdersPage() {
+export default async function AdminGrowthCampPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth?next=/admin/orders");
+    redirect("/auth?next=/admin/growth-camp");
   }
 
   if (!isAdminEmail(user.email)) {
@@ -45,31 +45,17 @@ export default async function AdminOrdersPage() {
     <main>
       <div className="mb-5 rounded-2xl border border-slate-700 bg-slate-900/70 px-5 py-4 text-slate-100 shadow-[0_22px_52px_-34px_rgba(0,0,0,0.85)]">
         <p className="text-xs uppercase tracking-[0.24em] text-amber-300">ADMIN BACKSTAGE</p>
-        <p className="mt-1 text-lg font-semibold">管理后台 · 订单核销与会员权限（P1）</p>
+        <p className="mt-1 text-lg font-semibold">管理后台 · AI 变现陪跑报名线索</p>
       </div>
       <div className="mb-6 flex flex-wrap items-center justify-end gap-3">
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/users"
-            className="inline-flex items-center rounded-full border border-slate-600 bg-slate-900/60 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-300 hover:text-amber-200"
-          >
-            用户管理
-          </Link>
-          <Link
-            href="/membership"
-            className="inline-flex items-center rounded-full border border-slate-600 bg-slate-900/60 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-300 hover:text-amber-200"
-          >
-            会员页
-          </Link>
-          <Link
-            href="/guide"
-            className="inline-flex items-center rounded-full border border-slate-600 bg-slate-900/60 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-300 hover:text-amber-200"
-          >
-            教程页
-          </Link>
-        </div>
+        <Link
+          href="/admin/orders"
+          className="inline-flex items-center rounded-full border border-slate-600 bg-slate-900/60 px-4 py-2 text-sm text-slate-200 transition hover:border-amber-300 hover:text-amber-200"
+        >
+          订单后台
+        </Link>
       </div>
-      <OrdersDashboard adminEmail={user.email ?? ""} />
+      <GrowthCampApplicationsDashboard />
     </main>
   );
 }

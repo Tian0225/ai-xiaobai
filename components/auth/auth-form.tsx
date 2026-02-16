@@ -9,16 +9,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useSearchParams } from 'next/navigation'
 
 export default function AuthForm() {
+  const searchParams = useSearchParams()
+  const mode = searchParams.get('mode')
+  const defaultIsLogin = mode !== 'register' && mode !== 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLogin, setIsLogin] = useState(defaultIsLogin)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const supabase = createClient()
-  const searchParams = useSearchParams()
 
   const getRedirectPath = () => {
     const nextPath = searchParams.get('next')

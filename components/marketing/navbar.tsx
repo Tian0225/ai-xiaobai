@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 const navigation = [
   { name: "首页", href: "/" },
   { name: "教程", href: "/guide" },
+  { name: "AI变现陪跑", href: "/growth-camp" },
   { name: "会员", href: "/membership" },
   { name: "商城", href: "/shop" },
   { name: "企业服务", href: "/enterprise" },

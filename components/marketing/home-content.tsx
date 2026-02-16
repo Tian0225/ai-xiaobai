@@ -1,7 +1,19 @@
 import Link from "next/link";
 import { getAllTutorials } from "@/lib/mdx";
 import { TutorialCard } from "@/components/guide/tutorial-card";
-import { ArrowRight, Crown, Sparkles, Users, Building2, ShieldCheck, Zap, BookOpen, Handshake } from "lucide-react";
+import {
+  ArrowRight,
+  Crown,
+  Sparkles,
+  Users,
+  Building2,
+  ShieldCheck,
+  Zap,
+  BookOpen,
+  Handshake,
+  Rocket,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { siteProfile } from "@/lib/site-profile";
@@ -41,6 +53,12 @@ const enterprisePlans = [
   { name: "AI 咨询诊断", price: "¥19,999", features: "需求调研 · 场景分析 · 技术选型" },
   { name: "AI 系统落地", price: "¥69,999", features: "定制开发 · 员工培训 · 3个月支持" },
   { name: "AI 全面升级", price: "¥299,999", features: "多部门打通 · 私有化部署 · 1年保障" },
+];
+
+const campHighlights = [
+  "适合新手：从定位到报价，按步骤推进",
+  "6 周节奏：每周任务 + 关键节点反馈",
+  "转化闭环：咨询评估、报名意向、会员解锁",
 ];
 
 export default function HomeContent() {
@@ -105,6 +123,57 @@ export default function HomeContent() {
             {featuredTutorials.map((tutorial) => (
               <TutorialCard key={tutorial.slug} tutorial={tutorial} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="surface-card overflow-hidden rounded-3xl border border-[#d8e6df] p-8 lg:p-10">
+            <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
+                  <Rocket className="h-4 w-4" />
+                  AI 变现陪跑
+                </div>
+                <h2 className="mt-4 font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">
+                  新手也能看懂的 AI 变现路径
+                </h2>
+                <p className="mt-3 max-w-2xl text-lg text-slate-600">
+                  用明确步骤替代“听了很多却做不动”。从定位、获客到交付复购，按节奏把第一条收入链路跑通。
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] px-6 hover:opacity-95" asChild>
+                    <Link href="/growth-camp">
+                      查看陪跑详情
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                    <Link href="/growth-camp/apply">提交报名意向</Link>
+                  </Button>
+                  <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                    <Link href="/contact">咨询是否适合</Link>
+                  </Button>
+                  <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                    <Link href="/membership">会员解锁完整说明</Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#d8e6df] bg-white/85 p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Path Snapshot</p>
+                <ul className="mt-4 space-y-4">
+                  {campHighlights.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--brand-fresh)]" />
+                      <span className="text-sm text-slate-700">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </section>

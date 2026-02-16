@@ -9,7 +9,7 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // 需要登录的路径
-  const protectedPaths = ['/membership', '/admin', '/api/orders', '/api/admin']
+  const protectedPaths = ['/admin', '/api/orders', '/api/admin']
   const isProtectedPath = protectedPaths.some(path =>
     pathname.startsWith(path)
   )
