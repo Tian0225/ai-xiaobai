@@ -165,6 +165,9 @@ export default function MembershipPage() {
                   <Link href="/guide/member">查看会员内容</Link>
                 </Button>
                 <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                  <Link href="/growth-camp">AI 变现实战陪跑</Link>
+                </Button>
+                <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
                   <Link href="/guide">继续学习</Link>
                 </Button>
               </div>
