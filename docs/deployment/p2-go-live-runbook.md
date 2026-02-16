@@ -36,7 +36,6 @@ node scripts/deploy/validate-env.mjs
 ### 1.2 必填变量清单（生产）
 
 - `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_UI_REVAMP_ENABLED`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -157,34 +156,3 @@ DRY_RUN=1 bash scripts/deploy/rollback-vercel.sh
 
 - 模板文件：`docs/deployment/known-issues-template.md`
 - 用于发布前和发布后统一登记：影响范围、规避方案、回滚条件、责任人、预计修复时间。
-
-## 5) UI 重构开关（一次性切换兜底）
-
-### 5.1 开关说明
-
-- 变量：`NEXT_PUBLIC_UI_REVAMP_ENABLED`
-- 取值：
-  - `true`：新 UI（默认）
-  - `false`：legacy 导航/页脚壳（紧急回退）
-
-### 5.2 切换命令
-
-```bash
-# 开启新 UI（production）
-npm run deploy:ui-on
-
-# 关闭新 UI，回退 legacy（production）
-npm run deploy:ui-off
-```
-
-手动指定环境（preview/development）：
-
-```bash
-bash scripts/deploy/toggle-ui-revamp.sh false preview
-```
-
-演练模式（不修改）：
-
-```bash
-DRY_RUN=1 bash scripts/deploy/toggle-ui-revamp.sh false production
-```

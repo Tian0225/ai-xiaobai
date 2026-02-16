@@ -127,7 +127,7 @@ export default function Navbar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "inline-flex min-h-10 items-center text-sm font-medium transition-colors",
+                  "text-sm font-medium transition-colors",
                   pathname === item.href
                     ? "text-[var(--brand-fresh)]"
                     : "text-slate-700 hover:text-[var(--brand-fresh)]"
@@ -142,7 +142,7 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 gap-2 rounded-full text-slate-600"
+              className="gap-2 rounded-full text-slate-600"
               onClick={() => {
                 document.dispatchEvent(
                   new KeyboardEvent("keydown", {
@@ -163,8 +163,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setAccountOpen((prev) => !prev)}
-                  className="flex min-h-10 items-center gap-2 rounded-full border border-[#c7ddd5] bg-white/80 px-2 py-1.5 transition hover:border-[var(--brand-fresh)]"
-                  aria-label="打开账号菜单"
+                  className="flex items-center gap-2 rounded-full border border-[#c7ddd5] bg-white/80 px-2 py-1.5 transition hover:border-[var(--brand-fresh)]"
                 >
                   <span className="grid h-7 w-7 place-items-center rounded-full bg-[#e3f0eb] text-xs font-semibold text-[var(--brand-fresh)]">
                     {avatarLabel}
@@ -210,10 +209,10 @@ export default function Navbar() {
               </div>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="h-10" asChild>
+                <Button variant="ghost" size="sm" asChild>
                   <Link href="/auth">登录</Link>
                 </Button>
-                <Button size="sm" className="h-10 rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
+                <Button size="sm" className="rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95" asChild>
                   <Link href="/guide">
                     开始学习
                     <ArrowRight className="ml-1 h-4 w-4" />
@@ -229,22 +228,21 @@ export default function Navbar() {
             ) : currentUser ? (
               <button
                 type="button"
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#c7ddd5] bg-white/80 text-xs font-semibold text-[var(--brand-fresh)]"
+                className="grid h-8 w-8 place-items-center rounded-full border border-[#c7ddd5] bg-white/80 text-xs font-semibold text-[var(--brand-fresh)]"
                 onClick={() => setIsOpen(true)}
                 aria-label="打开账号菜单"
               >
                 {avatarLabel}
               </button>
             ) : (
-              <Button variant="ghost" size="sm" className="h-10" asChild>
+              <Button variant="ghost" size="sm" asChild>
                 <Link href="/auth">登录</Link>
               </Button>
             )}
             <button
               type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-md text-slate-700 hover:bg-white/70"
+              className="rounded-md p-2 text-slate-700 hover:bg-white/70"
               onClick={() => setIsOpen(!isOpen)}
-              aria-label={isOpen ? "关闭菜单" : "打开菜单"}
             >
               <span className="sr-only">打开菜单</span>
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -260,7 +258,7 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex min-h-10 items-center rounded-xl px-3 py-2 text-base font-medium hover:bg-white/80",
+                    "block rounded-xl px-3 py-2 text-base font-medium hover:bg-white/80",
                     pathname === item.href ? "bg-white text-[var(--brand-fresh)]" : "text-slate-700"
                   )}
                   onClick={() => setIsOpen(false)}

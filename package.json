@@ -11,9 +11,7 @@
     "redeem:sql": "node scripts/payment/generate-redeem-import-sql.mjs",
     "deploy:check-env": "node scripts/deploy/validate-env.mjs",
     "deploy:acceptance": "bash scripts/deploy/acceptance.sh",
-    "deploy:rollback": "bash scripts/deploy/rollback-vercel.sh",
-    "deploy:ui-on": "bash scripts/deploy/toggle-ui-revamp.sh true production",
-    "deploy:ui-off": "bash scripts/deploy/toggle-ui-revamp.sh false production"
+    "deploy:rollback": "bash scripts/deploy/rollback-vercel.sh"
   },
   "dependencies": {
     "@radix-ui/react-icons": "^1.3.2",
