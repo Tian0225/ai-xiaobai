@@ -236,23 +236,27 @@ npm run dev
 - `POST /api/payments/alipay/notify`（当前返回 501）
 - `lib/payment/alipay-official.ts`（当前仅定义接口，尚未实现）
 
-## 8. 对账定时任务（Vercel Cron）
+## 8. 对账定时任务（GitHub Actions 调度）
 
 ### 8.1 在 Vercel 环境变量中配置
 
-- `CRON_SECRET`
-- `ORDER_RECONCILE_TOKEN`（用于手动触发，可选但建议配置）
+- `ORDER_RECONCILE_TOKEN`（用于外部调度与手动触发，必填）
 - `WECHAT_BILL_API_URL`
 - `WECHAT_BILL_API_TOKEN`
 - `ALIPAY_BILL_API_URL`
 - `ALIPAY_BILL_API_TOKEN`
 
-### 8.2 定时任务入口
+### 8.2 在 GitHub Secrets 中配置
+
+- `ORDER_RECONCILE_URL`（示例：`https://your-domain.com/api/orders/reconcile`）
+- `ORDER_RECONCILE_TOKEN`（与 Vercel 环境变量同值）
+
+### 8.3 定时任务入口
 
 - 路径：`/api/orders/reconcile`
 - 触发方式：
-  - Vercel Cron（GET + `Authorization: Bearer ${CRON_SECRET}`）
-  - 手动触发（POST + `x-order-reconcile-token`）
+  - GitHub Actions（`POST + x-order-reconcile-token`）
+  - 手动触发（`POST + x-order-reconcile-token`）
 
 ## 9. 后台人工确认支付（推荐，经营码模式）
 

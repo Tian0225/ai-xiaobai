@@ -132,9 +132,9 @@ async function reconcileOrders(request: NextRequest) {
 }
 
 /**
- * 定时对账接口（建议由 Vercel Cron 调用）。
+ * 定时对账接口（建议由外部调度器调用，如 GitHub Actions）。
  *
- * GET: Vercel Cron（Authorization: Bearer ${CRON_SECRET}）
+ * GET: 外部调度（Authorization: Bearer ${CRON_SECRET}）
  * POST: 手动触发（x-order-reconcile-token）
  */
 export async function GET(request: NextRequest) {
