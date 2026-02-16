@@ -61,13 +61,13 @@ export default function ConsultationForm() {
 
   if (isSubmitted) {
     return (
-      <section id="consultation-form" className="py-20">
+      <section id="consultation-form" className="stitch-section">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <div className="surface-card rounded-3xl border border-[#d8e6df] p-8 text-center sm:p-10">
+          <div className="surface-card stitch-card rounded-3xl p-8 text-center sm:p-10">
             <div className="mx-auto mb-6 inline-flex rounded-full bg-[#e3f0eb] p-4">
               <CheckCircle2 className="h-12 w-12 text-[var(--brand-fresh)]" />
             </div>
-            <h3 className="font-display text-3xl text-[var(--brand-ink)]">预约成功</h3>
+            <h3 className="stitch-h2 text-3xl">预约成功</h3>
             <p className="mt-4 text-slate-600">
               我们已收到您的咨询申请，将在 24 小时内与您联系。
             </p>
@@ -85,12 +85,12 @@ export default function ConsultationForm() {
   }
 
   return (
-    <section id="consultation-form" className="py-20">
+      <section id="consultation-form" className="stitch-section">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="surface-card rounded-3xl border border-[#d8e6df] p-7 sm:p-10">
+        <div className="surface-card stitch-card rounded-3xl p-7 sm:p-10">
           <div className="mb-8 text-center">
-            <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">预约免费诊断</h2>
-            <p className="mt-3 text-lg text-slate-600">填写关键信息，我们会给出可执行的初步路线建议。</p>
+            <h2 className="stitch-h2 sm:text-4xl">预约免费诊断</h2>
+            <p className="mt-3 text-lg text-slate-600">填写关键信息后，我们会给出可执行的初步路线建议。</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -107,7 +107,7 @@ export default function ConsultationForm() {
                   value={formData.company}
                   onChange={handleChange}
                   placeholder="例：XX科技有限公司"
-                  className="bg-white/90"
+                  className="stitch-control bg-white/90"
                 />
               </div>
 
@@ -123,7 +123,7 @@ export default function ConsultationForm() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="例：张三"
-                  className="bg-white/90"
+                  className="stitch-control bg-white/90"
                 />
               </div>
 
@@ -139,7 +139,7 @@ export default function ConsultationForm() {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="例：13800138000"
-                  className="bg-white/90"
+                  className="stitch-control bg-white/90"
                 />
               </div>
 
@@ -154,7 +154,7 @@ export default function ConsultationForm() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="例：example@company.com"
-                  className="bg-white/90"
+                  className="stitch-control bg-white/90"
                 />
               </div>
 
@@ -169,7 +169,7 @@ export default function ConsultationForm() {
                   value={formData.employees}
                   onChange={handleChange}
                   placeholder="例：50-200人"
-                  className="bg-white/90"
+                  className="stitch-control bg-white/90"
                 />
               </div>
             </div>
@@ -186,13 +186,13 @@ export default function ConsultationForm() {
                 onChange={handleChange}
                 rows={5}
                 placeholder="请描述您的业务目标、当前流程和希望优先解决的问题"
-                className="bg-white/90"
+                className="stitch-control bg-white/90"
               />
             </div>
 
             {errorMessage && (
               <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {errorMessage}
+                提交未成功：{errorMessage}
               </p>
             )}
 

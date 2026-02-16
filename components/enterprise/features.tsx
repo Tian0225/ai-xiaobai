@@ -37,11 +37,11 @@ const features = [
 
 export default function EnterpriseFeatures() {
   return (
-    <section className="py-20">
+    <section className="stitch-section">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14">
           <p className="text-sm font-semibold text-[var(--brand-fresh)]">Execution Principles</p>
-          <h2 className="mt-2 font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">
+          <h2 className="stitch-h2 mt-2 sm:text-4xl">
             关注可交付结果，而不是演示效果
           </h2>
           <p className="mt-3 max-w-2xl text-lg text-slate-600">
@@ -53,7 +53,7 @@ export default function EnterpriseFeatures() {
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <article key={feature.title} className="surface-card rounded-2xl border border-[#d8e6df] p-7">
+              <article key={feature.title} className="surface-card stitch-card rounded-2xl p-7">
                 <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#e3f0eb] text-[var(--brand-fresh)]">
                   <Icon className="h-5 w-5" />
                 </div>

@@ -109,14 +109,14 @@ export default function MembershipPage() {
 
   return (
     <div className="min-h-screen pb-20 pt-28 sm:pt-32">
-      <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 stitch-section">
         <div className="reveal-up">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
+          <div className="stitch-kicker mb-6">
             <Crown className="h-4 w-4" />
             年度会员
           </div>
 
-          <h1 className="font-display text-4xl leading-tight text-[var(--brand-ink)] sm:text-5xl">
+          <h1 className="stitch-h1">
             一次订阅，
             <br />
             全年获得可执行增长路径
@@ -129,7 +129,7 @@ export default function MembershipPage() {
             {benefits.map((item) => {
               const Icon = item.icon;
               return (
-                <article key={item.title} className="surface-card rounded-2xl border border-[#d8e6df] p-5">
+                <article key={item.title} className="surface-card stitch-card rounded-2xl p-5">
                   <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#e3f0eb] text-[var(--brand-fresh)]">
                     <Icon className="h-5 w-5" />
                   </div>
@@ -141,7 +141,7 @@ export default function MembershipPage() {
           </div>
         </div>
 
-        <div className="surface-card rounded-3xl border border-[#d8e6df] p-6 sm:p-8 reveal-up reveal-delay-1">
+        <div className="surface-card stitch-card rounded-3xl p-6 sm:p-8 reveal-up reveal-delay-1">
           <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Membership</p>
           <div className="mt-3 text-5xl font-display text-[var(--brand-ink)]">
             ¥{MEMBERSHIP_PRICE}<span className="text-lg text-slate-500">/年</span>
@@ -203,7 +203,7 @@ export default function MembershipPage() {
                     {userEmail ? (
                       <RedeemForm onSuccess={handleRedeemSuccess} />
                     ) : (
-                      <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
+                      <p className="text-sm text-red-600">未识别到登录账号，请刷新页面后重试。</p>
                     )}
                   </div>
                 ) : null}
@@ -218,9 +218,9 @@ export default function MembershipPage() {
       </section>
 
       <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="surface-card overflow-hidden rounded-3xl border border-[#d8e6df]">
+        <div className="surface-card stitch-card overflow-hidden rounded-3xl">
           <div className="border-b border-[#d8e6df] px-6 py-5">
-            <h2 className="font-display text-2xl text-[var(--brand-ink)]">权益对比</h2>
+            <h2 className="stitch-h2 text-2xl">权益对比</h2>
           </div>
           <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr] bg-[#f8fbf9] px-6 py-3 text-sm font-semibold text-slate-600">
             <span>项目</span>

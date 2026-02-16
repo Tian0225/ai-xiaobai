@@ -82,7 +82,7 @@ export default function RedeemForm({ onSuccess }: RedeemFormProps) {
             value={code}
             onChange={(event) => setCode(event.target.value)}
             disabled={submitting}
-            className="font-mono tracking-wide"
+            className="stitch-control font-mono tracking-wide"
           />
           <p className="text-xs text-slate-500">示例：A7C49D2E91F84B6C3E0A57D1F29B8C64</p>
         </div>
@@ -114,7 +114,7 @@ export default function RedeemForm({ onSuccess }: RedeemFormProps) {
           {submitting ? (
             <>
               <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-              正在兑换...
+              正在校验卡密...
             </>
           ) : (
             '立即兑换开通'

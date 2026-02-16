@@ -41,10 +41,10 @@ export default function PricingPlans() {
   };
 
   return (
-    <section id="pricing" className="py-20">
+    <section id="pricing" className="stitch-section">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
-          <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">服务套餐</h2>
+          <h2 className="stitch-h2 sm:text-4xl">服务套餐</h2>
           <p className="mt-3 text-lg text-slate-600">按企业阶段分层配置，支持定制化扩展。</p>
         </div>
 
@@ -53,7 +53,7 @@ export default function PricingPlans() {
             <article
               key={plan.name}
               className={cn(
-                "surface-card relative rounded-3xl border border-[#d8e6df] p-7",
+                "surface-card stitch-card relative rounded-3xl p-7",
                 plan.popular && "ring-2 ring-[#80b7a8]"
               )}
             >

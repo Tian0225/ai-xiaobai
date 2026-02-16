@@ -10,17 +10,17 @@ export default function EnterpriseHero() {
   };
 
   return (
-    <section className="relative overflow-hidden pb-20 pt-28 sm:pt-32">
+    <section className="relative overflow-hidden stitch-section pt-28 sm:pt-32">
       <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-[#f4a259]/25 blur-3xl" />
       <div className="absolute -right-20 top-40 h-64 w-64 rounded-full bg-[#3a7d6b]/25 blur-3xl" />
 
       <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div className="reveal-up">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#e3f0eb] px-4 py-2 text-sm font-semibold text-[var(--brand-fresh)]">
+          <div className="stitch-kicker mb-6">
             <Building2 className="h-4 w-4" />
-            Enterprise AI
+            企业服务
           </div>
-          <h1 className="font-display text-4xl leading-tight text-[var(--brand-ink)] sm:text-6xl">
+          <h1 className="stitch-h1 sm:text-6xl">
             让企业 AI 项目
             <br />
             从试点走向规模化
@@ -47,7 +47,7 @@ export default function EnterpriseHero() {
           </div>
         </div>
 
-        <div className="surface-card reveal-up reveal-delay-1 rounded-3xl border border-[#d8e6df] p-6 sm:p-8">
+        <div className="surface-card stitch-card reveal-up reveal-delay-1 rounded-3xl p-6 sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Delivery Metrics</p>
           <div className="mt-6 grid grid-cols-1 gap-4">
             <div className="rounded-2xl bg-white p-5">

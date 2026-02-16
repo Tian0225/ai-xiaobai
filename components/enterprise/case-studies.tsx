@@ -40,16 +40,16 @@ const cases = [
 
 export default function CaseStudies() {
   return (
-    <section className="py-20">
+    <section className="stitch-section">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
-          <h2 className="font-display text-3xl tracking-tight text-[var(--brand-ink)] sm:text-4xl">行业案例</h2>
+          <h2 className="stitch-h2 sm:text-4xl">行业案例</h2>
           <p className="mt-3 text-lg text-slate-600">真实项目脱敏后整理，可用于评估落地预期。</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {cases.map((caseStudy) => (
-            <article key={caseStudy.company} className="surface-card rounded-2xl border border-[#d8e6df] p-7">
+            <article key={caseStudy.company} className="surface-card stitch-card rounded-2xl p-7">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-[#e6f2ec] px-3 py-1 text-sm font-medium text-[var(--brand-fresh)]">
                 <Building className="h-4 w-4" />
                 {caseStudy.industry}
