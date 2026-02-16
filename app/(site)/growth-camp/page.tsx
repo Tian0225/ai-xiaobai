@@ -98,7 +98,7 @@ export default async function GrowthCampPage() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
             <Link
-              href="/contact"
+              href="/growth-camp/apply"
               className="inline-flex items-center justify-center rounded-full border border-[#b9d1c9] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-[#f4faf7]"
             >
               提交报名意向

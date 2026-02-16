@@ -151,6 +151,9 @@ export default function HomeContent() {
                     </Link>
                   </Button>
                   <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
+                    <Link href="/growth-camp/apply">提交报名意向</Link>
+                  </Button>
+                  <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
                     <Link href="/contact">咨询是否适合</Link>
                   </Button>
                   <Button variant="outline" className="rounded-full border-[#b9d1c9] bg-white/80" asChild>
