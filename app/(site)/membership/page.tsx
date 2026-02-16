@@ -170,38 +170,62 @@ export default function MembershipPage() {
           ) : (
             <>
               <div className="mt-6 rounded-2xl border border-[#c8ddd6] bg-white/80 p-4">
-                <div className="flex flex-col gap-3">
-                  <Button
-                    size="lg"
-                    className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
-                    asChild
-                  >
-                    <a href={MEMBERSHIP_PURCHASE_URL} target="_blank" rel="noreferrer noopener">
-                      去支付平台购买卡密
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full rounded-full border-[#b9d1c9] bg-white/80"
-                    disabled={loadingUser || !userEmail}
-                    onClick={() => setShowRedeem((previous) => !previous)}
-                  >
-                    {loadingUser ? "加载账户中..." : userEmail ? "我已购买，输入卡密兑换" : "请先登录"}
-                  </Button>
-                </div>
-
-                {showRedeem ? (
-                  <div className="mt-4">
-                    {userEmail ? (
-                      <RedeemForm onSuccess={handleRedeemSuccess} />
-                    ) : (
-                      <p className="text-sm text-red-600">未获取到登录邮箱，请刷新后重试。</p>
-                    )}
+                {loadingUser ? (
+                  <p className="text-sm text-slate-600">正在识别登录状态...</p>
+                ) : !userEmail ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-slate-700">
+                      先看清会员权益，再决定是否开通。登录或注册后可兑换卡密并自动同步会员状态。
+                    </p>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        size="lg"
+                        className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                        asChild
+                      >
+                        <Link href="/auth?next=/membership&mode=login">登录</Link>
+                      </Button>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full rounded-full border-[#b9d1c9] bg-white/80"
+                        asChild
+                      >
+                        <Link href="/auth?next=/membership&mode=register">注册</Link>
+                      </Button>
+                    </div>
                   </div>
-                ) : null}
+                ) : (
+                  <>
+                    <div className="flex flex-col gap-3">
+                      <Button
+                        size="lg"
+                        className="w-full rounded-full bg-[linear-gradient(120deg,#0d3b3a,#3a7d6b)] hover:opacity-95"
+                        asChild
+                      >
+                        <a href={MEMBERSHIP_PURCHASE_URL} target="_blank" rel="noreferrer noopener">
+                          去支付平台购买卡密
+                          <ExternalLink className="ml-2 h-4 w-4" />
+                        </a>
+                      </Button>
+
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full rounded-full border-[#b9d1c9] bg-white/80"
+                        onClick={() => setShowRedeem((previous) => !previous)}
+                      >
+                        我已购买，输入卡密兑换
+                      </Button>
+                    </div>
+
+                    {showRedeem ? (
+                      <div className="mt-4">
+                        <RedeemForm onSuccess={handleRedeemSuccess} />
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </div>
 
               <p className="mt-4 text-xs text-slate-500">
